@@ -1,3 +1,4 @@
+import type { ObjectId } from 'mongodb';
 import { toViewModel, withDatabase } from './db-utils';
 
 interface IRepository<T> {
@@ -14,6 +15,15 @@ export class Repository<T> implements IRepository<T> {
 
   constructor(collection: string) {
     this.collection = collection;
+  }
+
+  async findById(id: ObjectId): Promise<T | null> {
+    return await withDatabase(async (db) => {
+      const collection = db.collection(this.collection);
+      const raw = await collection.findOne({ _id: id });
+      // @ts-expect-error reason
+      return raw ? toViewModel(raw) : null;
+    });
   }
 
   async find(

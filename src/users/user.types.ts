@@ -1,14 +1,25 @@
 import type { ObjectId } from 'mongodb';
 import type { MovieViewModel } from '@/movies/movie.type';
 
-export interface User {
+export interface AuthUser {
   email: string;
   name: string;
   emailVerified: boolean;
   image: string;
-  movies: MovieViewModel[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface AuthUserViewModel extends AuthUser {
+  id: string;
+}
+
+export interface AuthUserDocument extends AuthUser {
+  _id: ObjectId;
+}
+
+export interface User {
+  movies: MovieViewModel[];
 }
 
 export interface UserViewModel extends User {

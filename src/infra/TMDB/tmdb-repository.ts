@@ -10,12 +10,11 @@ interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
 }
 
-interface MovieSummary {
+export interface MovieSummary {
   id: number;
   title: string;
   posterPath: string | null;
   releaseDate: string;
-  voteAverage: number;
 }
 
 export interface SearchMoviesResult {
@@ -52,7 +51,6 @@ export class TmdbRepository implements ITmdbRepository {
       title: r.title,
       posterPath: r.poster_path ?? null,
       releaseDate: r.release_date,
-      voteAverage: r.vote_average,
     }));
 
     return {

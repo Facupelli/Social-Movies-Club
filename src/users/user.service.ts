@@ -1,3 +1,4 @@
+import type { ObjectId } from 'mongodb';
 import type { UserViewModel } from './user.types';
 import { UserRepository } from './user-repository';
 
@@ -12,6 +13,10 @@ export class UserService implements IUserService {
 
   constructor() {
     this.userRepository = new UserRepository();
+  }
+
+  async getUser(id: ObjectId): Promise<UserViewModel | null> {
+    return await this.userRepository.findById(id);
   }
 
   async searchUser(
