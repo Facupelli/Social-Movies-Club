@@ -1,6 +1,6 @@
 import type { Genre } from '@/infra/TMDB/types/detail-movie';
 
-export interface MovieViewModel {
+export interface MovieData {
   id: number;
   genres: Genre[];
   originalTitle: string;
@@ -8,4 +8,8 @@ export interface MovieViewModel {
   releaseDate: string;
   title: string;
   addedAt: Date;
+}
+
+export interface MovieViewModel extends MovieData {
+  rating: number;
 }

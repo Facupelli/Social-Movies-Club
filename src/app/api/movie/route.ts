@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import type { SearchMoviesResult } from '@/infra/TMDB/tmdb-repository';
 import { MovieService } from '@/movies/movie.service';
 
 export async function GET(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (!query) {
     return Response.json({});
   }
-  const res = await movieService.searchMovie(query);
+  const res: SearchMoviesResult = await movieService.searchMovie(query);
 
   return Response.json(res);
 }

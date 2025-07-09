@@ -4,8 +4,8 @@ import type { MovieViewModel } from '@/movies/movie.type';
 export interface User {
   email: string;
   name: string;
-  isActive: boolean;
-  registeredAt: Date;
+  emailVerified: boolean;
+  image: string;
   movies: MovieViewModel[];
   createdAt: Date;
   updatedAt: Date;

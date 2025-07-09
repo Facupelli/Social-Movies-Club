@@ -3,7 +3,7 @@ import type {
   SearchMovieQueryParams,
   SearchMovieResult,
 } from '@/infra/TMDB/types/search-movie';
-import type { MovieViewModel } from '@/movies/movie.type';
+import type { MovieData } from '@/movies/movie.type';
 import type { MovieDetailApiResponse } from './types/detail-movie';
 
 interface ITmdbRepository {
@@ -47,7 +47,6 @@ export class TmdbRepository implements ITmdbRepository {
         page: String(page),
       });
 
-    // Down-map the payload to your domain model
     const data: MovieSummary[] = json.results.map((r: SearchMovieResult) => ({
       id: r.id,
       title: r.title,
@@ -64,11 +63,11 @@ export class TmdbRepository implements ITmdbRepository {
     };
   }
 
-  async getDetail(movieId: number): Promise<{ data: MovieViewModel }> {
+  async getDetail(movieId: number): Promise<{ data: MovieData }> {
     const json: MovieDetailApiResponse =
       await this.request<MovieDetailApiResponse>(`/movie/${movieId}`);
 
-    const data: MovieViewModel = {
+    const data: MovieData = {
       id: json.id,
       title: json.title,
       posterPath: json.poster_path ?? null,

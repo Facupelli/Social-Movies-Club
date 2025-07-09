@@ -1,6 +1,7 @@
 // user-movie.service.ts
 import type { ObjectId } from 'mongodb';
 import { TmdbRepository } from '@/infra/TMDB/tmdb-repository';
+import type { MovieViewModel } from '@/movies/movie.type';
 import { UserRepository } from './user-repository';
 
 export class UserMovieService {
@@ -14,9 +15,18 @@ export class UserMovieService {
   /**
    * Fetches the movie from TMDB and stores a snapshot on the user document.
    */
-  async addMovieToUser(userId: ObjectId, tmdbId: number): Promise<void> {
+  async addMovieToUser(
+    userId: ObjectId,
+    tmdbId: number,
+    rating: number
+  ): Promise<void> {
     const movie = await this.tmdb.getDetail(tmdbId);
 
-    await this.users.addMovie(userId, movie.data);
+    const movieViewModel: MovieViewModel = {
+      ...movie.data,
+      rating,
+    };
+
+    await this.users.addMovie(userId, movieViewModel);
   }
 }

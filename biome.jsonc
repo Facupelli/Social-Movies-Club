@@ -4,7 +4,8 @@
   "linter": {
     "rules": {
       "style": {
-        "noParameterProperties": "off"
+        "noParameterProperties": "off",
+        "useConsistentBuiltinInstantiation": "off"
       },
       "suspicious": {
         "noConsole": "warn"
