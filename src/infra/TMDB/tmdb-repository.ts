@@ -2,7 +2,9 @@ import type {
   SearchMovieApiResponse,
   SearchMovieQueryParams,
   SearchMovieResult,
-} from '@/movies/search.api.response';
+} from '@/infra/TMDB/types/search-movie';
+import type { MovieViewModel } from '@/movies/movie.type';
+import type { MovieDetailApiResponse } from './types/detail-movie';
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -62,9 +64,28 @@ export class TmdbRepository implements ITmdbRepository {
     };
   }
 
+  async getDetail(movieId: number): Promise<{ data: MovieViewModel }> {
+    const json: MovieDetailApiResponse =
+      await this.request<MovieDetailApiResponse>(`/movie/${movieId}`);
+
+    const data: MovieViewModel = {
+      id: json.id,
+      title: json.title,
+      posterPath: json.poster_path ?? null,
+      releaseDate: json.release_date,
+      addedAt: new Date(),
+      originalTitle: json.original_title,
+      genres: json.genres,
+    };
+
+    return {
+      data,
+    };
+  }
+
   private async request<T>(
     endpoint: string,
-    qs: Record<string, string>
+    qs?: Record<string, string>
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(qs)}`;
 

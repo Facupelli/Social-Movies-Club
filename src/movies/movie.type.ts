@@ -1,18 +1,11 @@
-import type { ObjectId } from 'mongodb';
+import type { Genre } from '@/infra/TMDB/types/detail-movie';
 
-export interface Movie {
-  name: string;
-  password: string;
-  active: boolean;
-  registeredAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface MovieViewModel extends Movie {
-  id: string;
-}
-
-export interface MovieDocument extends Movie {
-  _id: ObjectId;
+export interface MovieViewModel {
+  id: number;
+  genres: Genre[];
+  originalTitle: string;
+  posterPath: string;
+  releaseDate: string;
+  title: string;
+  addedAt: Date;
 }

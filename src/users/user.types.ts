@@ -1,11 +1,12 @@
 import type { ObjectId } from 'mongodb';
+import type { MovieViewModel } from '@/movies/movie.type';
 
 export interface User {
   email: string;
   name: string;
-  password: string;
-  active: boolean;
+  isActive: boolean;
   registeredAt: Date;
+  movies: MovieViewModel[];
   createdAt: Date;
   updatedAt: Date;
 }

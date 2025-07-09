@@ -26,7 +26,7 @@ export interface MovieDetailApiResponse {
   vote_count: number; // Defaults to 0
 }
 
-interface Genre {
+export interface Genre {
   id: number; // Defaults to 0
   name: string;
 }

@@ -1,5 +1,5 @@
-import { Repository } from '@/infra/mongo/mongo-repository';
 import type { UserViewModel } from './user.types';
+import { UserRepository } from './user-repository';
 
 export interface IUserService {
   searchUser(
@@ -8,10 +8,10 @@ export interface IUserService {
 }
 
 export class UserService implements IUserService {
-  private repository: Repository<UserViewModel>;
+  private userRepository: UserRepository;
 
   constructor() {
-    this.repository = new Repository<UserViewModel>('users');
+    this.userRepository = new UserRepository();
   }
 
   async searchUser(
@@ -19,6 +19,6 @@ export class UserService implements IUserService {
     page = 1,
     limit = 10
   ): Promise<{ data: UserViewModel[]; totalCount: number }> {
-    return await this.repository.find(filter, page, limit);
+    return await this.userRepository.find(filter, page, limit);
   }
 }
