@@ -1,8 +1,18 @@
-import type { ObjectId } from 'mongodb';
+import type { Document, ObjectId, WithId } from 'mongodb';
 import { withDatabase } from '@/infra/mongo/db-utils';
 
 export class UserRelationshipRepository {
   private readonly followsCollection = 'user-relationships';
+
+  async getFollowingUsers(userId: ObjectId): Promise<WithId<Document>[]> {
+    return await withDatabase(async (db) => {
+      const followingUsers = await db.collection(this.followsCollection).find({
+        followerId: userId,
+      });
+
+      return followingUsers.toArray();
+    });
+  }
 
   async isFollowingUser(
     userId: ObjectId,

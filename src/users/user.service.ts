@@ -1,4 +1,4 @@
-import type { ObjectId } from 'mongodb';
+import type { Document, ObjectId, WithId } from 'mongodb';
 import { AuthUserRepository } from './auth-user.repository';
 import type { AuthUserViewModel, UserViewModel } from './user.types';
 import { UserRelationshipRepository } from './user-relationships.repository';
@@ -37,6 +37,10 @@ export class UserService implements IUserService {
     limit = 10
   ): Promise<{ data: UserViewModel[]; totalCount: number }> {
     return await this.userRepository.find(filter, page, limit);
+  }
+
+  async getFollowingUsers(userId: ObjectId): Promise<WithId<Document>[]> {
+    return await this.userRelationshipRepository.getFollowingUsers(userId);
   }
 
   async isFollowingUser(

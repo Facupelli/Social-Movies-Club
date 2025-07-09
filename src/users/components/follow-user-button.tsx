@@ -16,7 +16,7 @@ export function FollowUserButton({
     try {
       await followUser(followedUserId);
     } catch (error) {
-      console.error('addRatingToMovie Error:', error);
+      console.error('followUser Error:', error);
     }
   };
 

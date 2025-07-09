@@ -35,7 +35,7 @@ export function Nav() {
           <a href="/">Home</a>
         </li>
         <li>
-          <a href="/profile">Profile</a>
+          <a href={`/profile/${session?.user.id}`}>Profile</a>
         </li>
       </ul>
 
