@@ -2,10 +2,12 @@
 
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
-import type { MovieSummary } from '@/infra/TMDB/tmdb-repository';
+import type { MovieViewModel } from '@/movies/movie.type';
 import { RateDialog } from './rate-dialog';
 
-const MovieCardContext = createContext<{ movie: MovieSummary | null }>({
+const MovieCardContext = createContext<{
+  movie: MovieViewModel | null;
+}>({
   movie: null,
 });
 
@@ -14,7 +16,7 @@ export function MovieCard({
   movie,
 }: {
   children: React.ReactNode;
-  movie: MovieSummary;
+  movie: MovieViewModel;
 }) {
   return (
     <MovieCardContext.Provider value={{ movie }}>
@@ -29,7 +31,7 @@ function Poster() {
     <div>
       <Image
         alt={movie.title}
-        className="h-auto w-[200px]"
+        className="h-auto w-[200px] rounded-xs"
         height={350}
         src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
         unoptimized
@@ -49,6 +51,16 @@ function Title() {
 function ReleaseDate() {
   const { movie } = useContext(MovieCardContext);
   return <p className="text-gray-600 text-sm">{movie?.releaseDate}</p>;
+}
+
+function Rating() {
+  const { movie } = useContext(MovieCardContext);
+
+  return (
+    <div className="flex size-7 items-center justify-center rounded bg-blue-300">
+      <p className="font-bold text-sm">{movie?.rating}</p>
+    </div>
+  );
 }
 
 function AddToWatchlistButton() {
@@ -75,3 +87,4 @@ MovieCard.Title = Title;
 MovieCard.ReleaseDate = ReleaseDate;
 MovieCard.AddToWatchlistButton = AddToWatchlistButton;
 MovieCard.Rate = Rate;
+MovieCard.Rating = Rating;

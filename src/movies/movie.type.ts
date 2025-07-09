@@ -2,7 +2,7 @@ import type { Genre } from '@/infra/TMDB/types/detail-movie';
 
 export interface MovieData {
   id: number;
-  genres: Genre[];
+  genres: Genre[] | null;
   originalTitle: string;
   posterPath: string;
   releaseDate: string;
@@ -11,5 +11,5 @@ export interface MovieData {
 }
 
 export interface MovieViewModel extends MovieData {
-  rating: number;
+  rating: number | null;
 }

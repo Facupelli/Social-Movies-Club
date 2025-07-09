@@ -2,36 +2,26 @@
 
 import { useState } from 'react';
 import { MovieCard } from '@/components/movies/movie-card';
+import { Input } from '@/components/ui/input';
 import useDebounce from '@/movies/hooks/use-debounce';
 import { useSearchMovies } from '@/movies/hooks/use-search-movies';
-import type { UserViewModel } from '@/users/user.types';
 
-export function HomeClient({ appUser }: { appUser: UserViewModel | null }) {
+export function HomeClient() {
   const [query, setQuery] = useState('');
   const debouncedSearchTerm = useDebounce(query, 500);
 
   return (
-    <div>
-      <div>
-        <input
+    <div className="flex-1 bg-neutral-300 px-10 py-6">
+      <div className="pb-6">
+        <Input
+          className="w-full bg-white"
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Pulp Fiction"
+          placeholder="Search for a movie..."
           type="search"
         />
       </div>
-      <MoviesList debouncedSearchTerm={debouncedSearchTerm} />
 
-      <div className="grid gap-6 pt-10 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
-        {appUser?.movies?.map((movie) => (
-          <MovieCard key={movie.id} movie={movie}>
-            <MovieCard.Poster />
-            <div className="pt-2">
-              <MovieCard.Title />
-              <MovieCard.ReleaseDate />
-            </div>
-          </MovieCard>
-        ))}
-      </div>
+      <MoviesList debouncedSearchTerm={debouncedSearchTerm} />
     </div>
   );
 }

@@ -3,22 +3,15 @@ import type {
   SearchMovieQueryParams,
   SearchMovieResult,
 } from '@/infra/TMDB/types/search-movie';
-import type { MovieData } from '@/movies/movie.type';
+import type { MovieData, MovieViewModel } from '@/movies/movie.type';
 import type { MovieDetailApiResponse } from './types/detail-movie';
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
 }
 
-export interface MovieSummary {
-  id: number;
-  title: string;
-  posterPath: string | null;
-  releaseDate: string;
-}
-
 export interface SearchMoviesResult {
-  data: MovieSummary[];
+  data: MovieViewModel[];
   totalCount: number;
   totalPages: number;
   page: number;
@@ -46,11 +39,15 @@ export class TmdbRepository implements ITmdbRepository {
         page: String(page),
       });
 
-    const data: MovieSummary[] = json.results.map((r: SearchMovieResult) => ({
+    const data: MovieViewModel[] = json.results.map((r: SearchMovieResult) => ({
       id: r.id,
       title: r.title,
       posterPath: r.poster_path ?? null,
       releaseDate: r.release_date,
+      genres: null,
+      addedAt: new Date(),
+      originalTitle: r.original_title,
+      rating: null,
     }));
 
     return {
