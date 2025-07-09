@@ -29,3 +29,13 @@ export interface UserViewModel extends User {
 export interface UserDocument extends User {
   _id: ObjectId;
 }
+
+export interface UserRelationship {
+  followerId: ObjectId;
+  followedId: ObjectId;
+  createdAt: Date;
+}
+
+export interface UserRelationshipDocument extends UserRelationship {
+  _id: ObjectId;
+}

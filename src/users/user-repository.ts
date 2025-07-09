@@ -1,4 +1,3 @@
-// user-repository.ts
 import type { ObjectId } from 'mongodb';
 import { withDatabase } from '@/infra/mongo/db-utils';
 import { Repository } from '@/infra/mongo/mongo-repository';

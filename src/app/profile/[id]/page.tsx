@@ -4,9 +4,9 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/auth';
 import { tryCatch } from '@/lib/utils';
+import { FollowUserButton } from '@/users/components/follow-user-button';
 import { UserService } from '@/users/user.service';
 import { ProfileClientPage } from './page.client';
 
@@ -18,6 +18,11 @@ const fetchUserById = async (userId: ObjectId) => {
 const fetchAuthUserById = async (userId: ObjectId) => {
   const userService = new UserService();
   return await userService.getAuthUser(userId);
+};
+
+const isFollowingUser = async (userId: ObjectId, followedUserId: ObjectId) => {
+  const userService = new UserService();
+  return await userService.isFollowingUser(userId, followedUserId);
 };
 
 export default async function UserProfilePage(props: {
@@ -33,18 +38,29 @@ export default async function UserProfilePage(props: {
 
   const params = await props.params;
 
+  const currentUserIdResult = await tryCatch<ObjectId>(
+    new Promise((resolve) => resolve(new ObjectId(session.user.id)))
+  );
   const userIdResult = await tryCatch<ObjectId>(
     new Promise((resolve) => resolve(new ObjectId(params.id)))
   );
 
-  if (userIdResult.error) {
+  if (userIdResult.error || currentUserIdResult.error) {
     return notFound();
   }
 
   const userPromise = fetchUserById(userIdResult.data);
   const authUserPromise = fetchAuthUserById(userIdResult.data);
+  const isFollowingPromise = isFollowingUser(
+    currentUserIdResult.data,
+    userIdResult.data
+  );
 
-  const [user, authUser] = await Promise.all([userPromise, authUserPromise]);
+  const [user, authUser, isFollowing] = await Promise.all([
+    userPromise,
+    authUserPromise,
+    isFollowingPromise,
+  ]);
 
   if (!(user && authUser)) {
     return notFound();
@@ -74,7 +90,12 @@ export default async function UserProfilePage(props: {
           )}
           {session.user.id !== user.id && (
             <div>
-              <Button>Follow</Button>
+              <FollowUserButton
+                followedUserId={user.id}
+                isFollowing={isFollowing}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </FollowUserButton>
             </div>
           )}
         </div>
