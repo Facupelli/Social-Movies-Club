@@ -35,6 +35,9 @@ export function Nav() {
         <li>
           <a href={`/profile/${session?.user.id}`}>Perfil</a>
         </li>
+        <li>
+          <a href="/credits">Créditos</a>
+        </li>
       </ul>
 
       <div className="mt-auto ">

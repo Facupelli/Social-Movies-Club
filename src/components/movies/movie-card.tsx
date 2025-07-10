@@ -93,8 +93,8 @@ function WatchProviders() {
   } = useMovieWatchProviders(movie?.id);
 
   return (
-    <div>
-      <Button onClick={() => refetch()} variant="ghost">
+    <div className="space-y-2">
+      <Button className="h-auto p-0" onClick={() => refetch()} variant="link">
         Donde ver?
       </Button>
 
@@ -109,19 +109,40 @@ function WatchProviders() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-1 pt-2">
-        {watchProviders?.data.flatrate.map((provider) => (
-          <div key={provider.provider_id}>
-            <Image
-              alt={provider.provider_name}
-              className={clsx('h-auto rounded-sm')}
-              height={30}
-              src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-              unoptimized
-              width={30}
-            />
-          </div>
-        ))}
+      {watchProviders?.data && (
+        <div className="flex flex-wrap gap-1">
+          {watchProviders?.data.flatrate.map((provider) => (
+            <div key={provider.provider_id}>
+              <Image
+                alt={provider.provider_name}
+                className={clsx('h-auto rounded-sm')}
+                height={30}
+                src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                unoptimized
+                width={30}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* JustWatch Attribution */}
+      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+        <span>Powered by</span>
+        <a
+          className="inline-flex items-center gap-1 transition-opacity hover:opacity-80"
+          href={'todo'}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <Image
+            alt="JustWatch"
+            className="h-auto"
+            height={10}
+            src="https://widget.justwatch.com/assets/JW_logo_color_10px.svg"
+            width={60}
+          />
+        </a>
       </div>
     </div>
   );
