@@ -2,7 +2,11 @@ import type { Document, ObjectId, WithId } from 'mongodb';
 import { AuthUserRepository } from './auth-user.repository';
 import type { AuthUserViewModel, UserViewModel } from './user.types';
 import { UserRelationshipRepository } from './user-relationships.repository';
-import { UserRepository } from './user-repository';
+import {
+  UserRepository,
+  type UserSortBy,
+  type UserSortOrder,
+} from './user-repository';
 
 export interface IUserService {
   searchUsers(
@@ -23,8 +27,12 @@ export class UserService implements IUserService {
     this.userRelationshipRepository = new UserRelationshipRepository();
   }
 
-  async getUser(id: ObjectId): Promise<UserViewModel | null> {
-    return await this.userRepository.findById(id);
+  async getUser(
+    id: ObjectId,
+    sortBy?: UserSortBy,
+    sortOrder?: UserSortOrder
+  ): Promise<UserViewModel | null> {
+    return await this.userRepository.findById(id, sortBy, sortOrder);
   }
 
   async getAuthUser(id: ObjectId): Promise<AuthUserViewModel | null> {

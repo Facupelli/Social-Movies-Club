@@ -11,6 +11,7 @@ import { tryCatch } from '@/lib/utils';
 import { FollowUserButton } from '@/users/components/follow-user-button';
 import { UserService } from '@/users/user.service';
 import type { UserViewModel } from '@/users/user.types';
+import type { UserSortBy, UserSortOrder } from '@/users/user-repository';
 import { ProfileClientPage } from './page.client';
 
 const fetchFollowingUsers = async (userId: ObjectId) => {
@@ -19,14 +20,22 @@ const fetchFollowingUsers = async (userId: ObjectId) => {
   return followingUsers;
 };
 
-const fetchPageData = async (userId: ObjectId, followedUserId: ObjectId) => {
+const fetchPageData = async (
+  userId: ObjectId,
+  followedUserId: ObjectId,
+  searchParams: { sortBy?: UserSortBy; sortOrder?: UserSortOrder }
+) => {
   const userService = new UserService();
   const isFollowingUserPromise = userService.isFollowingUser(
     userId,
     followedUserId
   );
   const authUserPromise = userService.getAuthUser(followedUserId);
-  const userPromise = userService.getUser(followedUserId);
+  const userPromise = userService.getUser(
+    followedUserId,
+    searchParams.sortBy,
+    searchParams.sortOrder
+  );
 
   const [isFollowing, authUser, user] = await Promise.all([
     isFollowingUserPromise,
@@ -43,6 +52,7 @@ const fetchPageData = async (userId: ObjectId, followedUserId: ObjectId) => {
 
 export default async function UserProfilePage(props: {
   params: Promise<{ slug: string[] }>;
+  searchParams: Promise<{ sortBy?: UserSortBy; sortOrder?: UserSortOrder }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -53,6 +63,7 @@ export default async function UserProfilePage(props: {
   }
 
   const params = await props.params;
+  const searchParams = await props.searchParams;
 
   const paramId = params.slug[0];
   const tab = params.slug[1];
@@ -70,7 +81,8 @@ export default async function UserProfilePage(props: {
 
   const { isFollowing, user, authUser } = await fetchPageData(
     currentUserIdResult.data,
-    userIdResult.data
+    userIdResult.data,
+    searchParams
   );
 
   if (!(user && authUser)) {

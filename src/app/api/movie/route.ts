@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (!query) {
     return Response.json({});
   }
-  const res: SearchMoviesResult = await movieService.searchMovie(query);
 
+  const res: SearchMoviesResult = await movieService.searchMovie(query);
   return Response.json(res);
 }

@@ -10,7 +10,7 @@ export async function GET() {
   });
 
   if (!session) {
-    return { success: false, error: 'Unauthorized' };
+    return Response.json({ success: false, error: 'Unauthorized' });
   }
 
   const userId = new ObjectId(session.user.id);
