@@ -25,8 +25,8 @@ const fetchPageData = async (userId: ObjectId, followedUserId: ObjectId) => {
     userId,
     followedUserId
   );
-  const authUserPromise = userService.getAuthUser(userId);
-  const userPromise = userService.getUser(userId);
+  const authUserPromise = userService.getAuthUser(followedUserId);
+  const userPromise = userService.getUser(followedUserId);
 
   const [isFollowing, authUser, user] = await Promise.all([
     isFollowingUserPromise,

@@ -7,12 +7,10 @@ import { Button } from './ui/button';
 export function Nav() {
   const {
     data: session,
-    isPending, //loading state
-    error, //error object
+    // isPending, //loading state
+    // error, //error object
     // refetch, //refetch the session
   } = authClient.useSession();
-
-  console.log({ session, isPending, error });
 
   const handleSignIn = async () => {
     await authClient.signIn.social({

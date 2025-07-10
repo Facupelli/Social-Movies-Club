@@ -1,5 +1,6 @@
 'use client';
 
+import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
 import type { MovieViewModel } from '@/movies/movie.type';
@@ -32,7 +33,7 @@ function Poster() {
       <Image
         alt={movie.title}
         className="h-auto w-[200px] rounded-xs"
-        height={350}
+        height={300}
         src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
         unoptimized
         width={200}
@@ -64,7 +65,11 @@ function Rating() {
 }
 
 function AddToWatchlistButton() {
-  return <button type="button">Add to watch list</button>;
+  return (
+    <button type="button">
+      <Bookmark />
+    </button>
+  );
 }
 
 function Rate() {

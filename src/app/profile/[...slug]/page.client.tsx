@@ -9,7 +9,7 @@ export function ProfileClientPage({
   appUser: UserViewModel | null;
 }) {
   return (
-    <div className="flex-1 bg-neutral-300 pt-10">
+    <div className="flex-1 bg-neutral-300 py-10">
       <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
         {appUser?.movies?.map((movie) => (
           <MovieCard key={movie.id} movie={movie}>

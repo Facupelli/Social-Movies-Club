@@ -1,7 +1,8 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { StarIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -13,6 +14,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { addRatingToMovie } from '@/movies/actions/add-rating';
+import { useUser } from '@/movies/hooks/use-user';
+import { SubmitButton } from '../submit-button';
 import { Button } from '../ui/button';
 
 export function RateDialog({
@@ -24,20 +27,23 @@ export function RateDialog({
   title: string;
   releaseDate: string;
 }) {
+  const { data: user } = useUser();
+  const queryClient = useQueryClient();
+
+  const [state, action] = useActionState(addRatingToMovie, {
+    success: false,
+  });
+
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
-  const handleRateMovie = async () => {
-    try {
-      await addRatingToMovie(movieId, rating);
-    } catch (error) {
-      console.error('addRatingToMovie Error:', error);
-    }
-  };
+  const isMovieRated = user?.movies.map((movie) => movie.id).includes(movieId);
 
   return (
     <Dialog>
-      <DialogTrigger>Rate</DialogTrigger>
+      <DialogTrigger className="cursor-pointer">
+        {isMovieRated ? <StarIcon className="fill-yellow-400" /> : <StarIcon />}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -50,6 +56,8 @@ export function RateDialog({
         </DialogHeader>
 
         <form className="pt-2">
+          <input name="movieId" type="hidden" value={movieId} />
+
           <p className="sr-only">
             Use the number keys 1 through 10 to select a rating.
           </p>
@@ -72,9 +80,10 @@ export function RateDialog({
                   >
                     <input
                       aria-label={`${ratingValue} out of 10`}
+                      checked={rating === ratingValue}
                       className="sr-only"
                       name="rating"
-                      onClick={() => setRating(ratingValue)}
+                      onChange={() => setRating(ratingValue)}
                       type="radio"
                       value={ratingValue}
                     />
@@ -83,7 +92,7 @@ export function RateDialog({
                         ratingValue <= (hoverRating || rating)
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-300 dark:text-gray-600'
-                      }hover:text-yellow-300 rounded-full focus-within:outline-none focus-within:ring-2 focus-within:ring-yellow-500 focus-within:ring-offset-2 focus-within:ring-offset-white dark:hover:text-yellow-500 dark:focus-within:ring-offset-gray-800 `}
+                      } rounded-full focus-within:outline-none focus-within:ring-2 focus-within:ring-yellow-500 focus-within:ring-offset-2 focus-within:ring-offset-white hover:text-yellow-300 dark:hover:text-yellow-500 dark:focus-within:ring-offset-gray-800`}
                     />
                   </label>
                 );
@@ -98,10 +107,28 @@ export function RateDialog({
               </Button>
             </DialogClose>
 
-            <Button disabled={rating === 0} formAction={handleRateMovie}>
+            <SubmitButton
+              disabled={rating === 0}
+              formAction={(formData) => {
+                action(formData);
+                queryClient.invalidateQueries({ queryKey: ['user'] });
+              }}
+              loadingText="Adding Rating..."
+            >
               Submit Rating
-            </Button>
+            </SubmitButton>
           </DialogFooter>
+
+          {!state.success && state.error && (
+            <div className="flex justify-end pt-2">
+              <p className="text-red-500">{state.error}</p>
+            </div>
+          )}
+          {state.success && (
+            <div className="flex justify-end pt-2">
+              <p className="text-green-500">Rating added successfully!</p>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
