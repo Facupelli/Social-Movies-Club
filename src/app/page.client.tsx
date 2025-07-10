@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MovieCard } from '@/components/movies/movie-card';
+import { MovieGrid } from '@/components/movies/movie-grid';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/movies/hooks/use-debounce';
@@ -36,7 +37,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
+      <MovieGrid>
         {[...Array(10)].map((_, i) => (
           // biome-ignore lint: reason
           <div key={i}>
@@ -47,7 +48,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
             </div>
           </div>
         ))}
-      </div>
+      </MovieGrid>
     );
   }
 
@@ -56,7 +57,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
   }
 
   return (
-    <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
+    <MovieGrid>
       {movies?.data?.map((movie) => (
         <MovieCard key={movie.id} movie={movie}>
           <MovieCard.Poster />
@@ -70,6 +71,6 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
           </div>
         </MovieCard>
       ))}
-    </div>
+    </MovieGrid>
   );
 }

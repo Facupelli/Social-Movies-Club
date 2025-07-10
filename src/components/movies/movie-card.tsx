@@ -1,8 +1,10 @@
 'use client';
 
+import clsx from 'clsx';
 import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
+import { cn } from '@/lib/utils';
 import type { MovieViewModel } from '@/movies/movie.type';
 import { RateDialog } from './rate-dialog';
 
@@ -26,17 +28,20 @@ export function MovieCard({
   );
 }
 
-function Poster() {
+function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
   const { movie } = useContext(MovieCardContext);
+  const dimensions =
+    size === 'small' ? { width: 80, height: 120 } : { width: 200, height: 300 };
+
   return movie?.posterPath ? (
     <div>
       <Image
         alt={movie.title}
-        className="h-auto w-[200px] rounded-xs"
-        height={300}
+        className={clsx('h-auto rounded-xs')}
+        height={dimensions.height}
         src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
         unoptimized
-        width={200}
+        width={dimensions.width}
       />
     </div>
   ) : (
@@ -44,9 +49,9 @@ function Poster() {
   );
 }
 
-function Title() {
+function Title({ className }: { className?: string }) {
   const { movie } = useContext(MovieCardContext);
-  return <p>{movie?.title}</p>;
+  return <p className={cn('', className)}>{movie?.title}</p>;
 }
 
 function ReleaseDate() {
