@@ -1,3 +1,4 @@
+import { kv } from '@vercel/kv';
 import type {
   SearchMovieApiResponse,
   SearchMovieQueryParams,
@@ -100,12 +101,35 @@ export class TmdbRepository implements ITmdbRepository {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(qs)}`;
 
+    const isLocked = await kv.get('tmdb_rate_limit_lock');
+    if (isLocked) {
+      throw new Error(
+        'TMDB API is currently rate-limited. Please try again later.'
+      );
+    }
+
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.bearer}`,
         'Content-Type': 'application/json;charset=utf-8',
       },
     });
+
+    if (res.status === 429) {
+      const retryAfterHeader = res.headers.get('Retry-After');
+      const waitSeconds = retryAfterHeader
+        ? Number.parseInt(retryAfterHeader, 10)
+        : 50;
+
+      // biome-ignore lint:reason
+      console.warn(
+        `RATE LIMIT HIT. Setting external lock for ${waitSeconds} seconds.`
+      );
+
+      await kv.set('tmdb_rate_limit_lock', 'true', { ex: waitSeconds });
+
+      throw new Error('Rate limit exceeded.');
+    }
 
     if (!res.ok) {
       throw new Error(`TMDB error (${res.status})`);
