@@ -5,6 +5,10 @@ import type {
 } from '@/infra/TMDB/types/search-movie';
 import type { MovieData, MovieViewModel } from '@/movies/movie.type';
 import type { MovieDetailApiResponse } from './types/detail-movie';
+import type {
+  WatchProviderApiResponse,
+  WatchProviderResult,
+} from './types/watch-provider';
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -74,6 +78,19 @@ export class TmdbRepository implements ITmdbRepository {
 
     return {
       data,
+    };
+  }
+
+  async getWatchProviders(
+    movieId: number
+  ): Promise<{ data: WatchProviderResult }> {
+    const json: WatchProviderApiResponse =
+      await this.request<WatchProviderApiResponse>(
+        `/movie/${movieId}/watch/providers`
+      );
+
+    return {
+      data: json.results.AR,
     };
   }
 

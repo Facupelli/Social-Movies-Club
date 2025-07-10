@@ -5,14 +5,29 @@ import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
+import { useMovieWatchProviders } from '@/movies/hooks/use-movie-watch-providers';
 import type { MovieViewModel } from '@/movies/movie.type';
+import { Button } from '../ui/button';
+import { Skeleton } from '../ui/skeleton';
 import { RateDialog } from './rate-dialog';
 
-const MovieCardContext = createContext<{
-  movie: MovieViewModel | null;
-}>({
-  movie: null,
-});
+type MovieCardContextType = {
+  movie: MovieViewModel;
+};
+
+const MovieCardContext = createContext<MovieCardContextType | undefined>(
+  undefined
+);
+
+function useMovieCardContext() {
+  const context = useContext(MovieCardContext);
+  if (!context) {
+    throw new Error(
+      'useMovieCardContext must be used within a MovieCard.Provider'
+    );
+  }
+  return context;
+}
 
 export function MovieCard({
   children,
@@ -29,7 +44,7 @@ export function MovieCard({
 }
 
 function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
-  const { movie } = useContext(MovieCardContext);
+  const { movie } = useMovieCardContext();
   const dimensions =
     size === 'small' ? { width: 80, height: 120 } : { width: 200, height: 300 };
 
@@ -50,21 +65,64 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
 }
 
 function Title({ className }: { className?: string }) {
-  const { movie } = useContext(MovieCardContext);
+  const { movie } = useMovieCardContext();
   return <p className={cn('', className)}>{movie?.title}</p>;
 }
 
 function ReleaseDate() {
-  const { movie } = useContext(MovieCardContext);
+  const { movie } = useMovieCardContext();
   return <p className="text-gray-600 text-sm">{movie?.releaseDate}</p>;
 }
 
 function Rating() {
-  const { movie } = useContext(MovieCardContext);
+  const { movie } = useMovieCardContext();
 
   return (
     <div className="flex size-7 items-center justify-center rounded bg-blue-300">
       <p className="font-bold text-sm">{movie?.rating}</p>
+    </div>
+  );
+}
+
+function WatchProviders() {
+  const { movie } = useMovieCardContext();
+  const {
+    data: watchProviders,
+    isLoading,
+    refetch,
+  } = useMovieWatchProviders(movie?.id);
+
+  return (
+    <div>
+      <Button onClick={() => refetch()} variant="ghost">
+        Donde ver?
+      </Button>
+
+      {isLoading && (
+        <div className="flex flex-wrap gap-1 pt-2">
+          {[...Array(3)].map((_, idx) => (
+            // biome-ignore lint:reason
+            <div key={idx}>
+              <Skeleton className="size-[30px] rounded-sm" />{' '}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-1 pt-2">
+        {watchProviders?.data.flatrate.map((provider) => (
+          <div key={provider.provider_id}>
+            <Image
+              alt={provider.provider_name}
+              className={clsx('h-auto rounded-sm')}
+              height={30}
+              src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+              unoptimized
+              width={30}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -78,7 +136,7 @@ function AddToWatchlistButton() {
 }
 
 function Rate() {
-  const { movie } = useContext(MovieCardContext);
+  const { movie } = useMovieCardContext();
   if (!movie) {
     return null;
   }
@@ -98,3 +156,4 @@ MovieCard.ReleaseDate = ReleaseDate;
 MovieCard.AddToWatchlistButton = AddToWatchlistButton;
 MovieCard.Rate = Rate;
 MovieCard.Rating = Rating;
+MovieCard.WatchProviders = WatchProviders;

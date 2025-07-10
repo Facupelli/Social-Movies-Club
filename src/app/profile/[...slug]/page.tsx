@@ -118,7 +118,7 @@ export default async function UserProfilePage(props: {
                   followedUserId={user.id}
                   isFollowing={isFollowing}
                 >
-                  {isFollowing ? 'Following' : 'Follow'}
+                  {isFollowing ? 'Siguiendo' : 'Seguir'}
                 </FollowUserButton>
               </div>
             )}
@@ -128,10 +128,11 @@ export default async function UserProfilePage(props: {
           </div>
           <div className="flex items-center gap-2 font-bold text-sm">
             <p>
-              10 <span className="font-normal text-neutral-500">Following</span>
+              10 <span className="font-normal text-neutral-500">Siguiendo</span>
             </p>
             <p>
-              32 <span className="font-normal text-neutral-500">Followers</span>
+              32{' '}
+              <span className="font-normal text-neutral-500">Seguidores</span>
             </p>
           </div>
         </div>
@@ -144,7 +145,7 @@ export default async function UserProfilePage(props: {
             )}
             href={`/profile/${user.id}/`}
           >
-            Movies
+            Películas
           </Link>
           <Link
             className={clsx(
@@ -153,7 +154,7 @@ export default async function UserProfilePage(props: {
             )}
             href={`/profile/${user.id}/following`}
           >
-            Following
+            Siguiendo
           </Link>
         </div>
 

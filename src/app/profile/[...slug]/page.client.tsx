@@ -54,7 +54,7 @@ export function ProfileClientPage({
   };
 
   const getSortLabel = () => {
-    return sortBy === 'rating' ? 'Rating' : 'Date Added';
+    return sortBy === 'rating' ? 'Puntaje' : 'Fecha';
   };
 
   return (
@@ -72,7 +72,10 @@ export function ProfileClientPage({
                 ) : (
                   <Calendar className="size-4" />
                 )}
-                Sort by {getSortLabel()}
+                <span className="font-normal text-neutral-500">
+                  Ordenar por
+                </span>{' '}
+                {getSortLabel()}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -151,7 +154,10 @@ export function ProfileClientPage({
                       <MovieCard.ReleaseDate />
                     </div>
                   </div>
-                  <MovieCard.Rating />
+                  <div className="flex items-center gap-4">
+                    <MovieCard.WatchProviders />
+                    <MovieCard.Rating />
+                  </div>
                 </div>
               </div>
             </MovieCard>

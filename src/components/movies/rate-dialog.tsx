@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { addRatingToMovie } from '@/movies/actions/add-rating';
-import { useUser } from '@/movies/hooks/use-user';
+import { useUser } from '@/users/hooks/use-user';
 import { SubmitButton } from '../submit-button';
 import { Button } from '../ui/button';
 

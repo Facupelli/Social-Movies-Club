@@ -30,10 +30,10 @@ export function Nav() {
     <nav className="sticky top-0 left-0 flex h-screen w-[250px] flex-col p-8">
       <ul className="grid gap-4">
         <li>
-          <a href="/">Home</a>
+          <a href="/">Inicio</a>
         </li>
         <li>
-          <a href={`/profile/${session?.user.id}`}>Profile</a>
+          <a href={`/profile/${session?.user.id}`}>Perfil</a>
         </li>
       </ul>
 
@@ -58,12 +58,12 @@ export function Nav() {
               </div>
             </div>
             <Button onClick={handleLogOut} type="button">
-              Sign Out
+              Salir
             </Button>
           </div>
         ) : (
           <Button onClick={handleSignIn} type="button">
-            Sign In
+            Ingresar
           </Button>
         )}
       </div>
