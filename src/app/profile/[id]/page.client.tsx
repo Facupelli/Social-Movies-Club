@@ -55,7 +55,7 @@ export function ProfileMoviesClientPage({
 
   return (
     <Tabs className="flex-1 pt-2 pb-10" defaultValue="grid">
-      <div className="flex justify-end gap-4 py-4">
+      <div className="flex justify-between gap-4 py-4 md:justify-end">
         <div className="flex h-9 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -143,17 +143,22 @@ export function ProfileMoviesClientPage({
           {profileMovies.map((movie, idx) => (
             <MovieCard key={movie.id} movie={movie}>
               <div className="flex gap-6">
-                <p className="pl-2 font-bold">{idx + 1}</p>
-                <div className="flex flex-1 items-center">
-                  <div className="flex flex-1 gap-4">
-                    <MovieCard.Poster size="small" />
-                    <div className="flex-1 pt-2">
+                <p className="hidden pl-2 font-bold md:block">{idx + 1}</p>
+
+                <div className="flex flex-1 gap-4">
+                  <MovieCard.Poster size="small" />
+
+                  <div className="flex flex-col gap-2 md:flex-1 md:flex-row md:gap-4">
+                    <div className="pt-2 md:flex-1">
                       <MovieCard.Title className="font-bold text-lg" />
                       <MovieCard.ReleaseDate />
                     </div>
+                    <div className="flex items-center gap-4 pr-4">
+                      <MovieCard.WatchProviders />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 pr-4">
-                    <MovieCard.WatchProviders />
+
+                  <div className="self-center px-2 md:px-4">
                     <MovieCard.Score />
                   </div>
                 </div>

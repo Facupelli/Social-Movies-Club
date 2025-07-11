@@ -55,10 +55,12 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
   const { movie } = useMovieCardContext();
 
   const dimensions =
-    size === 'small' ? { width: 80, height: 120 } : { width: 250, height: 300 };
+    size === 'small'
+      ? { width: 120, height: 230 }
+      : { width: 250, height: 300 };
 
   return movie.posterPath ? (
-    <div>
+    <div className="shrink-0">
       <Image
         alt={movie.title}
         className={clsx('h-auto rounded-xs')}
@@ -78,7 +80,7 @@ function Title({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        'line-clamp-2 font-semibold text-lg leading-tight',
+        'line-clamp-2 font-semibold leading-tight md:text-lg',
         className
       )}
     >
@@ -106,8 +108,8 @@ function Score() {
   }
 
   return (
-    <div className="flex size-7 items-center justify-center rounded bg-primary">
-      <p className="font-bold text-sm">{movie.score}</p>
+    <div className="flex size-7 items-center justify-center rounded bg-primary md:size-9">
+      <p className="font-bold text-sm md:text-xl">{movie.score}</p>
     </div>
   );
 }
@@ -121,7 +123,7 @@ function WatchProviders() {
   } = useMovieWatchProviders(movie.id);
 
   return (
-    <div className="space-y-2">
+    <div className="md:space-y-2">
       <Button className="h-auto p-0" onClick={() => refetch()} variant="link">
         Donde ver?
       </Button>

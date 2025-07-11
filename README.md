@@ -39,9 +39,11 @@ This app is built with the following technologies:
 
 Here are the next steps to improve and expand the app:
 
-- [ ] **Make the app responsive**: Ensure the app works seamlessly on all devices, including mobile, tablet, and desktop.
-- [ ] **Add server-side input validation**: Validate user inputs on the server to enhance security and data integrity.
+- [x] **Add server-side input validation**: Validate user inputs on the server to enhance security and data integrity.
+- [x] **Make the app responsive**: Ensure the app works seamlessly on all devices, including mobile, tablet, and desktop.
 - [ ] **Implement the feed feature**: Build the feed functionality to display the recent ratings of users you follow.
+- [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
+- [ ] **Add pagination**: Add pagination to MovieGrid and MovieList.
 
 ---
 

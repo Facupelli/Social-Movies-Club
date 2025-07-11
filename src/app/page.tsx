@@ -14,7 +14,7 @@ export default function HomePage() {
   const debouncedSearchTerm = useDebounce(query, 500);
 
   return (
-    <div className="flex-1 px-10 py-6">
+    <div className="min-h-svh flex-1 px-4 py-6 md:min-h-auto md:px-10">
       <div className="pb-6">
         <Input
           className="w-full bg-white"
@@ -42,7 +42,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
         {[...Array(10)].map((_, i) => (
           // biome-ignore lint: reason
           <div key={i}>
-            <Skeleton className="h-[300px] w-[200px] rounded-xs" />
+            <Skeleton className="h-[240px] w-[150px] rounded-xs md:h-[300px] md:w-[200px]" />
             <div className="grid gap-1 pt-2">
               <Skeleton className="h-5 w-[120px]" />
               <Skeleton className="h-5 w-[70px]" />

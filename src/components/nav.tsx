@@ -1,5 +1,6 @@
 'use client';
 
+import { Home, Info, User2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { authClient } from '@/lib/auth-client';
 import { Button } from './ui/button';
@@ -27,20 +28,32 @@ export function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 left-0 flex h-screen w-[250px] flex-col border-accent-foreground border-r bg-sidebar p-8">
-      <ul className="grid gap-4">
+    <nav className="fixed bottom-0 left-0 flex w-full flex-row justify-center border-accent-foreground bg-sidebar p-4 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:border-r md:p-8">
+      <ul className="flex gap-10 md:grid md:gap-4">
         <li>
-          <a href="/">Inicio</a>
+          <a className="flex items-center gap-2" href="/">
+            <Home />
+            <span className="hidden md:block">Inicio</span>
+          </a>
         </li>
         <li>
-          <a href={`/profile/${session?.user.id}`}>Perfil</a>
+          <a
+            className="flex items-center gap-2"
+            href={`/profile/${session?.user.id}`}
+          >
+            <User2Icon />
+            <span className="hidden md:block">Perfil</span>
+          </a>
         </li>
         <li>
-          <a href="/credits">Créditos</a>
+          <a className="flex items-center gap-2" href="/credits">
+            <Info />
+            <span className="hidden md:block">Créditos</span>
+          </a>
         </li>
       </ul>
 
-      <div className="mt-auto ">
+      <div className="mt-auto hidden md:block ">
         {session ? (
           <div>
             <div className="flex items-center gap-2 pb-4">

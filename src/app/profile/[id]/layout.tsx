@@ -28,13 +28,13 @@ export default async function ProfileLayout(
 
   return (
     <div>
-      <div className="bg-card px-10 py-2">
+      <div className="bg-card px-2 py-2 md:px-10">
         <Link href="/">
           <ArrowLeft />
         </Link>
       </div>
 
-      <div className="px-10">
+      <div className="px-4 md:px-10">
         <UserInfo
           profileUserId={profileUserId}
           sessionUserId={session.user.id}

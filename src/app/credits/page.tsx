@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 export default function CreditsPage() {
   return (
-    <div className="min-h-screen flex-1 bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-12 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen flex-1 bg-gradient-to-br from-background/80 to-background px-4 py-12">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8 text-center">
           <h1 className="mb-2 font-bold text-3xl text-slate-900 dark:text-slate-100">
@@ -32,7 +32,7 @@ export default function CreditsPage() {
                     This product uses the TMDb API but is not endorsed or
                     certified by TMDb.
                   </p>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex flex-col items-center justify-center md:flex-row md:gap-2">
                     <span className="text-slate-600 dark:text-slate-400">
                       Learn more about TMDb at
                     </span>

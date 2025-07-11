@@ -53,7 +53,7 @@ export function RateDialog({
         <DialogHeader>
           <DialogTitle>
             <span className="text-neutral-500">Calificar</span> {title}{' '}
-            <span className="text-neutral-500 text-sm">{year}</span>
+            <span className="font-normal text-neutral-500 text-sm">{year}</span>
           </DialogTitle>
           <DialogDescription>
             Después de calificar esta película, se agregará a tu lista personal.
@@ -93,7 +93,7 @@ export function RateDialog({
                       value={ratingValue}
                     />
                     <StarIcon
-                      className={`h-7 w-7 transition-colors duration-200 sm:h-8 sm:w-8 ${
+                      className={`size-6 transition-colors duration-200 sm:h-8 sm:w-8 md:size-7 ${
                         ratingValue <= (hoverRating || rating)
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-300 dark:text-gray-600'
@@ -105,7 +105,7 @@ export function RateDialog({
             </div>
           </fieldset>
 
-          <DialogFooter className="gap-6">
+          <DialogFooter className="gap-2 md:gap-6">
             <DialogClose asChild>
               <Button type="button" variant="secondary">
                 Cancelar
@@ -125,12 +125,12 @@ export function RateDialog({
           </DialogFooter>
 
           {!state.success && state.error && (
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-center pt-2 md:justify-end">
               <p className="text-red-500">{state.error}</p>
             </div>
           )}
           {state.success && (
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-center pt-2 md:justify-end">
               <p className="text-green-500">Calificaste esta película!</p>
             </div>
           )}

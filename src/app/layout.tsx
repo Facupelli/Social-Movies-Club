@@ -31,9 +31,11 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <div className="dark bg-sidebar">
-            <div className="mx-auto flex max-w-7xl text-card-foreground">
+            <div className="relative mx-auto flex max-w-7xl flex-col text-card-foreground md:flex-row">
               <Nav />
-              <div className="flex-1 bg-background">{children}</div>
+              <div className="flex-1 bg-background pb-[60px] md:pb-0">
+                {children}
+              </div>
             </div>
           </div>
         </ReactQueryProvider>
