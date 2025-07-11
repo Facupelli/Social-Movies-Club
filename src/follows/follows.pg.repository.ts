@@ -28,7 +28,7 @@ export class FollowsPgRepository {
           FROM ${follows} AS f
           WHERE f.follower_id = ${userId}
             AND f.followee_id = ${followedUserId}
-        ) AS is_following
+        ) AS "is_following"
       `
     );
 

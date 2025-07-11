@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import type { SortBy, SortOrder } from '@/app/profile/[...slug]/page';
+import type { SortBy, SortOrder } from '@/app/profile/[id]/page';
 import { withDatabase } from '@/infra/neon/db-utils';
 import { movies, ratings, type User, users } from '@/infra/neon/schema';
 
@@ -17,7 +17,7 @@ export class UserPgRepository {
   async getUserById(userId: string): Promise<User> {
     return await withDatabase(async (db) => {
       const query = sql<User>`
-        SELECT * FROM users WHERE ${users.id} = ${userId};
+        SELECT * FROM users WHERE ${users.id} = ${userId}
       `;
 
       const { rows } = await db.execute<User>(query);

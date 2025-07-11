@@ -1,4 +1,4 @@
-import type { SortBy, SortOrder } from '@/app/profile/[...slug]/page';
+import type { SortBy, SortOrder } from '@/app/profile/[id]/page';
 import type { User } from '@/infra/neon/schema';
 import { AuthUserRepository } from './auth-user.repository';
 import { UserPgRepository, type UserRatings } from './user.pg.repository';

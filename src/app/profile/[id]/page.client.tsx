@@ -8,7 +8,7 @@ import {
   Grid2X2,
   Star,
 } from 'lucide-react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { MovieCard, type MovieView } from '@/components/movies/movie-card';
 import { MovieGrid } from '@/components/movies/movie-grid';
 import { MovieList } from '@/components/movies/movie-list';
@@ -23,17 +23,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SortBy, SortOrder } from './page';
 
-export function ProfileClientPage({
+export function ProfileMoviesClientPage({
   profileMovies = [],
+  searchParams,
 }: {
   profileMovies: MovieView[];
+  searchParams: { sortBy?: SortBy; sortOrder?: SortOrder };
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const sortBy = (searchParams.get('sortBy') as SortBy) || 'score';
-  const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'desc';
 
   const updateSearchParams = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -42,7 +40,7 @@ export function ProfileClientPage({
   };
 
   const toggleSortOrder = () => {
-    const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    const newOrder = searchParams.sortOrder === 'asc' ? 'desc' : 'asc';
     updateSearchParams('sortOrder', newOrder);
   };
 
@@ -51,7 +49,7 @@ export function ProfileClientPage({
   };
 
   const getSortLabel = () => {
-    return sortBy === 'score' ? 'Puntaje' : 'Fecha';
+    return searchParams.sortBy === 'score' ? 'Puntaje' : 'Fecha';
   };
 
   return (
@@ -64,7 +62,7 @@ export function ProfileClientPage({
                 className="h-[calc(100%-1px)] gap-2 bg-transparent"
                 variant="outline"
               >
-                {sortBy === 'score' ? (
+                {searchParams.sortBy === 'score' ? (
                   <Star className="size-4" />
                 ) : (
                   <Calendar className="size-4" />
@@ -78,7 +76,7 @@ export function ProfileClientPage({
             <DropdownMenuContent align="end">
               <DropdownMenuRadioGroup
                 onValueChange={handleSortByChange}
-                value={sortBy}
+                value={searchParams.sortBy}
               >
                 <DropdownMenuRadioItem className="gap-2" value="score">
                   <Star className="size-4" />
@@ -96,10 +94,10 @@ export function ProfileClientPage({
             className="h-[calc(100%-1px)] gap-1 bg-transparent"
             onClick={toggleSortOrder}
             size="icon"
-            title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+            title={`Sort ${searchParams.sortOrder === 'asc' ? 'ascending' : 'descending'}`}
             variant="outline"
           >
-            {sortOrder === 'asc' ? (
+            {searchParams.sortOrder === 'asc' ? (
               <ArrowUp className="size-4" />
             ) : (
               <ArrowDown className="size-4" />
