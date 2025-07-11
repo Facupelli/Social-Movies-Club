@@ -6,13 +6,20 @@ import Image from 'next/image';
 import { createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import { useMovieWatchProviders } from '@/movies/hooks/use-movie-watch-providers';
-import type { MovieViewModel } from '@/movies/movie.type';
 import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import { RateDialog } from './rate-dialog';
 
+export interface MovieView {
+  id: number; // aquí usamos el TMDB‐ID siempre
+  title: string;
+  year: string;
+  posterPath: string;
+  score?: number; // opcional, sólo existe si viene de ratings
+}
+
 type MovieCardContextType = {
-  movie: MovieViewModel;
+  movie: MovieView;
 };
 
 const MovieCardContext = createContext<MovieCardContextType | undefined>(
@@ -34,7 +41,7 @@ export function MovieCard({
   movie,
 }: {
   children: React.ReactNode;
-  movie: MovieViewModel;
+  movie: MovieView;
 }) {
   return (
     <MovieCardContext.Provider value={{ movie }}>
@@ -45,10 +52,11 @@ export function MovieCard({
 
 function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
   const { movie } = useMovieCardContext();
+
   const dimensions =
     size === 'small' ? { width: 80, height: 120 } : { width: 200, height: 300 };
 
-  return movie?.posterPath ? (
+  return movie.posterPath ? (
     <div>
       <Image
         alt={movie.title}
@@ -66,20 +74,24 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
 
 function Title({ className }: { className?: string }) {
   const { movie } = useMovieCardContext();
-  return <p className={cn('', className)}>{movie?.title}</p>;
+  return <p className={cn('', className)}>{movie.title}</p>;
 }
 
 function ReleaseDate() {
   const { movie } = useMovieCardContext();
-  return <p className="text-gray-600 text-sm">{movie?.releaseDate}</p>;
+  return <p className="text-gray-600 text-sm">{movie.year}</p>;
 }
 
 function Rating() {
   const { movie } = useMovieCardContext();
 
+  if (!movie.score) {
+    return null;
+  }
+
   return (
     <div className="flex size-7 items-center justify-center rounded bg-blue-300">
-      <p className="font-bold text-sm">{movie?.rating}</p>
+      <p className="font-bold text-sm">{movie.score}</p>
     </div>
   );
 }
@@ -90,7 +102,7 @@ function WatchProviders() {
     data: watchProviders,
     isLoading,
     refetch,
-  } = useMovieWatchProviders(movie?.id);
+  } = useMovieWatchProviders(movie.id);
 
   return (
     <div className="space-y-2">
@@ -158,16 +170,9 @@ function AddToWatchlistButton() {
 
 function Rate() {
   const { movie } = useMovieCardContext();
-  if (!movie) {
-    return null;
-  }
 
   return (
-    <RateDialog
-      movieId={movie.id}
-      releaseDate={movie.releaseDate}
-      title={movie.title}
-    />
+    <RateDialog movieTMDBId={movie.id} title={movie.title} year={movie.year} />
   );
 }
 

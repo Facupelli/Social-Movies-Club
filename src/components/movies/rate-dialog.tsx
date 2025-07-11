@@ -14,20 +14,18 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { addRatingToMovie } from '@/movies/actions/add-rating';
-import { useUser } from '@/users/hooks/use-user';
 import { SubmitButton } from '../submit-button';
 import { Button } from '../ui/button';
 
 export function RateDialog({
-  movieId,
+  movieTMDBId,
   title,
-  releaseDate,
+  year,
 }: {
-  movieId: number;
+  movieTMDBId: number;
   title: string;
-  releaseDate: string;
+  year: string;
 }) {
-  const { data: user } = useUser();
   const queryClient = useQueryClient();
 
   const [state, action] = useActionState(addRatingToMovie, {
@@ -37,7 +35,7 @@ export function RateDialog({
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
-  const isMovieRated = user?.movies.map((movie) => movie.id).includes(movieId);
+  const isMovieRated = false;
 
   return (
     <Dialog>
@@ -48,7 +46,7 @@ export function RateDialog({
         <DialogHeader>
           <DialogTitle>
             Rating {title}{' '}
-            <span className="text-neutral-500 text-sm">{releaseDate}</span>
+            <span className="text-neutral-500 text-sm">{year}</span>
           </DialogTitle>
           <DialogDescription>
             After rating this movie it will be added to your personal list.
@@ -56,7 +54,7 @@ export function RateDialog({
         </DialogHeader>
 
         <form className="pt-2">
-          <input name="movieId" type="hidden" value={movieId} />
+          <input name="movieTMDBId" type="hidden" value={movieTMDBId} />
 
           <p className="sr-only">
             Use the number keys 1 through 10 to select a rating.

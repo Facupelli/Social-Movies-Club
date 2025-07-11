@@ -58,7 +58,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 
   return (
     <MovieGrid>
-      {movies?.data?.map((movie) => (
+      {movies?.map((movie) => (
         <MovieCard key={movie.id} movie={movie}>
           <MovieCard.Poster />
           <div className="pt-2">

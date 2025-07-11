@@ -1,11 +1,10 @@
 'use server';
 
-import { ObjectId } from 'mongodb';
 import { headers } from 'next/headers';
+import { FollowService } from '@/follows/follow.service';
 import { auth } from '@/lib/auth';
-import { UserService } from '../user.service';
 
-export async function followUser(followedUserStringId: string) {
+export async function followUser(followedUserId: string) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -14,10 +13,11 @@ export async function followUser(followedUserStringId: string) {
     throw new Error('Unauthorized');
   }
 
-  const userId = new ObjectId(session.user.id);
-  const followedUserId = new ObjectId(followedUserStringId);
-  const userService = new UserService();
+  const followService = new FollowService();
 
-  const result = await userService.followUser(userId, followedUserId);
+  const result = await followService.followUser(
+    session.user.id,
+    followedUserId
+  );
   return result;
 }

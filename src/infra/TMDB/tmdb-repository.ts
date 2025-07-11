@@ -4,7 +4,7 @@ import type {
   SearchMovieQueryParams,
   SearchMovieResult,
 } from '@/infra/TMDB/types/search-movie';
-import type { MovieData, MovieViewModel } from '@/movies/movie.type';
+import type { TMDbMovieSearch } from '@/movies/movie.type';
 import type { MovieDetailApiResponse } from './types/detail-movie';
 import type {
   WatchProviderApiResponse,
@@ -16,7 +16,7 @@ interface ITmdbRepository {
 }
 
 export interface SearchMoviesResult {
-  data: MovieViewModel[];
+  data: TMDbMovieSearch[];
   totalCount: number;
   totalPages: number;
   page: number;
@@ -44,16 +44,14 @@ export class TmdbRepository implements ITmdbRepository {
         page: String(page),
       });
 
-    const data: MovieViewModel[] = json.results.map((r: SearchMovieResult) => ({
-      id: r.id,
-      title: r.title,
-      posterPath: r.poster_path ?? null,
-      releaseDate: r.release_date,
-      genres: null,
-      addedAt: new Date(),
-      originalTitle: r.original_title,
-      rating: null,
-    }));
+    const data: TMDbMovieSearch[] = json.results.map(
+      (r: SearchMovieResult) => ({
+        id: r.id,
+        title: r.title,
+        posterPath: r.poster_path ?? null,
+        year: r.release_date.split('-')[0],
+      })
+    );
 
     return {
       data,
@@ -63,18 +61,15 @@ export class TmdbRepository implements ITmdbRepository {
     };
   }
 
-  async getDetail(movieId: number): Promise<{ data: MovieData }> {
+  async getDetail(movieId: number): Promise<{ data: TMDbMovieSearch }> {
     const json: MovieDetailApiResponse =
       await this.request<MovieDetailApiResponse>(`/movie/${movieId}`);
 
-    const data: MovieData = {
+    const data: TMDbMovieSearch = {
       id: json.id,
       title: json.title,
       posterPath: json.poster_path ?? null,
-      releaseDate: json.release_date,
-      addedAt: new Date(),
-      originalTitle: json.original_title,
-      genres: json.genres,
+      year: json.release_date.split('-')[0],
     };
 
     return {

@@ -1,58 +1,58 @@
 import clsx from 'clsx';
 import { ArrowLeft } from 'lucide-react';
-import { ObjectId } from 'mongodb';
 import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import type { MovieView } from '@/components/movies/movie-card';
+import { FollowService } from '@/follows/follow.service';
 import { auth } from '@/lib/auth';
-import { tryCatch } from '@/lib/utils';
+import { dbMovieToView } from '@/movies/movie.adapters';
 import { FollowUserButton } from '@/users/components/follow-user-button';
 import { UserService } from '@/users/user.service';
-import type { UserViewModel } from '@/users/user.types';
-import type { UserSortBy, UserSortOrder } from '@/users/user-repository';
 import { ProfileClientPage } from './page.client';
 
-const fetchFollowingUsers = async (userId: ObjectId) => {
-  const userService = new UserService();
-  const followingUsers = await userService.getFollowingUsers(userId);
-  return followingUsers;
-};
+export type SortBy = 'score' | 'createdAt';
+export type SortOrder = 'asc' | 'desc';
 
 const fetchPageData = async (
-  userId: ObjectId,
-  followedUserId: ObjectId,
-  searchParams: { sortBy?: UserSortBy; sortOrder?: UserSortOrder }
+  sessionUserId: string,
+  profileUserId: string,
+  searchParams: { sortBy?: SortBy; sortOrder?: SortOrder }
 ) => {
+  const followService = new FollowService();
   const userService = new UserService();
-  const isFollowingUserPromise = userService.isFollowingUser(
-    userId,
-    followedUserId
-  );
-  const authUserPromise = userService.getAuthUser(followedUserId);
-  const userPromise = userService.getUser(
-    followedUserId,
+
+  const profileUserPromise = await userService.getUser(profileUserId);
+  const profileRatingsPromise = await userService.getUserRatingMovies(
+    profileUserId,
     searchParams.sortBy,
     searchParams.sortOrder
   );
+  const isFollowingUserPromise = followService.isFollowingUser(
+    sessionUserId,
+    profileUserId
+  );
 
-  const [isFollowing, authUser, user] = await Promise.all([
+  const [profileUser, profileRatings, isFollowing] = await Promise.all([
+    profileUserPromise,
+    profileRatingsPromise,
     isFollowingUserPromise,
-    authUserPromise,
-    userPromise,
   ]);
 
+  const profileMovies: MovieView[] = profileRatings.map(dbMovieToView);
+
   return {
+    profileUser,
+    profileMovies,
     isFollowing,
-    authUser,
-    user,
   };
 };
 
 export default async function UserProfilePage(props: {
   params: Promise<{ slug: string[] }>;
-  searchParams: Promise<{ sortBy?: UserSortBy; sortOrder?: UserSortOrder }>;
+  searchParams: Promise<{ sortBy?: SortBy; sortOrder?: SortOrder }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -65,28 +65,17 @@ export default async function UserProfilePage(props: {
   const params = await props.params;
   const searchParams = await props.searchParams;
 
-  const paramId = params.slug[0];
+  const profileUserId = params.slug[0];
   const tab = params.slug[1];
 
-  const currentUserIdResult = await tryCatch<ObjectId>(
-    new Promise((resolve) => resolve(new ObjectId(session.user.id)))
-  );
-  const userIdResult = await tryCatch<ObjectId>(
-    new Promise((resolve) => resolve(new ObjectId(paramId)))
-  );
-
-  if (userIdResult.error || currentUserIdResult.error) {
-    return notFound();
-  }
-
-  const { isFollowing, user, authUser } = await fetchPageData(
-    currentUserIdResult.data,
-    userIdResult.data,
+  const { profileUser, profileMovies, isFollowing } = await fetchPageData(
+    session.user.id,
+    profileUserId,
     searchParams
   );
 
-  if (!(user && authUser)) {
-    return notFound();
+  if (!profileUser) {
+    redirect('/');
   }
 
   return (
@@ -100,22 +89,22 @@ export default async function UserProfilePage(props: {
       <div className="px-10">
         <div className="grid gap-2 py-4">
           <div className="flex items-center justify-between">
-            {authUser.image && (
+            {profileUser.image && (
               <div className="shrink-0">
                 <Image
-                  alt={authUser.name}
+                  alt={profileUser.name}
                   className="size-[100px] rounded-full object-cover"
                   height={100}
-                  src={authUser.image}
+                  src={profileUser.image}
                   unoptimized
                   width={100}
                 />
               </div>
             )}
-            {session.user.id !== user.id && (
+            {session.user.id !== profileUser.id && (
               <div>
                 <FollowUserButton
-                  followedUserId={user.id}
+                  followedUserId={profileUser.id}
                   isFollowing={isFollowing}
                 >
                   {isFollowing ? 'Siguiendo' : 'Seguir'}
@@ -124,7 +113,7 @@ export default async function UserProfilePage(props: {
             )}
           </div>
           <div>
-            <p className="font-bold">{authUser.name}</p>
+            <p className="font-bold">{profileUser.name}</p>
           </div>
           <div className="flex items-center gap-2 font-bold text-sm">
             <p>
@@ -143,7 +132,7 @@ export default async function UserProfilePage(props: {
               !tab && 'border-blue-400 border-b-3 font-bold',
               'pb-2'
             )}
-            href={`/profile/${user.id}/`}
+            href={`/profile/${profileUser.id}/`}
           >
             Películas
           </Link>
@@ -152,13 +141,17 @@ export default async function UserProfilePage(props: {
               tab === 'following' && 'border-blue-400 border-b-3 font-bold',
               'pb-2'
             )}
-            href={`/profile/${user.id}/following`}
+            href={`/profile/${profileUser.id}/following`}
           >
             Siguiendo
           </Link>
         </div>
 
-        <RenderActiveTab tab={tab} user={user} userId={userIdResult.data} />
+        <RenderActiveTab
+          profileMovies={profileMovies}
+          sessionUserId={session.user.id}
+          tab={tab}
+        />
       </div>
     </div>
   );
@@ -166,37 +159,44 @@ export default async function UserProfilePage(props: {
 
 function RenderActiveTab({
   tab,
-  userId,
-  user,
+  sessionUserId,
+  profileMovies,
 }: {
   tab: string | undefined;
-  userId: ObjectId;
-  user: UserViewModel | null;
+  sessionUserId: string;
+  profileMovies: MovieView[];
 }) {
   if (!tab) {
-    return <ProfileClientPage appUser={user} />;
+    return <ProfileClientPage profileMovies={profileMovies} />;
   }
 
   if (tab === 'following') {
     return (
       <Suspense fallback={<div className="pt-10">Loading...</div>}>
-        <FollowingUsersList userId={userId} />
+        <FollowingUsersList userId={sessionUserId} />
       </Suspense>
     );
   }
 }
 
-async function FollowingUsersList({ userId }: { userId: ObjectId }) {
+const fetchFollowingUsers = async (userId: string) => {
+  const followService = new FollowService();
+  const followingUsers = await followService.getFollowingUsers(userId);
+  return followingUsers;
+};
+
+async function FollowingUsersList({ userId }: { userId: string }) {
   const followingUsers = await fetchFollowingUsers(userId);
+
   return (
     <div className="flex-1 pt-10">
       <div>
         {followingUsers.map((followingUser) => (
           <div
             className="truncate text-ellipsis"
-            key={followingUser._id.toHexString()}
+            key={followingUser.followeeId}
           >
-            {followingUser._id.toHexString()}
+            {followingUser.followeeId}
           </div>
         ))}
       </div>

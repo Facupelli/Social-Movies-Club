@@ -1,15 +1,6 @@
-import type { Genre } from '@/infra/TMDB/types/detail-movie';
-
-export interface MovieData {
+export interface TMDbMovieSearch {
   id: number;
-  genres: Genre[] | null;
-  originalTitle: string;
   posterPath: string;
-  releaseDate: string;
+  year: string;
   title: string;
-  addedAt: Date;
-}
-
-export interface MovieViewModel extends MovieData {
-  rating: number | null;
 }

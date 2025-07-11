@@ -1,5 +1,7 @@
 import type { NextRequest } from 'next/server';
+import type { MovieView } from '@/components/movies/movie-card';
 import type { SearchMoviesResult } from '@/infra/TMDB/tmdb-repository';
+import { apiMovieToView } from '@/movies/movie.adapters';
 import { MovieService } from '@/movies/movie.service';
 
 export async function GET(request: NextRequest) {
@@ -12,5 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   const res: SearchMoviesResult = await movieService.searchMovie(query);
-  return Response.json(res);
+  const movies: MovieView[] = res.data.map(apiMovieToView);
+
+  return Response.json(movies);
 }

@@ -1,77 +1,37 @@
-import type { Document, ObjectId, WithId } from 'mongodb';
+import type { SortBy, SortOrder } from '@/app/profile/[...slug]/page';
+import type { User } from '@/infra/neon/schema';
 import { AuthUserRepository } from './auth-user.repository';
-import type { AuthUserViewModel, UserViewModel } from './user.types';
-import { UserRelationshipRepository } from './user-relationships.repository';
-import {
-  UserRepository,
-  type UserSortBy,
-  type UserSortOrder,
-} from './user-repository';
+import { UserPgRepository, type UserRatings } from './user.pg.repository';
 
-export interface IUserService {
-  searchUsers(
-    filter: Partial<UserViewModel>
-  ): Promise<{ data: UserViewModel[]; totalCount: number }>;
-
-  getUser(userId: ObjectId): Promise<UserViewModel | null>;
-}
-
-export class UserService implements IUserService {
-  private userRepository: UserRepository;
+export class UserService {
+  private userPgRepository: UserPgRepository;
   private authUserRepository: AuthUserRepository;
-  private userRelationshipRepository: UserRelationshipRepository;
 
   constructor() {
-    this.userRepository = new UserRepository();
+    this.userPgRepository = new UserPgRepository();
     this.authUserRepository = new AuthUserRepository();
-    this.userRelationshipRepository = new UserRelationshipRepository();
   }
 
-  async getUser(
-    id: ObjectId,
-    sortBy?: UserSortBy,
-    sortOrder?: UserSortOrder
-  ): Promise<UserViewModel | null> {
-    return await this.userRepository.findById(id, sortBy, sortOrder);
+  async getUser(id: string): Promise<User | null> {
+    return await this.userPgRepository.getUserById(id);
   }
 
-  async getAuthUser(id: ObjectId): Promise<AuthUserViewModel | null> {
-    return await this.authUserRepository.findById(id);
-  }
+  // async searchUsers(
+  //   filter: Partial<UserViewModel>,
+  //   page = 1,
+  //   limit = 10
+  // ): Promise<{ data: UserViewModel[]; totalCount: number }> {
+  //   return await this.userRepository.find(filter, page, limit);
+  // }
 
-  async searchUsers(
-    filter: Partial<UserViewModel>,
-    page = 1,
-    limit = 10
-  ): Promise<{ data: UserViewModel[]; totalCount: number }> {
-    return await this.userRepository.find(filter, page, limit);
-  }
-
-  async getFollowingUsers(userId: ObjectId): Promise<WithId<Document>[]> {
-    return await this.userRelationshipRepository.getFollowingUsers(userId);
-  }
-
-  async isFollowingUser(
-    userId: ObjectId,
-    followedUserId: ObjectId
-  ): Promise<boolean> {
-    return await this.userRelationshipRepository.isFollowingUser(
-      userId,
-      followedUserId
-    );
-  }
-
-  async followUser(userId: ObjectId, followedUserId: ObjectId): Promise<void> {
-    const isFollowingUser =
-      await this.userRelationshipRepository.isFollowingUser(
-        userId,
-        followedUserId
-      );
-
-    if (isFollowingUser) {
-      throw new Error('User is already being followed');
-    }
-
-    await this.userRelationshipRepository.followUser(userId, followedUserId);
+  async getUserRatingMovies(
+    userId: string,
+    sortBy?: SortBy,
+    sortOrder?: SortOrder
+  ): Promise<UserRatings[]> {
+    return await this.userPgRepository.getUserRatingMovies(userId, {
+      field: sortBy,
+      dir: sortOrder,
+    });
   }
 }

@@ -9,7 +9,7 @@ import {
   Star,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { MovieCard } from '@/components/movies/movie-card';
+import { MovieCard, type MovieView } from '@/components/movies/movie-card';
 import { MovieGrid } from '@/components/movies/movie-grid';
 import { MovieList } from '@/components/movies/movie-list';
 import { Button } from '@/components/ui/button';
@@ -21,22 +21,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { UserViewModel } from '@/users/user.types';
-import type { UserSortBy, UserSortOrder } from '@/users/user-repository';
+import type { SortBy, SortOrder } from './page';
 
 export function ProfileClientPage({
-  appUser,
+  profileMovies = [],
 }: {
-  appUser: UserViewModel | null;
+  profileMovies: MovieView[];
 }) {
-  const movies = appUser?.movies ?? [];
-
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const sortBy = (searchParams.get('sortBy') as UserSortBy) || 'rating';
-  const sortOrder = (searchParams.get('sortOrder') as UserSortOrder) || 'desc';
+  const sortBy = (searchParams.get('sortBy') as SortBy) || 'score';
+  const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'desc';
 
   const updateSearchParams = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -54,7 +51,7 @@ export function ProfileClientPage({
   };
 
   const getSortLabel = () => {
-    return sortBy === 'rating' ? 'Puntaje' : 'Fecha';
+    return sortBy === 'score' ? 'Puntaje' : 'Fecha';
   };
 
   return (
@@ -67,7 +64,7 @@ export function ProfileClientPage({
                 className="h-[calc(100%-1px)] gap-2 bg-transparent"
                 variant="outline"
               >
-                {sortBy === 'rating' ? (
+                {sortBy === 'score' ? (
                   <Star className="size-4" />
                 ) : (
                   <Calendar className="size-4" />
@@ -83,13 +80,13 @@ export function ProfileClientPage({
                 onValueChange={handleSortByChange}
                 value={sortBy}
               >
-                <DropdownMenuRadioItem className="gap-2" value="rating">
+                <DropdownMenuRadioItem className="gap-2" value="score">
                   <Star className="size-4" />
-                  Rating
+                  Puntaje
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem className="gap-2" value="addedAt">
+                <DropdownMenuRadioItem className="gap-2" value="createdAt">
                   <Calendar className="size-4" />
-                  Date Added
+                  Fecha agregada
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
@@ -127,7 +124,7 @@ export function ProfileClientPage({
 
       <TabsContent value="grid">
         <MovieGrid>
-          {movies.map((movie) => (
+          {profileMovies.map((movie) => (
             <MovieCard key={movie.id} movie={movie}>
               <MovieCard.Poster />
               <div className="pt-2">
@@ -142,7 +139,7 @@ export function ProfileClientPage({
 
       <TabsContent value="list">
         <MovieList>
-          {movies.map((movie, idx) => (
+          {profileMovies.map((movie, idx) => (
             <MovieCard key={movie.id} movie={movie}>
               <div className="flex gap-6">
                 <p className="font-bold">{idx + 1}</p>

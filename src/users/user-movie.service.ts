@@ -1,32 +1,33 @@
-// user-movie.service.ts
-import type { ObjectId } from 'mongodb';
+import type { Movie } from '@/infra/neon/schema';
 import { TmdbRepository } from '@/infra/TMDB/tmdb-repository';
-import type { MovieViewModel } from '@/movies/movie.type';
-import { UserRepository } from './user-repository';
+import { MoviePgRepository } from '@/movies/movie.pg.repository';
+import { UserPgRepository } from './user.pg.repository';
 
 export class UserMovieService {
   constructor(
-    private readonly users = new UserRepository(),
+    private readonly movies = new MoviePgRepository(),
+    private readonly users = new UserPgRepository(),
     private readonly tmdb = new TmdbRepository(
       process.env.TMDB_ACCESS_TOKEN as string
     )
   ) {}
 
-  /**
-   * Fetches the movie from TMDB and stores a snapshot on the user document.
-   */
   async addMovieToUser(
-    userId: ObjectId,
+    userId: string,
     tmdbId: number,
     rating: number
   ): Promise<void> {
-    const movie = await this.tmdb.getDetail(tmdbId);
+    const { data: movie } = await this.tmdb.getDetail(tmdbId);
 
-    const movieViewModel: MovieViewModel = {
-      ...movie.data,
-      rating,
+    const movieData: Omit<Movie, 'id'> = {
+      posterPath: movie.posterPath,
+      title: movie.title,
+      year: movie.year,
+      tmdbId: movie.id,
     };
 
-    await this.users.addMovie(userId, movieViewModel);
+    const { id: movieId } = await this.movies.upsertMovie(movieData);
+
+    await this.users.rateMovie(userId, movieId, rating);
   }
 }

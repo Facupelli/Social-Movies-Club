@@ -1,6 +1,5 @@
 'use server';
 
-import { ObjectId } from 'mongodb';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { UserMovieService } from '@/users/user-movie.service';
@@ -17,16 +16,15 @@ export async function addRatingToMovie(
     return { success: false, error: 'Unauthorized' };
   }
 
-  const movieId = Number(formData.get('movieId'));
+  const movieTMDBId = Number(formData.get('movieTMDBId'));
   const rating = Number(formData.get('rating'));
 
-  if (!(movieId && rating)) {
+  if (!(movieTMDBId && rating)) {
     return { success: false, error: 'Missing movie ID or rating' };
   }
 
-  const userId = new ObjectId(session.user.id);
   const userMovieService = new UserMovieService();
 
-  await userMovieService.addMovieToUser(userId, movieId, rating);
+  await userMovieService.addMovieToUser(session.user.id, movieTMDBId, rating);
   return { success: true };
 }

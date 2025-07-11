@@ -17,7 +17,7 @@ export function Nav() {
       provider: 'google',
       callbackURL: '/',
       errorCallbackURL: '/error',
-      newUserCallbackURL: '/welcome',
+      newUserCallbackURL: '/',
       // disableRedirect: true,
     });
   };

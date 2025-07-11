@@ -1,8 +1,7 @@
-import { ObjectId } from 'mongodb';
 import { headers } from 'next/headers';
+import type { User } from '@/infra/neon/schema';
 import { auth } from '@/lib/auth';
 import { UserService } from '@/users/user.service';
-import type { UserViewModel } from '@/users/user.types';
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -13,9 +12,8 @@ export async function GET() {
     return Response.json({ success: false, error: 'Unauthorized' });
   }
 
-  const userId = new ObjectId(session.user.id);
   const userService = new UserService();
 
-  const res: UserViewModel | null = await userService.getUser(userId);
+  const res: User | null = await userService.getUser(session.user.id);
   return Response.json(res);
 }
