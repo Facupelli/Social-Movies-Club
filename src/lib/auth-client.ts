@@ -4,6 +4,6 @@ export const authClient = createAuthClient({
   /** The base URL of the server (optional if you're using the same domain) */
   baseURL:
     process.env.NODE_ENV === 'production'
-      ? process.env.VERCEL_URL
+      ? 'https://social-movies-club.vercel.app/'
       : 'http://localhost:3000',
 });
