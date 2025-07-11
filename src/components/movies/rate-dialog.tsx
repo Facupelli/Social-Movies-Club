@@ -30,6 +30,7 @@ export function RateDialog({
 
   const [state, action] = useActionState(addRatingToMovie, {
     success: false,
+    error: '',
   });
 
   const [rating, setRating] = useState(0);

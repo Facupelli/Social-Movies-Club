@@ -1,30 +1,19 @@
 'use server';
 
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth-server-action.middleware';
 import { UserMovieService } from '@/users/user-movie.service';
+import { validateMovieRating } from './movies-validation.service';
 
 export async function addRatingToMovie(
   _: { success: boolean; error?: string },
   formData: FormData
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
+  return await withAuth(async (session) => {
+    const { movieTMDBId, rating } = validateMovieRating(formData);
+
+    const userMovieService = new UserMovieService();
+    await userMovieService.addMovieToUser(session.user.id, movieTMDBId, rating);
+
+    return { success: true, error: '' };
   });
-
-  if (!session) {
-    return { success: false, error: 'Unauthorized' };
-  }
-
-  const movieTMDBId = Number(formData.get('movieTMDBId'));
-  const rating = Number(formData.get('rating'));
-
-  if (!(movieTMDBId && rating)) {
-    return { success: false, error: 'Missing movie ID or rating' };
-  }
-
-  const userMovieService = new UserMovieService();
-
-  await userMovieService.addMovieToUser(session.user.id, movieTMDBId, rating);
-  return { success: true };
 }

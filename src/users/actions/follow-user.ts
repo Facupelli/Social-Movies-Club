@@ -1,23 +1,20 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { FollowService } from '@/follows/follow.service';
-import { auth } from '@/lib/auth';
+import { withAuth } from '@/lib/auth-server-action.middleware';
 
 export async function followUser(followedUserId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
+  return await withAuth(async (session) => {
+    if (!followedUserId || typeof followedUserId !== 'string') {
+      return { success: false, error: 'Validation error' };
+    }
+
+    const followService = new FollowService();
+    const result = await followService.followUser(
+      session.user.id,
+      followedUserId
+    );
+
+    return result;
   });
-
-  if (!session) {
-    throw new Error('Unauthorized');
-  }
-
-  const followService = new FollowService();
-
-  const result = await followService.followUser(
-    session.user.id,
-    followedUserId
-  );
-  return result;
 }
