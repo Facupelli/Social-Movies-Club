@@ -27,7 +27,7 @@ export function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 left-0 flex h-screen w-[250px] flex-col p-8">
+    <nav className="sticky top-0 left-0 flex h-screen w-[250px] flex-col border-accent-foreground border-r bg-sidebar p-8">
       <ul className="grid gap-4">
         <li>
           <a href="/">Inicio</a>
@@ -45,7 +45,7 @@ export function Nav() {
           <div>
             <div className="flex items-center gap-2 pb-4">
               {session.user.image && (
-                <div className="shrink-0">
+                <div className="shrink-0 rounded-full bg-secondary-foreground">
                   <Image
                     alt={session.user.name}
                     className="size-[30px] rounded-full object-cover"

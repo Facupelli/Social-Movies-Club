@@ -27,8 +27,8 @@ export default async function ProfileLayout(
   const profileUserId = params.id;
 
   return (
-    <div className="flex-1 bg-neutral-300 ">
-      <div className="bg-neutral-500 px-10 py-2">
+    <div>
+      <div className="bg-card px-10 py-2">
         <Link href="/">
           <ArrowLeft />
         </Link>
@@ -86,7 +86,7 @@ async function UserInfo({
     <div className="grid gap-2 py-4">
       <div className="flex items-center justify-between">
         {profileUser.image && (
-          <div className="shrink-0">
+          <div className="shrink-0 rounded-full bg-secondary-foreground">
             <Image
               alt={profileUser.name}
               className="size-[100px] rounded-full object-cover"

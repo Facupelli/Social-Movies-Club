@@ -1,12 +1,13 @@
 'use client';
 
 import clsx from 'clsx';
-import { Bookmark } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import { useMovieWatchProviders } from '@/movies/hooks/use-movie-watch-providers';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { RateDialog } from './rate-dialog';
 
@@ -45,7 +46,7 @@ export function MovieCard({
 }) {
   return (
     <MovieCardContext.Provider value={{ movie }}>
-      <div className="grid">{children}</div>
+      <Card className="gap-2 overflow-hidden rounded-xs p-0">{children}</Card>
     </MovieCardContext.Provider>
   );
 }
@@ -54,7 +55,7 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
   const { movie } = useMovieCardContext();
 
   const dimensions =
-    size === 'small' ? { width: 80, height: 120 } : { width: 200, height: 300 };
+    size === 'small' ? { width: 80, height: 120 } : { width: 250, height: 300 };
 
   return movie.posterPath ? (
     <div>
@@ -68,21 +69,36 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
       />
     </div>
   ) : (
-    <div className="h-[350px] w-[200px] bg-gray-600" />
+    <div className="h-[350px] w-[250px] bg-gray-600" />
   );
 }
 
 function Title({ className }: { className?: string }) {
   const { movie } = useMovieCardContext();
-  return <p className={cn('', className)}>{movie.title}</p>;
+  return (
+    <p
+      className={cn(
+        'line-clamp-2 font-semibold text-lg leading-tight',
+        className
+      )}
+    >
+      {movie.title}
+    </p>
+  );
 }
 
 function ReleaseDate() {
   const { movie } = useMovieCardContext();
-  return <p className="text-gray-600 text-sm">{movie.year}</p>;
+  return (
+    <div className="flex items-center justify-between">
+      <span className="font-medium text-muted-foreground text-sm">
+        {movie.year}
+      </span>
+    </div>
+  );
 }
 
-function Rating() {
+function Score() {
   const { movie } = useMovieCardContext();
 
   if (!movie.score) {
@@ -90,7 +106,7 @@ function Rating() {
   }
 
   return (
-    <div className="flex size-7 items-center justify-center rounded bg-blue-300">
+    <div className="flex size-7 items-center justify-center rounded bg-primary">
       <p className="font-bold text-sm">{movie.score}</p>
     </div>
   );
@@ -162,9 +178,9 @@ function WatchProviders() {
 
 function AddToWatchlistButton() {
   return (
-    <button type="button">
-      <Bookmark />
-    </button>
+    <Button className="flex-1 gap-2" size="sm">
+      <Eye className="size-4" />
+    </Button>
   );
 }
 
@@ -181,5 +197,5 @@ MovieCard.Title = Title;
 MovieCard.ReleaseDate = ReleaseDate;
 MovieCard.AddToWatchlistButton = AddToWatchlistButton;
 MovieCard.Rate = Rate;
-MovieCard.Rating = Rating;
+MovieCard.Score = Score;
 MovieCard.WatchProviders = WatchProviders;

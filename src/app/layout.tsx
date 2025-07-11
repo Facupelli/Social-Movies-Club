@@ -27,12 +27,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <ReactQueryProvider>
-          <div className="flex gap-4">
-            <Nav />
-            {children}
+          <div className="dark bg-sidebar">
+            <div className="mx-auto flex max-w-7xl text-card-foreground">
+              <Nav />
+              <div className="flex-1 bg-background">{children}</div>
+            </div>
           </div>
         </ReactQueryProvider>
       </body>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { StarIcon } from 'lucide-react';
+import { Star, StarIcon } from 'lucide-react';
 import { useActionState, useState } from 'react';
 import {
   Dialog,
@@ -39,17 +39,23 @@ export function RateDialog({
 
   return (
     <Dialog>
-      <DialogTrigger className="cursor-pointer">
-        {isMovieRated ? <StarIcon className="fill-yellow-400" /> : <StarIcon />}
+      <DialogTrigger asChild className="cursor-pointer">
+        <Button
+          className="flex-1 gap-2 bg-transparent"
+          size="sm"
+          variant="outline"
+        >
+          {isMovieRated ? <Star className="fill-yellow-400" /> : <Star />}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Rating {title}{' '}
+            <span className="text-neutral-500">Calificar</span> {title}{' '}
             <span className="text-neutral-500 text-sm">{year}</span>
           </DialogTitle>
           <DialogDescription>
-            After rating this movie it will be added to your personal list.
+            Después de calificar esta película, se agregará a tu lista personal.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,7 +107,7 @@ export function RateDialog({
           <DialogFooter className="gap-6">
             <DialogClose asChild>
               <Button type="button" variant="secondary">
-                Close
+                Cancelar
               </Button>
             </DialogClose>
 
@@ -111,9 +117,9 @@ export function RateDialog({
                 action(formData);
                 queryClient.invalidateQueries({ queryKey: ['user'] });
               }}
-              loadingText="Adding Rating..."
+              loadingText="Calificando..."
             >
-              Submit Rating
+              Calificar
             </SubmitButton>
           </DialogFooter>
 
@@ -124,7 +130,7 @@ export function RateDialog({
           )}
           {state.success && (
             <div className="flex justify-end pt-2">
-              <p className="text-green-500">Rating added successfully!</p>
+              <p className="text-green-500">Calificaste esta película!</p>
             </div>
           )}
         </form>

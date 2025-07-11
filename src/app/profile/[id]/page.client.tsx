@@ -13,6 +13,7 @@ import { MovieCard, type MovieView } from '@/components/movies/movie-card';
 import { MovieGrid } from '@/components/movies/movie-grid';
 import { MovieList } from '@/components/movies/movie-list';
 import { Button } from '@/components/ui/button';
+import { CardContent } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +55,7 @@ export function ProfileMoviesClientPage({
 
   return (
     <Tabs className="flex-1 pt-2 pb-10" defaultValue="grid">
-      <div className="flex justify-end gap-4 py-2">
+      <div className="flex justify-end gap-4 py-4">
         <div className="flex h-9 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -105,7 +106,7 @@ export function ProfileMoviesClientPage({
           </Button>
         </div>
 
-        <TabsList className="gap-1 bg-transparent p-0">
+        <TabsList>
           <TabsTrigger asChild value="grid">
             <Button size="icon" variant="ghost">
               <Grid2X2 />
@@ -125,11 +126,13 @@ export function ProfileMoviesClientPage({
           {profileMovies.map((movie) => (
             <MovieCard key={movie.id} movie={movie}>
               <MovieCard.Poster />
-              <div className="pt-2">
+              <CardContent className="flex flex-col gap-1 px-4 py-2">
                 <MovieCard.Title />
-                <MovieCard.ReleaseDate />
-                <MovieCard.Rating />
-              </div>
+                <div className="flex items-center justify-between">
+                  <MovieCard.ReleaseDate />
+                  <MovieCard.Score />
+                </div>
+              </CardContent>
             </MovieCard>
           ))}
         </MovieGrid>
@@ -140,18 +143,18 @@ export function ProfileMoviesClientPage({
           {profileMovies.map((movie, idx) => (
             <MovieCard key={movie.id} movie={movie}>
               <div className="flex gap-6">
-                <p className="font-bold">{idx + 1}</p>
+                <p className="pl-2 font-bold">{idx + 1}</p>
                 <div className="flex flex-1 items-center">
                   <div className="flex flex-1 gap-4">
                     <MovieCard.Poster size="small" />
-                    <div className="flex-1">
+                    <div className="flex-1 pt-2">
                       <MovieCard.Title className="font-bold text-lg" />
                       <MovieCard.ReleaseDate />
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 pr-4">
                     <MovieCard.WatchProviders />
-                    <MovieCard.Rating />
+                    <MovieCard.Score />
                   </div>
                 </div>
               </div>

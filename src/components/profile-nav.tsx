@@ -19,7 +19,7 @@ export default function ProfileNav({ userId }: Props) {
     <div className="flex items-center gap-4 border-neutral-500 border-b pt-2">
       <Link
         className={clsx(
-          isMoviesTab && 'border-blue-400 border-b-3 font-bold',
+          isMoviesTab && 'border-accent-foreground border-b-3 font-bold',
           'pb-2'
         )}
         href={`/profile/${userId}`}
@@ -28,7 +28,7 @@ export default function ProfileNav({ userId }: Props) {
       </Link>
       <Link
         className={clsx(
-          isFollowingTab && 'border-blue-400 border-b-3 font-bold',
+          isFollowingTab && 'border-accent-foreground border-b-3 font-bold',
           'pb-2'
         )}
         href={`/profile/${userId}/following`}
