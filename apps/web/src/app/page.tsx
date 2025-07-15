@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useDeferredValue, useState, useTransition } from "react";
 import { MovieCard } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { CardContent, CardFooter } from "@/components/ui/card";
@@ -17,14 +17,20 @@ import type { FeedItem } from "@/users/user.types";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
-  const debouncedSearchTerm = useDebounce(query, 500);
+  const [_, startTransition] = useTransition();
+  const deferredQuery = useDeferredValue(query);
+  const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
   return (
     <div className="min-h-svh flex-1 py-6 md:min-h-auto ">
       <div className="pb-6 px-4 md:px-10">
         <Input
           className="w-full bg-white"
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) =>
+            startTransition(() => {
+              setQuery(e.target.value);
+            })
+          }
           placeholder="Buscar película..."
           type="search"
         />

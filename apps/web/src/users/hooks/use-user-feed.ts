@@ -26,6 +26,8 @@ const getUserFeedQueryOptions = infiniteQueryOptions({
     await getUserFeed({ cursor: pageParam }),
   initialPageParam: null as string | null,
   getNextPageParam: (lastPage) => lastPage.nextCursor,
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
 });
 
 export { getUserFeedQueryOptions, getUserFeed };
