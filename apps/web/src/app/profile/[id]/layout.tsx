@@ -54,7 +54,7 @@ async function getUserInfo(profileUserId: string, sessionUserId: string) {
 
   const profileUserPromise = userService.getUser(profileUserId);
   const profileFollowsInfoPromise =
-    userService.getUserFollowsInfo(profileUserId);
+    followService.getUserFollowsInfo(profileUserId);
   const isFollowingUserPromise = followService.isFollowingUser(
     sessionUserId,
     profileUserId

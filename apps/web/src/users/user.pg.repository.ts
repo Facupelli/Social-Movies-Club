@@ -9,11 +9,6 @@ import type {
   UserRatings,
 } from "./user.types";
 
-export interface GetUserFollowsInfoMap {
-  followerCount: number;
-  followingCount: number;
-}
-
 export class UserPgRepository {
   async getUserById(userId: string): Promise<User> {
     return await withDatabase(async (db) => {
@@ -23,25 +18,6 @@ export class UserPgRepository {
 
       const { rows } = await db.execute<User>(query);
       return rows[0];
-    });
-  }
-
-  async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
-    return await withDatabase(async (db) => {
-      const { rows } = await db.execute<{
-        follower_count: number;
-        following_count: number;
-      }>(sql`
-        SELECT
-          (SELECT COUNT(*) FROM follows WHERE followee_id = ${userId}) as follower_count,
-          (SELECT COUNT(*) FROM follows WHERE follower_id = ${userId}) as following_count
-      `);
-
-      const row = rows[0];
-      return {
-        followerCount: row.follower_count,
-        followingCount: row.following_count,
-      };
     });
   }
 

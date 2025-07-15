@@ -1,9 +1,6 @@
 import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
 import type { User } from "@/infra/postgres/schema";
-import {
-  type GetUserFollowsInfoMap,
-  UserPgRepository,
-} from "./user.pg.repository";
+import { UserPgRepository } from "./user.pg.repository";
 import type { FeedItem, GetUserFeedParams, UserRatings } from "./user.types";
 
 export class UserService {
@@ -15,10 +12,6 @@ export class UserService {
 
   async getUser(userId: string): Promise<User | null> {
     return await this.userPgRepository.getUserById(userId);
-  }
-
-  async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
-    return await this.userPgRepository.getUserFollowsInfo(userId);
   }
 
   async getFeed(params: GetUserFeedParams): Promise<{

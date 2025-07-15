@@ -1,5 +1,5 @@
-import type { Follow } from "@/infra/postgres/schema";
 import { FollowsPgRepository } from "./follows.pg.repository";
+import type { GetFollowingUsers, GetUserFollowsInfoMap } from "./follows.type";
 
 export class FollowService {
   private followPgRepository: FollowsPgRepository;
@@ -8,8 +8,12 @@ export class FollowService {
     this.followPgRepository = new FollowsPgRepository();
   }
 
-  async getFollowingUsers(userId: string): Promise<Follow[]> {
+  async getFollowingUsers(userId: string): Promise<GetFollowingUsers[]> {
     return await this.followPgRepository.getFollowingUsers(userId);
+  }
+
+  async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
+    return await this.followPgRepository.getUserFollowsInfo(userId);
   }
 
   async isFollowingUser(
