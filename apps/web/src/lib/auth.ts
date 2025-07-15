@@ -1,11 +1,11 @@
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from '@/infra/neon/db.neon';
-import * as schema from '@/infra/neon/schema';
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "@/infra/postgres/db.neon";
+import * as schema from "@/infra/postgres/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: 'pg',
+    provider: "pg",
     schema,
     usePlural: true,
   }),

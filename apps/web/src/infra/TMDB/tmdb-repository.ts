@@ -31,7 +31,7 @@ export class TmdbRepository implements ITmdbRepository {
   ): Promise<SearchMoviesResult> {
     const {
       query,
-      language = "en-US",
+      language = "es-AR",
       page = 1,
       // region,
       // year,
@@ -50,6 +50,7 @@ export class TmdbRepository implements ITmdbRepository {
         title: r.title,
         posterPath: r.poster_path ?? null,
         year: r.release_date?.split("-")[0],
+        overview: r.overview,
       })
     );
 
@@ -63,13 +64,16 @@ export class TmdbRepository implements ITmdbRepository {
 
   async getDetail(movieId: number): Promise<{ data: TMDbMovieSearch }> {
     const json: MovieDetailApiResponse =
-      await this.request<MovieDetailApiResponse>(`/movie/${movieId}`);
+      await this.request<MovieDetailApiResponse>(`/movie/${movieId}`, {
+        language: "es-AR",
+      });
 
     const data: TMDbMovieSearch = {
       id: json.id,
       title: json.title,
       posterPath: json.poster_path ?? null,
       year: json.release_date.split("-")[0],
+      overview: json.overview,
     };
 
     return {

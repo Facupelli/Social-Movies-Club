@@ -1,7 +1,7 @@
-import type { Movie } from '@/infra/neon/schema';
-import { TmdbRepository } from '@/infra/TMDB/tmdb-repository';
-import { MoviePgRepository } from '@/movies/movie.pg.repository';
-import { UserPgRepository } from './user.pg.repository';
+import type { Movie } from "@/infra/postgres/schema";
+import { TmdbRepository } from "@/infra/TMDB/tmdb-repository";
+import { MoviePgRepository } from "@/movies/movie.pg.repository";
+import { UserPgRepository } from "./user.pg.repository";
 
 export class UserMovieService {
   constructor(
@@ -19,11 +19,12 @@ export class UserMovieService {
   ): Promise<void> {
     const { data: movie } = await this.tmdb.getDetail(tmdbId);
 
-    const movieData: Omit<Movie, 'id'> = {
+    const movieData: Omit<Movie, "id"> = {
       posterPath: movie.posterPath,
       title: movie.title,
       year: movie.year,
       tmdbId: movie.id,
+      overview: movie.overview,
     };
 
     const { id: movieId } = await this.movies.upsertMovie(movieData);

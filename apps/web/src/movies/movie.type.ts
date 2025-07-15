@@ -3,4 +3,5 @@ export interface TMDbMovieSearch {
   posterPath: string;
   year: string;
   title: string;
+  overview: string;
 }

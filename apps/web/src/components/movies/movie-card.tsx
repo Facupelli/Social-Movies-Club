@@ -1,22 +1,29 @@
-'use client';
+"use client";
 
-import clsx from 'clsx';
-import { Eye } from 'lucide-react';
-import Image from 'next/image';
-import { createContext, useContext } from 'react';
-import { cn } from '@/lib/utils';
-import { useMovieWatchProviders } from '@/movies/hooks/use-movie-watch-providers';
-import { Button } from '../ui/button';
-import { Card } from '../ui/card';
-import { Skeleton } from '../ui/skeleton';
-import { RateDialog } from './rate-dialog';
+import clsx from "clsx";
+import { Eye } from "lucide-react";
+import Image from "next/image";
+import { createContext, useContext } from "react";
+import { cn } from "@/lib/utils";
+import { useMovieWatchProviders } from "@/movies/hooks/use-movie-watch-providers";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
+import { RateDialog } from "./rate-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 
 export interface MovieView {
-  id: number; // aquí usamos el TMDB‐ID siempre
+  id: number; //  TMDB‐ID
   title: string;
   year: string;
   posterPath: string;
-  score?: number; // opcional, sólo existe si viene de ratings
+  score: number;
+  overview: string;
 }
 
 type MovieCardContextType = {
@@ -31,7 +38,7 @@ function useMovieCardContext() {
   const context = useContext(MovieCardContext);
   if (!context) {
     throw new Error(
-      'useMovieCardContext must be used within a MovieCard.Provider'
+      "useMovieCardContext must be used within a MovieCard.Provider"
     );
   }
   return context;
@@ -40,22 +47,26 @@ function useMovieCardContext() {
 export function MovieCard({
   children,
   movie,
+  className,
 }: {
   children: React.ReactNode;
   movie: MovieView;
+  className?: string;
 }) {
   return (
     <MovieCardContext.Provider value={{ movie }}>
-      <Card className="gap-2 overflow-hidden rounded-xs p-0">{children}</Card>
+      <Card className={cn("gap-2 overflow-hidden rounded-xs p-0", className)}>
+        {children}
+      </Card>
     </MovieCardContext.Provider>
   );
 }
 
-function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
+function Poster({ size = "default" }: { size?: "small" | "default" }) {
   const { movie } = useMovieCardContext();
 
   const dimensions =
-    size === 'small'
+    size === "small"
       ? { width: 120, height: 230 }
       : { width: 250, height: 300 };
 
@@ -63,7 +74,7 @@ function Poster({ size = 'default' }: { size?: 'small' | 'default' }) {
     <div className="shrink-0">
       <Image
         alt={movie.title}
-        className={clsx('h-auto rounded-xs')}
+        className={clsx("h-auto rounded-xs")}
         height={dimensions.height}
         src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
         unoptimized
@@ -80,7 +91,7 @@ function Title({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        'line-clamp-2 font-semibold leading-tight md:text-lg',
+        "line-clamp-2 font-semibold leading-tight md:text-lg",
         className
       )}
     >
@@ -97,6 +108,19 @@ function ReleaseDate() {
         {movie.year}
       </span>
     </div>
+  );
+}
+
+function Overview() {
+  const { movie } = useMovieCardContext();
+
+  return (
+    <Accordion type="single" collapsible>
+      <AccordionItem value="item-1">
+        <AccordionTrigger className="py-0 pb-2">Sinopsis</AccordionTrigger>
+        <AccordionContent>{movie.overview}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
@@ -133,7 +157,7 @@ function WatchProviders() {
           {[...Array(3)].map((_, idx) => (
             // biome-ignore lint:reason
             <div key={idx}>
-              <Skeleton className="size-[30px] rounded-sm" />{' '}
+              <Skeleton className="size-[30px] rounded-sm" />{" "}
             </div>
           ))}
         </div>
@@ -145,7 +169,7 @@ function WatchProviders() {
             <div key={provider.provider_id}>
               <Image
                 alt={provider.provider_name}
-                className={clsx('h-auto rounded-sm')}
+                className={clsx("h-auto rounded-sm")}
                 height={30}
                 src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
                 unoptimized
@@ -161,7 +185,7 @@ function WatchProviders() {
         <span>Powered by</span>
         <a
           className="inline-flex items-center gap-1 transition-opacity hover:opacity-80"
-          href={'todo'}
+          href={"todo"}
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -201,3 +225,4 @@ MovieCard.AddToWatchlistButton = AddToWatchlistButton;
 MovieCard.Rate = Rate;
 MovieCard.Score = Score;
 MovieCard.WatchProviders = WatchProviders;
+MovieCard.Overview = Overview;

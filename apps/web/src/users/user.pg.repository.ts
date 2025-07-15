@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
-import { withDatabase } from "@/infra/neon/db-utils";
-import { movies, ratings, type User, users } from "@/infra/neon/schema";
+import { withDatabase } from "@/infra/postgres/db-utils";
+import { movies, ratings, type User, users } from "@/infra/postgres/schema";
 import type {
   FeedItem,
   FeedItemRaw,
@@ -67,6 +67,7 @@ export class UserPgRepository {
           m.title as movie_title,
           m.year as movie_year,
           m.poster_path as movie_poster,
+          m.overview as movie_overview,
           r.score,
           r.created_at as rated_at
         FROM feed_items as fi
@@ -86,6 +87,7 @@ export class UserPgRepository {
         actorImage: row.actor_image,
         actorUsername: row.actor_username,
         movieId: row.movie_id,
+        movieOverview: row.movie_overview,
         movieTitle: row.movie_title,
         movieYear: row.movie_year,
         moviePoster: row.movie_poster,

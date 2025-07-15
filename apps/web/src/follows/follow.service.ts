@@ -1,5 +1,5 @@
-import type { Follow } from '@/infra/neon/schema';
-import { FollowsPgRepository } from './follows.pg.repository';
+import type { Follow } from "@/infra/postgres/schema";
+import { FollowsPgRepository } from "./follows.pg.repository";
 
 export class FollowService {
   private followPgRepository: FollowsPgRepository;
@@ -29,7 +29,7 @@ export class FollowService {
     );
 
     if (isFollowingUser) {
-      throw new Error('User is already being followed');
+      throw new Error("User is already being followed");
     }
 
     await this.followPgRepository.followUser(userId, followedUserId);

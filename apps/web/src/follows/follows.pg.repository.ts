@@ -1,6 +1,6 @@
-import { sql } from 'drizzle-orm';
-import { db } from '@/infra/neon/db.neon';
-import { type Follow, follows } from '@/infra/neon/schema';
+import { sql } from "drizzle-orm";
+import { db } from "@/infra/postgres/db.neon";
+import { type Follow, follows } from "@/infra/postgres/schema";
 
 export class FollowsPgRepository {
   async getFollowingUsers(userId: string): Promise<Follow[]> {

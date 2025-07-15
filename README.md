@@ -56,6 +56,7 @@ Here are the next steps to improve and expand the app:
 - [x] **Add pagination**: Add pagination to Feed.
 - [x] **Add followers and following count**: Add count to user profile.
 - [x] **Check if movie is already scored**: Add rate check to MovieCard.
+- [ ] **Handle repeated rated movies**: Research some way to handle repeated rated movies if they are close enough on the feed (maybe an aggregate table).
 - [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
 - [ ] **Add _seenAt_ feature to feed posts**.
 - [ ] **Show followers**: Show followers user profiles links.

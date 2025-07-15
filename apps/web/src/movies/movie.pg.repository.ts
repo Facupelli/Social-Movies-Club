@@ -1,14 +1,14 @@
-import { sql } from 'drizzle-orm';
-import { withDatabase } from '@/infra/neon/db-utils';
-import { type Movie, movies } from '@/infra/neon/schema';
+import { sql } from "drizzle-orm";
+import { withDatabase } from "@/infra/postgres/db-utils";
+import { type Movie, movies } from "@/infra/postgres/schema";
 
 export class MoviePgRepository {
-  async upsertMovie(movie: Omit<Movie, 'id'>): Promise<{ id: bigint }> {
+  async upsertMovie(movie: Omit<Movie, "id">): Promise<{ id: bigint }> {
     return await withDatabase(async (db) => {
       const query = sql`
       WITH ins AS (
-        INSERT INTO ${movies} (title, year, poster_path, tmdb_id)
-        VALUES (${movie.title}, ${movie.year}, ${movie.posterPath}, ${movie.tmdbId})
+        INSERT INTO ${movies} (title, year, overview, poster_path, tmdb_id)
+        VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.tmdbId})
         ON CONFLICT (tmdb_id) DO NOTHING
         RETURNING id
       )

@@ -1,7 +1,7 @@
-import { headers } from 'next/headers';
-import type { User } from '@/infra/neon/schema';
-import { auth } from '@/lib/auth';
-import { UserService } from '@/users/user.service';
+import { headers } from "next/headers";
+import type { User } from "@/infra/postgres/schema";
+import { auth } from "@/lib/auth";
+import { UserService } from "@/users/user.service";
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -9,7 +9,7 @@ export async function GET() {
   });
 
   if (!session) {
-    return Response.json({ success: false, error: 'Unauthorized' });
+    return Response.json({ success: false, error: "Unauthorized" });
   }
 
   const userService = new UserService();

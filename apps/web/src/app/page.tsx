@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useState, useTransition } from "react";
-import { MovieCard } from "@/components/movies/movie-card";
+import { MovieCard, MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,6 +96,15 @@ function Feed() {
 }
 
 function FeedItemCard({ item }: { item: FeedItem }) {
+  const movieView: MovieView = {
+    id: item.movieId,
+    posterPath: item.moviePoster,
+    score: item.score,
+    title: item.movieTitle,
+    year: item.movieYear,
+    overview: item.movieOverview,
+  };
+
   return (
     <article key={item.feedItemId} className="px-2 py-4">
       <div className="flex items-start gap-4">
@@ -110,7 +119,10 @@ function FeedItemCard({ item }: { item: FeedItem }) {
           />
         </div>
 
-        <div>
+        <MovieCard
+          className="flex-1 bg-transparent border-none"
+          movie={movieView}
+        >
           <div>
             {item.actorName}{" "}
             <span className="text-secondary-foreground/30 text-sm">
@@ -120,32 +132,21 @@ function FeedItemCard({ item }: { item: FeedItem }) {
               {formatFeedItemTime(item.ratedAt)}
             </span>
           </div>
+
           <div className="pt-4 flex gap-4">
-            <div>
-              <Image
-                alt={item.movieTitle}
-                unoptimized
-                src={`https://image.tmdb.org/t/p/original${item.moviePoster}`}
-                width={100}
-                height={200}
-                className="h-auto object-cover rounded-xs"
-              />
-            </div>
-            <div>
-              <div>
-                <span className="font-bold">{item.movieTitle}</span>
-              </div>
-              <div>
-                <span className="text-sm text-secondary-foreground/30">
-                  {item.movieYear}
-                </span>
-              </div>
-              <div className="size-7 rounded-xs bg-primary flex justify-center items-center">
-                <span className="text-lg font-bold">{item.score}</span>
+            <MovieCard.Poster size="small" />
+            <div className="space-y-2">
+              <MovieCard.Title />
+              <div className="flex gap-4">
+                <div className="space-y-2">
+                  <MovieCard.ReleaseDate />
+                  <MovieCard.Score />
+                </div>
+                <MovieCard.Overview />
               </div>
             </div>
           </div>
-        </div>
+        </MovieCard>
       </div>
     </article>
   );

@@ -1,5 +1,5 @@
 import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
-import type { User } from "@/infra/neon/schema";
+import type { User } from "@/infra/postgres/schema";
 import {
   type GetUserFollowsInfoMap,
   UserPgRepository,
