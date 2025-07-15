@@ -23,6 +23,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { SortBy, SortOrder } from "./page";
+import { useEffect, useState } from "react";
+
+export const LOCAL_STORAGE_KEYS = {
+  PROFILE_TAB_VIEW: "profile-tab-view",
+};
 
 export function ProfileMoviesClientPage({
   profileMovies = [],
@@ -31,6 +36,16 @@ export function ProfileMoviesClientPage({
   profileMovies: MovieView[];
   searchParams: { sortBy?: SortBy; sortOrder?: SortOrder };
 }) {
+  const [tab, setTab] = useState<string>("grid");
+
+  // biome-ignore lint: only need this to run on first render
+  useEffect(() => {
+    const savedTab = localStorage.getItem(LOCAL_STORAGE_KEYS.PROFILE_TAB_VIEW);
+    if (savedTab && savedTab !== tab) {
+      setTab(savedTab);
+    }
+  }, []);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -53,8 +68,18 @@ export function ProfileMoviesClientPage({
     return searchParams.sortBy === "score" ? "Puntaje" : "Fecha";
   };
 
+  const onTabChange = (value: string) => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.PROFILE_TAB_VIEW, value);
+    setTab(value);
+  };
+
   return (
-    <Tabs className="flex-1 pt-2 pb-10" defaultValue="grid">
+    <Tabs
+      className="flex-1 pt-2 pb-10"
+      defaultValue="grid"
+      onValueChange={onTabChange}
+      value={tab}
+    >
       <div className="flex justify-between gap-4 py-4 md:justify-end">
         <div className="flex h-9 items-center gap-2">
           <DropdownMenu>
