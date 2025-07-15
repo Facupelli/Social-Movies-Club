@@ -1,13 +1,13 @@
-import { ArrowLeft } from 'lucide-react';
-import { headers } from 'next/headers';
-import Image from 'next/image';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import ProfileNav from '@/components/profile-nav';
-import { FollowService } from '@/follows/follow.service';
-import { auth } from '@/lib/auth';
-import { FollowUserButton } from '@/users/components/follow-user-button';
-import { UserService } from '@/users/user.service';
+import { ArrowLeft } from "lucide-react";
+import { headers } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import ProfileNav from "@/components/profile-nav";
+import { FollowService } from "@/follows/follow.service";
+import { auth } from "@/lib/auth";
+import { FollowUserButton } from "@/users/components/follow-user-button";
+import { UserService } from "@/users/user.service";
 
 export default async function ProfileLayout(
   props: Readonly<{
@@ -20,7 +20,7 @@ export default async function ProfileLayout(
   });
 
   if (!session) {
-    redirect('/');
+    redirect("/");
   }
 
   const params = await props.params;
@@ -53,17 +53,20 @@ async function getUserInfo(profileUserId: string, sessionUserId: string) {
   const followService = new FollowService();
 
   const profileUserPromise = userService.getUser(profileUserId);
+  const profileFollowsInfoPromise =
+    userService.getUserFollowsInfo(profileUserId);
   const isFollowingUserPromise = followService.isFollowingUser(
     sessionUserId,
     profileUserId
   );
 
-  const [profileUser, isFollowing] = await Promise.all([
+  const [profileUser, profileFollowsInfo, isFollowing] = await Promise.all([
     profileUserPromise,
+    profileFollowsInfoPromise,
     isFollowingUserPromise,
   ]);
 
-  return { profileUser, isFollowing };
+  return { profileUser, profileFollowsInfo, isFollowing };
 }
 
 async function UserInfo({
@@ -73,13 +76,13 @@ async function UserInfo({
   profileUserId: string;
   sessionUserId: string;
 }) {
-  const { isFollowing, profileUser } = await getUserInfo(
+  const { isFollowing, profileFollowsInfo, profileUser } = await getUserInfo(
     profileUserId,
     sessionUserId
   );
 
   if (!profileUser) {
-    redirect('/');
+    redirect("/");
   }
 
   return (
@@ -103,7 +106,7 @@ async function UserInfo({
               followedUserId={profileUser.id}
               isFollowing={isFollowing}
             >
-              {isFollowing ? 'Siguiendo' : 'Seguir'}
+              {isFollowing ? "Siguiendo" : "Seguir"}
             </FollowUserButton>
           </div>
         )}
@@ -113,10 +116,12 @@ async function UserInfo({
       </div>
       <div className="flex items-center gap-2 font-bold text-sm">
         <p>
-          10 <span className="font-normal text-neutral-500">Siguiendo</span>
+          {profileFollowsInfo.followingCount}{" "}
+          <span className="font-normal text-neutral-500">Siguiendo</span>
         </p>
         <p>
-          32 <span className="font-normal text-neutral-500">Seguidores</span>
+          {profileFollowsInfo.followerCount}{" "}
+          <span className="font-normal text-neutral-500">Seguidores</span>
         </p>
       </div>
     </div>

@@ -1,13 +1,13 @@
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
-import type { MovieView } from '@/components/movies/movie-card';
-import { auth } from '@/lib/auth';
-import { dbMovieToView } from '@/movies/movie.adapters';
-import { UserService } from '@/users/user.service';
-import { ProfileMoviesClientPage } from './page.client';
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import type { MovieView } from "@/components/movies/movie-card";
+import { auth } from "@/lib/auth";
+import { dbMovieToView } from "@/movies/movie.adapters";
+import { UserService } from "@/users/user.service";
+import { ProfileMoviesClientPage } from "./page.client";
 
-export type SortBy = 'score' | 'createdAt';
-export type SortOrder = 'asc' | 'desc';
+export type SortBy = "score" | "createdAt";
+export type SortOrder = "asc" | "desc";
 
 const getProfileMovies = async (
   profileUserId: string,
@@ -34,7 +34,7 @@ export default async function UserProfilePage(props: {
   });
 
   if (!session) {
-    redirect('/');
+    redirect("/");
   }
 
   const params = await props.params;

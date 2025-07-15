@@ -1,20 +1,24 @@
 import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
 import type { User } from "@/infra/neon/schema";
-import { AuthUserRepository } from "./auth-user.repository";
-import { UserPgRepository } from "./user.pg.repository";
+import {
+  type GetUserFollowsInfoMap,
+  UserPgRepository,
+} from "./user.pg.repository";
 import type { FeedItem, GetUserFeedParams, UserRatings } from "./user.types";
 
 export class UserService {
   private userPgRepository: UserPgRepository;
-  private authUserRepository: AuthUserRepository;
 
   constructor() {
     this.userPgRepository = new UserPgRepository();
-    this.authUserRepository = new AuthUserRepository();
   }
 
-  async getUser(id: string): Promise<User | null> {
-    return await this.userPgRepository.getUserById(id);
+  async getUser(userId: string): Promise<User | null> {
+    return await this.userPgRepository.getUserById(userId);
+  }
+
+  async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
+    return await this.userPgRepository.getUserFollowsInfo(userId);
   }
 
   async getFeed(params: GetUserFeedParams): Promise<{
