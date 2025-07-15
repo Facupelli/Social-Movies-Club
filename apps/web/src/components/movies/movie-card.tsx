@@ -184,7 +184,7 @@ function WatchProviders() {
       <div className="flex items-center gap-2 text-muted-foreground text-xs">
         <span>Powered by</span>
         <a
-          className="inline-flex items-center gap-1 transition-opacity hover:opacity-80"
+          className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-80"
           href={"todo"}
           rel="noopener noreferrer"
           target="_blank"

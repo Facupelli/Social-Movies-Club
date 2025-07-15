@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useState, useTransition } from "react";
-import { MovieCard, MovieView } from "@/components/movies/movie-card";
+import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,8 @@ export default function HomePage() {
   const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
   return (
-    <div className="min-h-svh flex-1 py-6 md:min-h-auto ">
-      <div className="pb-6 px-4 md:px-10">
+    <div className="min-h-svh flex-1 py-6 md:min-h-auto">
+      <div className="pb-2 md:pb-6 px-2 md:px-10">
         <Input
           className="w-full bg-white"
           onChange={(e) =>
@@ -37,7 +37,9 @@ export default function HomePage() {
       </div>
 
       {query ? (
-        <MoviesList debouncedSearchTerm={debouncedSearchTerm} />
+        <div className="px-4 md:px-10 py-2">
+          <MoviesList debouncedSearchTerm={debouncedSearchTerm} />
+        </div>
       ) : (
         <Feed />
       )}
@@ -59,7 +61,7 @@ function Feed() {
 
   if (isPending && isEnabled) {
     return (
-      <div className="grid gap-4 px-4 md:px-10">
+      <div className="grid gap-4 px-2 md:px-10">
         {[...Array(5)].map((_, idx) => (
           // biome-ignore lint:reason
           <Skeleton key={idx} className="w-full h-[200px] rounded-sm" />
@@ -76,7 +78,7 @@ function Feed() {
         {flatItems &&
           flatItems.length > 0 &&
           flatItems.map((item) => (
-            <div key={item.feedItemId} className="px-4 md:px-10">
+            <div key={item.feedItemId} className="px-2 md:px-10">
               <FeedItemCard item={item} />
             </div>
           ))}
@@ -107,8 +109,8 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 
   return (
     <article key={item.feedItemId} className="px-2 py-4">
-      <div className="flex items-start gap-4">
-        <div className="size-[50px] bg-accent-foreground rounded-full">
+      <div className="flex items-start gap-2 md:gap-4">
+        <div className="size-[30px] md:size-[50px] bg-accent-foreground rounded-full">
           <Image
             alt={item.actorName}
             unoptimized
@@ -133,11 +135,11 @@ function FeedItemCard({ item }: { item: FeedItem }) {
             </span>
           </div>
 
-          <div className="pt-4 flex gap-4">
+          <div className="md:pt-4 flex gap-4">
             <MovieCard.Poster size="small" />
             <div className="space-y-2">
               <MovieCard.Title />
-              <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row gap-2 md:gap-4">
                 <div className="space-y-2">
                   <MovieCard.ReleaseDate />
                   <MovieCard.Score />

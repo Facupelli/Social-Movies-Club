@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   AlignJustify,
@@ -7,22 +7,22 @@ import {
   Calendar,
   Grid2X2,
   Star,
-} from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { MovieCard, type MovieView } from '@/components/movies/movie-card';
-import { MovieGrid } from '@/components/movies/movie-grid';
-import { MovieList } from '@/components/movies/movie-list';
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { MovieCard, type MovieView } from "@/components/movies/movie-card";
+import { MovieGrid } from "@/components/movies/movie-grid";
+import { MovieList } from "@/components/movies/movie-list";
+import { Button } from "@/components/ui/button";
+import { CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { SortBy, SortOrder } from './page';
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { SortBy, SortOrder } from "./page";
 
 export function ProfileMoviesClientPage({
   profileMovies = [],
@@ -41,16 +41,16 @@ export function ProfileMoviesClientPage({
   };
 
   const toggleSortOrder = () => {
-    const newOrder = searchParams.sortOrder === 'asc' ? 'desc' : 'asc';
-    updateSearchParams('sortOrder', newOrder);
+    const newOrder = searchParams.sortOrder === "asc" ? "desc" : "asc";
+    updateSearchParams("sortOrder", newOrder);
   };
 
   const handleSortByChange = (value: string) => {
-    updateSearchParams('sortBy', value);
+    updateSearchParams("sortBy", value);
   };
 
   const getSortLabel = () => {
-    return searchParams.sortBy === 'score' ? 'Puntaje' : 'Fecha';
+    return searchParams.sortBy === "score" ? "Puntaje" : "Fecha";
   };
 
   return (
@@ -63,14 +63,14 @@ export function ProfileMoviesClientPage({
                 className="h-[calc(100%-1px)] gap-2 bg-transparent"
                 variant="outline"
               >
-                {searchParams.sortBy === 'score' ? (
+                {searchParams.sortBy === "score" ? (
                   <Star className="size-4" />
                 ) : (
                   <Calendar className="size-4" />
                 )}
                 <span className="font-normal text-neutral-500">
                   Ordenar por
-                </span>{' '}
+                </span>{" "}
                 {getSortLabel()}
               </Button>
             </DropdownMenuTrigger>
@@ -95,10 +95,10 @@ export function ProfileMoviesClientPage({
             className="h-[calc(100%-1px)] gap-1 bg-transparent"
             onClick={toggleSortOrder}
             size="icon"
-            title={`Sort ${searchParams.sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+            title={`Sort ${searchParams.sortOrder === "asc" ? "ascending" : "descending"}`}
             variant="outline"
           >
-            {searchParams.sortOrder === 'asc' ? (
+            {searchParams.sortOrder === "asc" ? (
               <ArrowUp className="size-4" />
             ) : (
               <ArrowDown className="size-4" />
@@ -153,7 +153,7 @@ export function ProfileMoviesClientPage({
                       <MovieCard.Title className="font-bold text-lg" />
                       <MovieCard.ReleaseDate />
                     </div>
-                    <div className="flex items-center gap-4 pr-4">
+                    <div className="flex items-center gap-4 md:pr-4">
                       <MovieCard.WatchProviders />
                     </div>
                   </div>

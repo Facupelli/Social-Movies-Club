@@ -55,7 +55,7 @@ export function RateDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <span className="text-neutral-500">Calificar</span> {title}{" "}
+            {title}{" "}
             <span className="font-normal text-neutral-500 text-sm">{year}</span>
           </DialogTitle>
           <DialogDescription>
@@ -63,7 +63,7 @@ export function RateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="pt-2">
+        <form className="md:pt-2">
           <input name="movieTMDBId" type="hidden" value={movieTMDBId} />
 
           <p className="sr-only">
