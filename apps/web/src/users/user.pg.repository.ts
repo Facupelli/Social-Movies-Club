@@ -134,6 +134,7 @@ export class UserPgRepository {
           m.title        AS "title",
           m.year         AS "year",
           m.poster_path  AS "posterPath",
+          m.overview     AS "overview",
           m.tmdb_id      AS "tmdbId"
         FROM ${ratings} r
         JOIN ${movies}  m ON m.id = r.movie_id

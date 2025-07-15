@@ -12,6 +12,7 @@ export type UserRatings = {
   title: string;
   year: string;
   posterPath: string;
+  overview: string;
   tmdbId: number;
 };
 

@@ -22,7 +22,7 @@ export interface MovieView {
   title: string;
   year: string;
   posterPath: string;
-  score: number;
+  score?: number;
   overview: string;
 }
 

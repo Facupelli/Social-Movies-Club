@@ -1,6 +1,6 @@
 import type { MovieView } from "@/components/movies/movie-card";
-import type { TMDbMovieSearch } from "./movie.type";
 import type { UserRatings } from "@/users/user.types";
+import type { TMDbMovieSearch } from "./movie.type";
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMovieSearch): MovieView {
@@ -9,6 +9,7 @@ export function apiMovieToView(m: TMDbMovieSearch): MovieView {
     title: m.title,
     year: m.year,
     posterPath: m.posterPath,
+    overview: m.overview,
   };
 }
 
@@ -20,5 +21,6 @@ export function dbMovieToView(r: UserRatings): MovieView {
     year: r.year,
     posterPath: r.posterPath,
     score: r.score,
+    overview: r.overview,
   };
 }
