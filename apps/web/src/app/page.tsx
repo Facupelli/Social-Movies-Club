@@ -99,7 +99,7 @@ function Feed() {
 
 function FeedItemCard({ item }: { item: FeedItem }) {
   const movieView: MovieView = {
-    id: item.movieId,
+    id: item.movieTmdbId,
     posterPath: item.moviePoster,
     score: item.score,
     title: item.movieTitle,
@@ -128,9 +128,9 @@ function FeedItemCard({ item }: { item: FeedItem }) {
           <div>
             {item.actorName}{" "}
             <span className="text-secondary-foreground/30 text-sm">
-              calificó
-            </span>
-            <span className="pl-4 text-secondary-foreground/30 text-sm">
+              calificó hace
+            </span>{" "}
+            <span className="text-secondary-foreground/30 text-sm">
               {formatFeedItemTime(item.ratedAt)}
             </span>
           </div>
@@ -144,7 +144,10 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                   <MovieCard.ReleaseDate />
                   <MovieCard.Score />
                 </div>
-                <MovieCard.Overview />
+                <div>
+                  <MovieCard.Overview />
+                  <MovieCard.WatchProviders />
+                </div>
               </div>
             </div>
           </div>

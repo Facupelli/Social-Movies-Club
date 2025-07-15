@@ -143,8 +143,17 @@ function WatchProviders() {
   const {
     data: watchProviders,
     isLoading,
+    error,
     refetch,
   } = useMovieWatchProviders(movie.id);
+
+  if (error) {
+    return (
+      <div className="text-muted-foreground text-xs">
+        Error, vas a tener que googlear
+      </div>
+    );
+  }
 
   return (
     <div className="md:space-y-2">

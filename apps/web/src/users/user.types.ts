@@ -27,6 +27,7 @@ export type FeedItemRaw = {
   movie_year: string;
   movie_poster: string;
   movie_overview: string;
+  movie_tmdb_id: number;
   score: number;
   rated_at: Date;
   seen_at: Date;
@@ -42,6 +43,7 @@ export type FeedItem = {
   movieTitle: string;
   movieYear: string;
   moviePoster: string;
+  movieTmdbId: number;
   movieOverview: string;
   score: number;
   ratedAt: Date;
