@@ -1,135 +1,78 @@
-# Turborepo starter
+# 🎥 Social Movies Club
 
-This Turborepo starter is maintained by the Turborepo core team.
+Welcome to the **Social Movies Club**! This is a social platform for movie enthusiasts to rate movies, share their opinions, and discover new films through their friends' activity. Whether you're looking to keep track of the movies you've watched or explore recommendations from your network, this app has you covered.
 
-## Using this example
+---
 
-Run the following command:
+This monorepo contains two apps. _Web_ it is a Nextjs app that holds the main web app. _Queue-system_ is a NestJS app for handling jobs in a queue using _bullmq_.
 
-```sh
-npx create-turbo@latest
-```
+---
 
-## What's inside?
+🎓 **Personal Side-Project**  
+This app is my way of learning how to build a small-scale social network while scratching a real itch: finding _actually_ good movies to watch.  
+The best recommendations I ever get come from friends whose taste I trust—so I’m wiring that experience into code.  
+Expect rough edges, frequent tweaks, and a lot of fun experiments along the way!
 
-This Turborepo includes the following packages/apps:
+---
 
-### Apps and Packages
+## 🚀 Features
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### 1. **User Profiles**
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Each user has a personal profile that displays all the movies they've rated.
+- Ratings are stored in a list, allowing users to revisit their movie history and share it with others.
 
-### Utilities
+### 2. **Social Feed**
 
-This Turborepo has some additional tools already setup for you:
+- Follow other users to see their recent movie ratings in your feed.
+- The feed updates in real-time, showing the latest activity from the users you follow.
+- Discover new movies and see what your friends think about them.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### 3. **Discover Movies Through Friends**
 
-### Build
+- Get inspired by your friends' ratings to find your next movie to watch.
+- See how your taste in movies aligns with others in your network.
 
-To build all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
+## 🛠️ Tech Stack
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+This app is built with the following technologies:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+- **[Next.js 15](https://nextjs.org/)**: A React framework for building fast and scalable web applications.
+- **[React](https://reactjs.org/)**: A JavaScript library for building user interfaces.
+- **[PostgreSQL](https://www.postgresql.org/)**: A powerful, open-source relational database for storing user data and movie ratings.
+- **[Drizzle ORM](https://orm.drizzle.team/)**: A lightweight and type-safe ORM for interacting with the database.
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## 📋 To-Do List
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Here are the next steps to improve and expand the app:
 
-### Develop
+- [x] **Add server-side input validation**: Validate user inputs on the server to enhance security and data integrity.
+- [x] **Make the app responsive**: Ensure the app works seamlessly on all devices, including mobile, tablet, and desktop.
+- [x] **Implement the feed feature**: Build the feed functionality to display the recent ratings of users you follow.
+- [x] **Add pagination**: Add pagination to Feed.
+- [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
+- [ ] **Add _seenAt_ feature to feed posts**.
+- [ ] **Add followers and following count**: Add count to user profile.
+- [x] **Check if movie is already scored**: Add rate check to MovieCard.
+- [ ] **Add series**: Add the same features for series/TV shows.
 
-To develop all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
+## 💡 How It Works
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+1. **Rate Movies**: After watching a movie, rate it on a scale of 1 to 10. Your rating will be added to your profile.
+2. **Follow Users**: Follow your friends or other users to see their activity in your feed.
+3. **Explore the Feed**: Check your feed to discover movies your friends have rated and see their opinions.
+4. **View Profiles**: Visit your profile or other users' profiles to see all the movies they've rated.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+---
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🎯 Vision
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+The Movies App is designed to make movie discovery a social experience. By connecting with friends and sharing ratings, users can explore new films, revisit classics, and engage in conversations about their favorite movies.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+---

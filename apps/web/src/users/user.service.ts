@@ -1,12 +1,8 @@
 import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
 import type { User } from "@/infra/neon/schema";
 import { AuthUserRepository } from "./auth-user.repository";
-import {
-  type FeedItem,
-  GetUserFeedParams,
-  UserPgRepository,
-  type UserRatings,
-} from "./user.pg.repository";
+import { UserPgRepository } from "./user.pg.repository";
+import type { FeedItem, GetUserFeedParams, UserRatings } from "./user.types";
 
 export class UserService {
   private userPgRepository: UserPgRepository;

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQueryClient } from '@tanstack/react-query';
-import { Star, StarIcon } from 'lucide-react';
-import { useActionState, useState } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Star, StarIcon } from "lucide-react";
+import { useActionState, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -12,10 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { addRatingToMovie } from '@/movies/actions/add-rating';
-import { SubmitButton } from '../submit-button';
-import { Button } from '../ui/button';
+} from "@/components/ui/dialog";
+import { addRatingToMovie } from "@/movies/actions/add-rating";
+import { SubmitButton } from "../submit-button";
+import { Button } from "../ui/button";
+import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
 
 export function RateDialog({
   movieTMDBId,
@@ -27,16 +28,18 @@ export function RateDialog({
   year: string;
 }) {
   const queryClient = useQueryClient();
+  const { data: userMovies } = useQuery(getUserMoviesQueryOptions);
 
   const [state, action] = useActionState(addRatingToMovie, {
     success: false,
-    error: '',
+    error: "",
   });
 
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
+  const userMovie = userMovies?.[movieTMDBId];
+  const isMovieRated = userMovie?.isRated;
 
-  const isMovieRated = false;
+  const [rating, setRating] = useState(userMovie?.score ?? 0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   return (
     <Dialog>
@@ -52,7 +55,7 @@ export function RateDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <span className="text-neutral-500">Calificar</span> {title}{' '}
+            <span className="text-neutral-500">Calificar</span> {title}{" "}
             <span className="font-normal text-neutral-500 text-sm">{year}</span>
           </DialogTitle>
           <DialogDescription>
@@ -95,8 +98,8 @@ export function RateDialog({
                     <StarIcon
                       className={`size-6 transition-colors duration-200 sm:h-8 sm:w-8 md:size-7 ${
                         ratingValue <= (hoverRating || rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300 dark:text-gray-600'
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300 dark:text-gray-600"
                       } rounded-full focus-within:outline-none focus-within:ring-2 focus-within:ring-yellow-500 focus-within:ring-offset-2 focus-within:ring-offset-white hover:text-yellow-300 dark:hover:text-yellow-500 dark:focus-within:ring-offset-gray-800`}
                     />
                   </label>
@@ -116,7 +119,7 @@ export function RateDialog({
               disabled={rating === 0}
               formAction={(formData) => {
                 action(formData);
-                queryClient.invalidateQueries({ queryKey: ['user'] });
+                queryClient.invalidateQueries({ queryKey: ["user"] });
               }}
               loadingText="Calificando..."
             >

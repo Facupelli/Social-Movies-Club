@@ -1,28 +1,46 @@
-import type { ObjectId } from 'mongodb';
+export interface GetUserFeedParams {
+  userId: string;
+  limit?: number;
+  cursor?: string | null;
+  onlyUnseen?: boolean;
+}
 
-export interface AuthUser {
-  email: string;
-  name: string;
-  emailVerified: boolean;
-  image: string;
+export type UserRatings = {
+  movieId: string;
+  score: number;
   createdAt: Date;
-  updatedAt: Date;
-}
+  title: string;
+  year: string;
+  posterPath: string;
+  tmdbId: number;
+};
 
-export interface AuthUserViewModel extends AuthUser {
-  id: string;
-}
+export type FeedItemRaw = {
+  feed_item_id: string;
+  actor_id: string;
+  actor_name: string;
+  actor_image: string;
+  actor_username?: string;
+  movie_id: number;
+  movie_title: string;
+  movie_year: string;
+  movie_poster: string;
+  score: number;
+  rated_at: Date;
+  seen_at: Date;
+};
 
-export interface AuthUserDocument extends AuthUser {
-  _id: ObjectId;
-}
-
-export interface UserRelationship {
-  followerId: ObjectId;
-  followedId: ObjectId;
-  createdAt: Date;
-}
-
-export interface UserRelationshipDocument extends UserRelationship {
-  _id: ObjectId;
-}
+export type FeedItem = {
+  feedItemId: string;
+  actorId: string;
+  actorName: string;
+  actorImage: string;
+  actorUsername?: string;
+  movieId: number;
+  movieTitle: string;
+  movieYear: string;
+  moviePoster: string;
+  score: number;
+  ratedAt: Date;
+  seenAt: Date;
+};

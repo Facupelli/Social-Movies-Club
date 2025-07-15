@@ -1,7 +1,7 @@
 "use client";
 
 import { infiniteQueryOptions } from "@tanstack/react-query";
-import type { FeedItem } from "../user.pg.repository";
+import type { FeedItem } from "../user.types";
 
 async function getUserFeed({
   cursor,

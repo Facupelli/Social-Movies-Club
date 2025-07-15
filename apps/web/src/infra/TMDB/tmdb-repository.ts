@@ -1,15 +1,15 @@
-import { kv } from '@vercel/kv';
+import { kv } from "@vercel/kv";
 import type {
   SearchMovieApiResponse,
   SearchMovieQueryParams,
   SearchMovieResult,
-} from '@/infra/TMDB/types/search-movie';
-import type { TMDbMovieSearch } from '@/movies/movie.type';
-import type { MovieDetailApiResponse } from './types/detail-movie';
+} from "@/infra/TMDB/types/search-movie";
+import type { TMDbMovieSearch } from "@/movies/movie.type";
+import type { MovieDetailApiResponse } from "./types/detail-movie";
 import type {
   WatchProviderApiResponse,
   WatchProviderResult,
-} from './types/watch-provider';
+} from "./types/watch-provider";
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -23,7 +23,7 @@ export interface SearchMoviesResult {
 }
 
 export class TmdbRepository implements ITmdbRepository {
-  private readonly baseUrl = 'https://api.themoviedb.org/3';
+  private readonly baseUrl = "https://api.themoviedb.org/3";
   constructor(private readonly bearer = process.env.TMDB_ACCESS_TOKEN) {}
 
   async searchMovies(
@@ -31,14 +31,14 @@ export class TmdbRepository implements ITmdbRepository {
   ): Promise<SearchMoviesResult> {
     const {
       query,
-      language = 'en-US',
+      language = "en-US",
       page = 1,
       // region,
       // year,
     } = params;
 
     const json: SearchMovieApiResponse =
-      await this.request<SearchMovieApiResponse>('/search/movie', {
+      await this.request<SearchMovieApiResponse>("/search/movie", {
         query,
         language,
         page: String(page),
@@ -49,7 +49,7 @@ export class TmdbRepository implements ITmdbRepository {
         id: r.id,
         title: r.title,
         posterPath: r.poster_path ?? null,
-        year: r.release_date.split('-')[0],
+        year: r.release_date?.split("-")[0],
       })
     );
 
@@ -69,7 +69,7 @@ export class TmdbRepository implements ITmdbRepository {
       id: json.id,
       title: json.title,
       posterPath: json.poster_path ?? null,
-      year: json.release_date.split('-')[0],
+      year: json.release_date.split("-")[0],
     };
 
     return {
@@ -96,22 +96,22 @@ export class TmdbRepository implements ITmdbRepository {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(qs)}`;
 
-    const isLocked = await kv.get('tmdb_rate_limit_lock');
+    const isLocked = await kv.get("tmdb_rate_limit_lock");
     if (isLocked) {
       throw new Error(
-        'TMDB API is currently rate-limited. Please try again later.'
+        "TMDB API is currently rate-limited. Please try again later."
       );
     }
 
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.bearer}`,
-        'Content-Type': 'application/json;charset=utf-8',
+        "Content-Type": "application/json;charset=utf-8",
       },
     });
 
     if (res.status === 429) {
-      const retryAfterHeader = res.headers.get('Retry-After');
+      const retryAfterHeader = res.headers.get("Retry-After");
       const waitSeconds = retryAfterHeader
         ? Number.parseInt(retryAfterHeader, 10)
         : 50;
@@ -121,9 +121,9 @@ export class TmdbRepository implements ITmdbRepository {
         `RATE LIMIT HIT. Setting external lock for ${waitSeconds} seconds.`
       );
 
-      await kv.set('tmdb_rate_limit_lock', 'true', { ex: waitSeconds });
+      await kv.set("tmdb_rate_limit_lock", "true", { ex: waitSeconds });
 
-      throw new Error('Rate limit exceeded.');
+      throw new Error("Rate limit exceeded.");
     }
 
     if (!res.ok) {

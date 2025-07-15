@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import type { FeedItem } from "@/users/user.pg.repository";
 import { UserService } from "@/users/user.service";
 import { validateGetUserFeedQuery } from "@/users/user-validation.service";
+import type { FeedItem } from "@/users/user.types";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({

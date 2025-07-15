@@ -1,6 +1,6 @@
-import type { MovieView } from '@/components/movies/movie-card';
-import type { UserRatings } from '@/users/user.pg.repository';
-import type { TMDbMovieSearch } from './movie.type';
+import type { MovieView } from "@/components/movies/movie-card";
+import type { TMDbMovieSearch } from "./movie.type";
+import type { UserRatings } from "@/users/user.types";
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMovieSearch): MovieView {

@@ -10,10 +10,10 @@ import useDebounce from "@/movies/hooks/use-debounce";
 import { useSearchMovies } from "@/movies/hooks/use-search-movies";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
 import Image from "next/image";
-import { FeedItem } from "@/users/user.pg.repository";
 import dayjs from "@/lib/days";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
+import type { FeedItem } from "@/users/user.types";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
@@ -207,7 +207,12 @@ function formatFeedItemTime(utcTimestamp: dayjs.ConfigType): string {
     return `${diffHours}h`;
   }
 
-  /* This week (1–6 days ago) */
+  /* Yesterday */
+  if (local.isYesterday()) {
+    return "1d";
+  }
+
+  /* This week (2-6 days ago) */
   if (diffDays < 7) {
     return `${diffDays}d`;
   }
