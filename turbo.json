@@ -4,12 +4,29 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "apps/social-movies-club/.env*",
-        "apps/queue-system/.env*"
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "web#build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "QUEUE_SERVICE_URL",
+        "TMDB_ACCESS_TOKEN",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "KV_URL",
+        "KV_REST_API_URL",
+        "KV_REST_API_TOKEN",
+        "KV_REST_API_READ_ONLY_TOKEN",
+        "REDIS_URL",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_STACK_PROJECT_ID",
+        "NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY",
+        "STACK_SECRET_SERVER_KEY"
       ],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
