@@ -9,6 +9,8 @@ import type {
   UserRatings,
 } from "./user.types";
 
+const MAX_FOLLOWERS_TO_FANOUT = 1000;
+
 export class UserPgRepository {
   async getUserById(userId: string): Promise<User> {
     return await withDatabase(async (db) => {
@@ -125,7 +127,7 @@ export class UserPgRepository {
     });
   }
 
-  async rateMovie(
+  async rateMovieWithQueue(
     userId: string,
     movieId: bigint,
     score: number
@@ -169,6 +171,83 @@ export class UserPgRepository {
 
       // biome-ignore lint: debugin logs
       console.log(`Rating-Job posted to queue service: ${response.ok}`);
+    });
+  }
+
+  // Use this method untile QUEUE-SYSTEM app is deployed
+  async rateMovie(
+    userId: string,
+    movieId: bigint,
+    score: number
+  ): Promise<void> {
+    return await withDatabase(async (db) => {
+      const createRatingQuery = sql`
+          INSERT INTO ${ratings}
+            (user_id, movie_id, score, created_at)
+          VALUES
+            (${userId}, ${movieId}, ${score}, now())
+          ON CONFLICT (user_id, movie_id)
+          DO UPDATE SET
+            score = EXCLUDED.score,
+            created_at = now()
+          RETURNING id, user_id, movie_id, score, created_at
+        `;
+
+      const ratingResult = await db.execute<{
+        id: string;
+        user_id: string;
+        movie_id: string;
+        score: number;
+        created_at: Date;
+      }>(createRatingQuery);
+
+      const rating = ratingResult.rows[0];
+      // biome-ignore lint: debugin logs
+      console.log(`✅ Rating created/updated: ${rating.id}`);
+
+      await db.transaction(async (tx) => {
+        // HANDLED BY QUEUE
+        const { rows: followers } = await tx.execute<{
+          follower_id: string;
+        }>(sql`
+            SELECT follower_id
+            FROM follows
+            WHERE followee_id = ${userId}
+            LIMIT ${MAX_FOLLOWERS_TO_FANOUT + 1}
+          `);
+
+        const followersSkipped = Math.max(
+          0,
+          followers.length - MAX_FOLLOWERS_TO_FANOUT
+        );
+        const followersToProcess = followers.slice(0, MAX_FOLLOWERS_TO_FANOUT);
+
+        if (followersSkipped > 0) {
+          console.warn(
+            `⚠️  Skipping ${followersSkipped} followers for rating ${rating.id} (over limit)`
+          );
+        }
+
+        let feedItemsCreated = 0;
+        if (followersToProcess.length > 0) {
+          await tx.execute(sql`
+          INSERT INTO feed_items (user_id, actor_id, rating_id)
+          VALUES ${sql.join(
+            followersToProcess.map(
+              (follower) =>
+                sql`(${follower.follower_id}, ${userId}, ${rating.id})`
+            ),
+            sql`, `
+          )}
+      `);
+
+          feedItemsCreated = followersToProcess.length;
+        }
+
+        console.log(
+          `📢 Created ${feedItemsCreated} feed items for rating ${rating.id}`
+        );
+      });
     });
   }
 }
