@@ -243,26 +243,12 @@ function WatchlistButton() {
     return { success: true, error: "" };
   };
 
-  const handleRemoveMovieFromWatchlist = async (
-    _state: typeof initialState,
-    formData: FormData
-  ) => {
-    const result = await removeMovieFromWatchlist(formData);
-    if (result.success) {
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.USER_WATCHLIST,
-      });
-    }
-
-    return { success: true, error: "" };
-  };
-
   const [_, addAction] = useActionState(handleAddMovieToWatchlist, {
     success: false,
     error: "",
   });
 
-  const [__, removeAction] = useActionState(handleRemoveMovieFromWatchlist, {
+  const [__, removeAction] = useActionState(removeMovieFromWatchlist, {
     success: false,
     error: "",
   });
