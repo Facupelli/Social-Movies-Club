@@ -134,7 +134,7 @@ function Feed() {
 
 function FeedItemCard({ item }: { item: FeedItem }) {
   const movieView: MovieView = {
-    id: item.movieTmdbId,
+    tmdbId: item.movieTmdbId,
     posterPath: item.moviePoster,
     score: item.score,
     title: item.movieTitle,
@@ -223,7 +223,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
   return (
     <MovieGrid>
       {movies?.map((movie) => (
-        <MovieCard key={movie.id} movie={movie}>
+        <MovieCard key={movie.tmdbId} movie={movie}>
           <MovieCard.Poster />
           <CardContent className="flex flex-col gap-1 px-4 pt-2">
             <MovieCard.Title />

@@ -49,7 +49,7 @@ export default async function FollowingPage(
   const isFollowing = false;
 
   return (
-    <div className="flex-1 pt-10 space-y-4">
+    <section className="flex-1 pt-10 space-y-4">
       {followingUsers.map((user) => (
         <a
           href={`/profile/${user.followeeId}`}
@@ -86,6 +86,6 @@ export default async function FollowingPage(
           )}
         </a>
       ))}
-    </div>
+    </section>
   );
 }

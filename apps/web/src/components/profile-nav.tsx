@@ -1,26 +1,27 @@
-'use client';
+"use client";
 
-import clsx from 'clsx';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import clsx from "clsx";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface Props {
   userId: string;
 }
 
 export default function ProfileNav({ userId }: Props) {
-  const pathname = usePathname() || '';
+  const pathname = usePathname() || "";
 
   const isMoviesTab =
     pathname === `/profile/${userId}` || pathname === `/profile/${userId}/`;
+  const isWatchlistTab = pathname.startsWith(`/profile/${userId}/watchlist`);
   const isFollowingTab = pathname.startsWith(`/profile/${userId}/following`);
 
   return (
-    <div className="flex items-center gap-4 border-neutral-500 border-b pt-2">
+    <div className="flex items-center gap-6 border-neutral-500 border-b pt-2">
       <Link
         className={clsx(
-          isMoviesTab && 'border-accent-foreground border-b-3 font-bold',
-          'pb-2'
+          isMoviesTab && "border-accent-foreground border-b-3 font-bold",
+          "pb-2"
         )}
         href={`/profile/${userId}`}
       >
@@ -28,8 +29,17 @@ export default function ProfileNav({ userId }: Props) {
       </Link>
       <Link
         className={clsx(
-          isFollowingTab && 'border-accent-foreground border-b-3 font-bold',
-          'pb-2'
+          isWatchlistTab && "border-accent-foreground border-b-3 font-bold",
+          "pb-2"
+        )}
+        href={`/profile/${userId}/watchlist`}
+      >
+        Lista
+      </Link>
+      <Link
+        className={clsx(
+          isFollowingTab && "border-accent-foreground border-b-3 font-bold",
+          "pb-2"
         )}
         href={`/profile/${userId}/following`}
       >

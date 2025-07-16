@@ -1,6 +1,7 @@
 import type { MovieView } from "@/components/movies/movie-card";
 import type { UserRatings } from "@/users/user.types";
 import type { TMDbMovieSearch } from "./movie.type";
+import type { UserWatchlist } from "@/watchlist/watchlist.repository";
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMovieSearch): MovieView {
@@ -22,5 +23,16 @@ export function dbMovieToView(r: UserRatings): MovieView {
     posterPath: r.posterPath,
     score: r.score,
     overview: r.overview,
+  };
+}
+
+// From Watchlist local DB table
+export function dbWatchlistMovieToView(w: UserWatchlist): MovieView {
+  return {
+    tmdbId: w.movieTmdbId,
+    title: w.movieTitle,
+    year: w.movieYear,
+    posterPath: w.moviePosterPath,
+    overview: w.movieOverview,
   };
 }

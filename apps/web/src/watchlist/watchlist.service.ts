@@ -1,4 +1,6 @@
+import { dbWatchlistMovieToView } from "@/movies/movie.adapters";
 import { WatchlistPgRepository } from "./watchlist.repository";
+import type { MovieView } from "@/components/movies/movie-card";
 
 export class WatchlistService {
   constructor(
@@ -9,7 +11,10 @@ export class WatchlistService {
     return this.watchlistRepository.removeMovie(userId, movieId);
   }
 
-  async getWatchlist(userId: string) {
-    return this.watchlistRepository.getWatchlist(userId);
+  async getWatchlist(userId: string): Promise<MovieView[]> {
+    const watchlist = await this.watchlistRepository.getWatchlist(userId);
+
+    const watchlistMovieView = watchlist.map(dbWatchlistMovieToView);
+    return watchlistMovieView;
   }
 }
