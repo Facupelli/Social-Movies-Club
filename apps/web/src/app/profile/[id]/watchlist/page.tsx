@@ -28,7 +28,7 @@ export default async function WatchlistPage(
   const watchlist = await getUserWatchlist(params.id);
 
   return (
-    <section className="pt-10">
+    <section className="py-10">
       <MovieGrid>
         {watchlist?.map((movie) => (
           <GridMovieCard movie={movie} key={movie.tmdbId} />

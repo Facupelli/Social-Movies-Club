@@ -63,11 +63,7 @@ export function RateDialog({
   return (
     <Dialog>
       <DialogTrigger asChild className="cursor-pointer">
-        <Button
-          className="flex-1 gap-2 bg-transparent"
-          size="sm"
-          variant="outline"
-        >
+        <Button className="bg-transparent w-full" size="sm" variant="outline">
           {isMovieRated ? <Star className="fill-yellow-400" /> : <Star />}
         </Button>
       </DialogTrigger>

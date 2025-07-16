@@ -223,7 +223,7 @@ const initialState = {
   error: "",
 };
 
-function AddToWatchlistButton() {
+function WatchlistButton() {
   const queryClient = useQueryClient();
   const { movie } = useMovieCardContext();
   const { data: session } = authClient.useSession();
@@ -271,7 +271,7 @@ function AddToWatchlistButton() {
   const isMovieInWatchlist = !!userMovie;
 
   return (
-    <form className="flex-1 gap-2">
+    <form>
       <input type="hidden" name="movieTMDBId" value={movie.tmdbId} />
       <input type="hidden" name="userId" value={session?.user.id} />
 
@@ -303,7 +303,7 @@ function Rate() {
 MovieCard.Poster = Poster;
 MovieCard.Title = Title;
 MovieCard.ReleaseDate = ReleaseDate;
-MovieCard.AddToWatchlistButton = AddToWatchlistButton;
+MovieCard.WatchlistButton = WatchlistButton;
 MovieCard.Rate = Rate;
 MovieCard.Score = Score;
 MovieCard.WatchProviders = WatchProviders;

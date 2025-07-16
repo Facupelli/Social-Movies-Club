@@ -229,9 +229,13 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
             <MovieCard.Title />
             <MovieCard.ReleaseDate />
           </CardContent>
-          <CardFooter className="gap-2 px-4 pb-4">
-            <MovieCard.AddToWatchlistButton />
-            <MovieCard.Rate />
+          <CardFooter className="flex justify-end gap-2 px-4 pb-4">
+            <div className="flex-1 md:flex-initial">
+              <MovieCard.WatchlistButton />
+            </div>
+            <div className="flex-1 md:flex-initial">
+              <MovieCard.Rate />
+            </div>
           </CardFooter>
         </MovieCard>
       ))}

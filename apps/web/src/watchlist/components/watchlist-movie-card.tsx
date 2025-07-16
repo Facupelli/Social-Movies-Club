@@ -11,6 +11,7 @@ export function GridMovieCard({ movie }: { movie: MovieView }) {
         <MovieCard.Title />
         <div className="flex items-center justify-between">
           <MovieCard.ReleaseDate />
+          <MovieCard.WatchlistButton />
         </div>
       </CardContent>
     </MovieCard>

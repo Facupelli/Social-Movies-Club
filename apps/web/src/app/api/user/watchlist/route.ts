@@ -20,8 +20,8 @@ export async function GET() {
   const statusMap: UseUserWatchlistMap = {};
 
   res.forEach((result) => {
-    if (!statusMap[result.movieTmdbId]) {
-      statusMap[result.movieTmdbId] = true;
+    if (!statusMap[result.tmdbId]) {
+      statusMap[result.tmdbId] = true;
     }
   });
 
