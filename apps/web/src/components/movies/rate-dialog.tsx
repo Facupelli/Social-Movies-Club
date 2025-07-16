@@ -19,6 +19,11 @@ import { Button } from "../ui/button";
 import { getUserRatingsQueryOptions } from "@/users/hooks/use-user-ratings";
 import { QUERY_KEYS } from "@/lib/app.constants";
 
+const initialState = {
+  success: false,
+  error: "",
+};
+
 export function RateDialog({
   movieTMDBId,
   title,
@@ -29,12 +34,25 @@ export function RateDialog({
   year: string;
 }) {
   const queryClient = useQueryClient();
-  const { data: userRatings, refetch } = useQuery(getUserRatingsQueryOptions);
+  const { data: userRatings } = useQuery(getUserRatingsQueryOptions);
 
-  const [state, action] = useActionState(addRatingToMovie, {
-    success: false,
-    error: "",
-  });
+  const handleAddRatingToMovie = async (
+    _state: typeof initialState,
+    formData: FormData
+  ) => {
+    const result = await addRatingToMovie(formData);
+    if (result.success) {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.USER_RATINGS,
+      });
+    }
+    return result;
+  };
+
+  const [state, action, isPending] = useActionState(
+    handleAddRatingToMovie,
+    initialState
+  );
 
   const userRating = userRatings?.[movieTMDBId];
   const isMovieRated = userRating?.isRated;
@@ -117,13 +135,8 @@ export function RateDialog({
             </DialogClose>
 
             <SubmitButton
-              disabled={rating === 0}
-              formAction={(formData) => {
-                action(formData);
-                queryClient.invalidateQueries({
-                  queryKey: QUERY_KEYS.USER_RATINGS,
-                });
-              }}
+              disabled={rating === 0 || isPending}
+              formAction={action}
               loadingText="Calificando"
             >
               Calificar

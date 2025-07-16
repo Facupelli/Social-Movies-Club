@@ -4,10 +4,7 @@ import { withAuth } from "@/lib/auth-server-action.middleware";
 import { UserMovieService } from "@/users/user-movie.service";
 import { validateMovieRating } from "../movie-validation.services";
 
-export async function addRatingToMovie(
-  _: { success: boolean; error?: string },
-  formData: FormData
-) {
+export async function addRatingToMovie(formData: FormData) {
   return await withAuth(async (session) => {
     const { movieTMDBId, rating } = validateMovieRating(formData);
 
