@@ -38,9 +38,8 @@ export default function ProfilePage({
   }>;
 }) {
   const pageSearchParams = use(searchParams);
-  const { data, isPending, hasNextPage, fetchNextPage } = useInfiniteQuery(
-    getUserMoviesQueryOptions
-  );
+  const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery(getUserMoviesQueryOptions);
   const profileMovies = data?.pages.flatMap((page) => page.data);
 
   const [tab, setTab] = useState<string>("grid");
@@ -177,7 +176,10 @@ export default function ProfilePage({
         </MovieGrid>
 
         {hasNextPage && (
-          <LoadNextPageButton onFecthNextPage={handleFetchNextPage} />
+          <LoadNextPageButton
+            onFecthNextPage={handleFetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         )}
       </TabsContent>
 
@@ -212,7 +214,10 @@ export default function ProfilePage({
           ))}
 
           {hasNextPage && (
-            <LoadNextPageButton onFecthNextPage={handleFetchNextPage} />
+            <LoadNextPageButton
+              onFecthNextPage={handleFetchNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+            />
           )}
         </MovieList>
       </TabsContent>
@@ -222,13 +227,19 @@ export default function ProfilePage({
 
 function LoadNextPageButton({
   onFecthNextPage,
+  isFetchingNextPage,
 }: {
   onFecthNextPage: () => void;
+  isFetchingNextPage: boolean;
 }) {
   return (
     <div className="flex justify-center">
-      <Button type="button" onClick={onFecthNextPage}>
-        Ver más
+      <Button
+        type="button"
+        disabled={isFetchingNextPage}
+        onClick={onFecthNextPage}
+      >
+        {isFetchingNextPage ? "Cargando..." : "Ver más"}
       </Button>
     </div>
   );
