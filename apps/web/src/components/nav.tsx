@@ -4,6 +4,7 @@ import { Home, Info, User2Icon } from "lucide-react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
+import SignInButton from "./sign-in-button";
 
 export function Nav() {
   const {
@@ -12,16 +13,6 @@ export function Nav() {
     // error, //error object
     // refetch, //refetch the session
   } = authClient.useSession();
-
-  const handleSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-      errorCallbackURL: "/error",
-      newUserCallbackURL: "/",
-      // disableRedirect: true,
-    });
-  };
 
   const handleLogOut = async () => {
     await authClient.signOut();
@@ -78,9 +69,7 @@ export function Nav() {
             </Button>
           </div>
         ) : (
-          <Button onClick={handleSignIn} type="button">
-            Ingresar
-          </Button>
+          <SignInButton />
         )}
       </div>
     </nav>

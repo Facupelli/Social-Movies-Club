@@ -14,6 +14,8 @@ import dayjs from "@/lib/days";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import type { FeedItem } from "@/users/user.types";
+import SignInButton from "@/components/sign-in-button";
+import { Search } from "lucide-react";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
@@ -21,30 +23,63 @@ export default function HomePage() {
   const deferredQuery = useDeferredValue(query);
   const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
+  const handleSearch = (value: string) => {
+    startTransition(() => {
+      setQuery(value);
+    });
+  };
+
+  const hasQuery = !!query;
+
   return (
     <div className="min-h-svh flex-1 py-6 md:min-h-auto">
       <div className="pb-2 md:pb-6 px-2 md:px-10">
-        <Input
-          className="w-full bg-white"
-          onChange={(e) =>
-            startTransition(() => {
-              setQuery(e.target.value);
-            })
-          }
-          placeholder="Buscar película..."
-          type="search"
-        />
+        <SearchInput onChange={handleSearch} />
       </div>
 
-      {query ? (
+      {hasQuery ? (
         <div className="px-4 md:px-10 py-2">
           <MoviesList debouncedSearchTerm={debouncedSearchTerm} />
         </div>
       ) : (
-        <Feed />
+        <>
+          <SessionMessage />
+          <Feed />
+        </>
       )}
     </div>
   );
+}
+
+function SearchInput({ onChange }: { onChange: (values: string) => void }) {
+  return (
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        className="w-full bg-white px-10"
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Buscar película..."
+        type="search"
+      />
+    </div>
+  );
+}
+
+function SessionMessage() {
+  const { data: session, isPending } = authClient.useSession();
+
+  if (!session && !isPending) {
+    return (
+      <div className="px-4 flex justify-center pt-10">
+        <div className="space-y-2 text-center text-balance">
+          <p>Inicia sesión para calificar películas y seguir a tus amigos!</p>
+          <SignInButton />
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function Feed() {

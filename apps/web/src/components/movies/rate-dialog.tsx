@@ -145,7 +145,11 @@ export function RateDialog({
 
           {!state.success && state.error && (
             <div className="flex justify-center pt-2 md:justify-end">
-              <p className="text-red-500">{state.error}</p>
+              <p className="text-red-500">
+                {state.error === "Unauthorized"
+                  ? "Debes inciar sesión para calificar"
+                  : state.error}
+              </p>
             </div>
           )}
           {state.success && (
