@@ -151,7 +151,7 @@ export const follows = pgTable(
 export type Follow = typeof follows.$inferSelect;
 
 /* ------------------------------------------------------------------ *
- *  feed                                             *
+ *  feed
  *
  *  PUSH MODEL (Fan-out on Write)
  * ------------------------------------------------------------------ */
@@ -179,5 +179,29 @@ export const feedItems = pgTable(
   (table) => [
     index("feed_items_user_time_idx").on(table.userId, table.createdAt),
     index("feed_items_unseen_idx").on(table.userId, table.seenAt),
+  ]
+);
+
+/* ------------------------------------------------------------------ *
+ *  watchlist
+ *
+ * ------------------------------------------------------------------ */
+
+export const watchlist = pgTable(
+  "watchlist",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    movieId: uuid("movie_id")
+      .notNull()
+      .references(() => movies.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("watchlist_user_movie_unique").on(table.userId, table.movieId),
+    index("watchlist_profile_idx").on(table.userId, table.createdAt),
   ]
 );

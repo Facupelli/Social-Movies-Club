@@ -9,7 +9,7 @@ export async function addRatingToMovie(formData: FormData) {
     const { movieTMDBId, rating } = validateMovieRating(formData);
 
     const userMovieService = new UserMovieService();
-    await userMovieService.addMovieToUser(session.user.id, movieTMDBId, rating);
+    await userMovieService.rateMovie(session.user.id, movieTMDBId, rating);
 
     return { success: true, error: "" };
   });

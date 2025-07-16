@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import { Eye } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { createContext, useContext } from "react";
+import { createContext, useActionState, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { useMovieWatchProviders } from "@/movies/hooks/use-movie-watch-providers";
 import { Button } from "../ui/button";
@@ -16,9 +16,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { addMovieToWatchlist } from "@/watchlist/actions/add-movie";
+import { removeMovieFromWatchlist } from "@/watchlist/actions/remove-movie";
+import { authClient } from "@/lib/auth-client";
+import { SubmitButton } from "../submit-button";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUserWatchlistQueryOptions } from "@/users/hooks/use-user-watchlist";
+import { QUERY_KEYS } from "@/lib/app.constants";
 
 export interface MovieView {
-  id: number; //  TMDB‐ID
+  tmdbId: number; //  TMDB‐ID
   title: string;
   year: string;
   posterPath: string;
@@ -145,7 +152,7 @@ function WatchProviders() {
     isLoading,
     error,
     refetch,
-  } = useMovieWatchProviders(movie.id);
+  } = useMovieWatchProviders(movie.tmdbId);
 
   if (error) {
     return (
@@ -211,11 +218,73 @@ function WatchProviders() {
   );
 }
 
+const initialState = {
+  success: false,
+  error: "",
+};
+
 function AddToWatchlistButton() {
+  const queryClient = useQueryClient();
+  const { movie } = useMovieCardContext();
+  const { data: session } = authClient.useSession();
+  const { data: userWatchlist } = useQuery(getUserWatchlistQueryOptions);
+
+  const handleAddMovieToWatchlist = async (
+    _state: typeof initialState,
+    formData: FormData
+  ) => {
+    const result = await addMovieToWatchlist(formData);
+    if (result.success) {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.USER_WATCHLIST,
+      });
+    }
+
+    return { success: true, error: "" };
+  };
+
+  const handleRemoveMovieFromWatchlist = async (
+    _state: typeof initialState,
+    formData: FormData
+  ) => {
+    const result = await removeMovieFromWatchlist(formData);
+    if (result.success) {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.USER_WATCHLIST,
+      });
+    }
+
+    return { success: true, error: "" };
+  };
+
+  const [_, addAction] = useActionState(handleAddMovieToWatchlist, {
+    success: false,
+    error: "",
+  });
+
+  const [__, removeAction] = useActionState(handleRemoveMovieFromWatchlist, {
+    success: false,
+    error: "",
+  });
+
+  const userMovie = userWatchlist?.[movie.tmdbId];
+  const isMovieInWatchlist = !!userMovie;
+
   return (
-    <Button className="flex-1 gap-2" size="sm">
-      <Eye className="size-4" />
-    </Button>
+    <form className="flex-1 gap-2">
+      <input type="hidden" name="movieTMDBId" value={movie.tmdbId} />
+      <input type="hidden" name="userId" value={session?.user.id} />
+
+      {isMovieInWatchlist ? (
+        <SubmitButton formAction={removeAction} size="sm" className="w-full">
+          <EyeOff className="size-4 fill-yellow-400" />
+        </SubmitButton>
+      ) : (
+        <SubmitButton formAction={addAction} size="sm" className="w-full">
+          <Eye className="size-4" />
+        </SubmitButton>
+      )}
+    </form>
   );
 }
 
@@ -223,7 +292,11 @@ function Rate() {
   const { movie } = useMovieCardContext();
 
   return (
-    <RateDialog movieTMDBId={movie.id} title={movie.title} year={movie.year} />
+    <RateDialog
+      movieTMDBId={movie.tmdbId}
+      title={movie.title}
+      year={movie.year}
+    />
   );
 }
 

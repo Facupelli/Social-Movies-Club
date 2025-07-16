@@ -8,6 +8,7 @@ export const QUERY_KEYS = {
   USER: ["user"],
   USER_FEED: ["user-feed"],
   USER_RATINGS: ["user-ratings"],
+  USER_WATCHLIST: ["user-watchlist"],
   getUserMovies: (
     userId: string,
     sortBy: UserMoviesSortBy | null,

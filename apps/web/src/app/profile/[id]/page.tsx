@@ -173,7 +173,7 @@ export default function ProfilePage({
           {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie) => (
-            <MovieCard key={movie.id} movie={movie}>
+            <MovieCard key={movie.tmdbId} movie={movie}>
               <MovieCard.Poster />
               <CardContent className="flex flex-col gap-1 px-4 py-2">
                 <MovieCard.Title />
@@ -199,7 +199,7 @@ export default function ProfilePage({
           {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie, idx) => (
-            <MovieCard key={movie.id} movie={movie}>
+            <MovieCard key={movie.tmdbId} movie={movie}>
               <div className="flex gap-6">
                 <p className="hidden pl-2 font-bold md:block">{idx + 1}</p>
 

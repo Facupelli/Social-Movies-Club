@@ -24,6 +24,16 @@ export class MoviePgRepository {
     });
   }
 
+  async getMovieByTMDBId(tmdbId: number): Promise<{ id: string }> {
+    return await withDatabase(async (db) => {
+      const { rows } = await db.execute<{ id: string }>(sql`
+        SELECT id FROM ${movies} WHERE tmdb_id = ${tmdbId};
+      `);
+
+      return rows[0];
+    });
+  }
+
   async getMovieById(movieId: bigint): Promise<Movie[]> {
     return await withDatabase(async (db) => {
       const query = sql`

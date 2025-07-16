@@ -5,7 +5,7 @@ import type { TMDbMovieSearch } from "./movie.type";
 // From TMDb API call
 export function apiMovieToView(m: TMDbMovieSearch): MovieView {
   return {
-    id: m.id,
+    tmdbId: m.id,
     title: m.title,
     year: m.year,
     posterPath: m.posterPath,
@@ -16,7 +16,7 @@ export function apiMovieToView(m: TMDbMovieSearch): MovieView {
 // From Ratings local DB table
 export function dbMovieToView(r: UserRatings): MovieView {
   return {
-    id: r.tmdbId,
+    tmdbId: r.tmdbId,
     title: r.title,
     year: r.year,
     posterPath: r.posterPath,
