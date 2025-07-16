@@ -26,10 +26,7 @@ import { use, useEffect, useState } from "react";
 import type { UserMoviesSortBy, UserMoviesSortOrder } from "@/users/user.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
-
-export const LOCAL_STORAGE_KEYS = {
-  PROFILE_TAB_VIEW: "profile-tab-view",
-};
+import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
 
 export default function ProfilePage({
   searchParams,
@@ -41,7 +38,7 @@ export default function ProfilePage({
   }>;
 }) {
   const pageSearchParams = use(searchParams);
-  const { data, hasNextPage, fetchNextPage } = useInfiniteQuery(
+  const { data, isPending, hasNextPage, fetchNextPage } = useInfiniteQuery(
     getUserMoviesQueryOptions
   );
   const profileMovies = data?.pages.flatMap((page) => page.data);
@@ -163,6 +160,8 @@ export default function ProfilePage({
 
       <TabsContent value="grid">
         <MovieGrid>
+          {isPending && <p>Loading...</p>}
+
           {profileMovies?.map((movie) => (
             <MovieCard key={movie.id} movie={movie}>
               <MovieCard.Poster />
@@ -184,6 +183,8 @@ export default function ProfilePage({
 
       <TabsContent value="list">
         <MovieList>
+          {isPending && <p>Loading...</p>}
+
           {profileMovies?.map((movie, idx) => (
             <MovieCard key={movie.id} movie={movie}>
               <div className="flex gap-6">

@@ -67,14 +67,14 @@ function Poster({ size = "default" }: { size?: "small" | "default" }) {
 
   const dimensions =
     size === "small"
-      ? { width: 120, height: 230 }
+      ? { width: 120, height: 180 }
       : { width: 250, height: 300 };
 
   return movie.posterPath ? (
     <div className="shrink-0">
       <Image
         alt={movie.title}
-        className={clsx("h-auto rounded-xs")}
+        className={clsx("rounded-xs")}
         height={dimensions.height}
         src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
         unoptimized

@@ -96,6 +96,7 @@ async function UserInfo({
               height={100}
               src={profileUser.image}
               unoptimized
+              priority
               width={100}
             />
           </div>

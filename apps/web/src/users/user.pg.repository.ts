@@ -132,15 +132,21 @@ export class UserPgRepository {
         dataQuery = sql`${dataQuery} LIMIT ${limit} OFFSET ${offset}`;
       }
 
-      const [_, dataResult] = await Promise.all([
+      const [countResult, dataResult] = await Promise.all([
         db.execute<{ count: number }>(countQuery),
         db.execute<UserRatings>(dataQuery),
       ]);
 
-      const nextCursor =
-        limit !== undefined && offset !== undefined
-          ? Math.floor(offset / limit) + 1
-          : null;
+      const totalCount = countResult.rows[0]?.count || 0;
+
+      let nextCursor: number | null = null;
+      if (limit !== undefined && offset !== undefined) {
+        const currentOffset = offset;
+        const nextOffset = currentOffset + limit;
+        if (nextOffset < totalCount) {
+          nextCursor = Math.floor(nextOffset / limit);
+        }
+      }
 
       return { data: dataResult.rows, nextCursor };
     });
