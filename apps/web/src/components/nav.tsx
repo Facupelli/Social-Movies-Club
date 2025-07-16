@@ -20,7 +20,7 @@ export function Nav() {
 
   return (
     <nav className="fixed bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar p-4 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:p-8">
-      <ul className="flex gap-10 md:grid md:gap-4">
+      <ul className="flex gap-16 md:grid md:gap-4">
         <li>
           <a className="flex items-center gap-2" href="/">
             <Home />

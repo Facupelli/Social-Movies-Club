@@ -27,7 +27,7 @@ export default async function ProfileLayout(
   const profileUserId = params.id;
 
   return (
-    <div>
+    <div className="min-h-svh">
       <div className="bg-card px-2 py-2 md:px-10">
         <Link href="/">
           <ArrowLeft />
