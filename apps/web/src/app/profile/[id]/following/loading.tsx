@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FollowingPageLoading() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
       {[...Array(5)].map((_, idx) => (
         // biome-ignore lint:reason
         <div key={idx} className="flex justify-between">

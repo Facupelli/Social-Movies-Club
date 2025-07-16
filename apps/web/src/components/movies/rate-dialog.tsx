@@ -17,6 +17,7 @@ import { addRatingToMovie } from "@/movies/actions/add-rating";
 import { SubmitButton } from "../submit-button";
 import { Button } from "../ui/button";
 import { getUserRatingsQueryOptions } from "@/users/hooks/use-user-ratings";
+import { QUERY_KEYS } from "@/lib/app.constants";
 
 export function RateDialog({
   movieTMDBId,
@@ -28,7 +29,7 @@ export function RateDialog({
   year: string;
 }) {
   const queryClient = useQueryClient();
-  const { data: userRatings } = useQuery(getUserRatingsQueryOptions);
+  const { data: userRatings, refetch } = useQuery(getUserRatingsQueryOptions);
 
   const [state, action] = useActionState(addRatingToMovie, {
     success: false,
@@ -119,9 +120,11 @@ export function RateDialog({
               disabled={rating === 0}
               formAction={(formData) => {
                 action(formData);
-                queryClient.invalidateQueries({ queryKey: ["user"] });
+                queryClient.invalidateQueries({
+                  queryKey: QUERY_KEYS.USER_RATINGS,
+                });
               }}
-              loadingText="Calificando..."
+              loadingText="Calificando"
             >
               Calificar
             </SubmitButton>

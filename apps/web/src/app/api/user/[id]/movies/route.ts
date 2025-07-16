@@ -12,7 +12,10 @@ export type UseUserMoviesMap = Record<
   { isRated: boolean; score: number }
 >;
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -20,6 +23,8 @@ export async function GET(request: Request) {
   if (!session) {
     return Response.json({ success: false, error: "Unauthorized" });
   }
+
+  const routeParams = await params;
 
   const userService = new UserService();
   const url = new URL(request.url);
@@ -32,7 +37,7 @@ export async function GET(request: Request) {
   const offset = page * limit;
 
   const res: GetUserRatingMovies = await userService.getUserRatingMovies(
-    session.user.id,
+    routeParams.id,
     {
       limit,
       offset,

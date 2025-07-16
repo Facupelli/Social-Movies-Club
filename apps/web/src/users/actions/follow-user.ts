@@ -1,20 +1,22 @@
-'use server';
+"use server";
 
-import { FollowService } from '@/follows/follow.service';
-import { withAuth } from '@/lib/auth-server-action.middleware';
+import { FollowService } from "@/follows/follow.service";
+import { withAuth } from "@/lib/auth-server-action.middleware";
+import { validateFollowUser } from "../user-validation.service";
+import { revalidatePath } from "next/cache";
 
-export async function followUser(followedUserId: string) {
+export async function followUser(
+  _: { success: boolean; error?: string },
+  formData: FormData
+) {
   return await withAuth(async (session) => {
-    if (!followedUserId || typeof followedUserId !== 'string') {
-      return { success: false, error: 'Validation error' };
-    }
+    const { followedUserId } = validateFollowUser(formData);
 
     const followService = new FollowService();
-    const result = await followService.followUser(
-      session.user.id,
-      followedUserId
-    );
+    await followService.followUser(session.user.id, followedUserId);
 
-    return result;
+    revalidatePath(`/profile/${followedUserId}`);
+
+    return { success: true, error: "" };
   });
 }

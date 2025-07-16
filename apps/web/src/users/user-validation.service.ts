@@ -22,3 +22,14 @@ export function validateGetUserFeedQuery(
   const data = Object.fromEntries(searchParams.entries());
   return GetUserFeedQuerySchema.parse(data);
 }
+
+const FollowUserSchema = z.object({
+  followedUserId: z.string().nonempty(),
+});
+
+export type FollowUserInput = z.infer<typeof FollowUserSchema>;
+
+export function validateFollowUser(formData: FormData): FollowUserInput {
+  const data = Object.fromEntries(formData.entries());
+  return FollowUserSchema.parse(data);
+}

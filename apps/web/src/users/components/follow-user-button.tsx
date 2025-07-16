@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { followUser } from '../actions/follow-user';
+import { useActionState } from "react";
+import { SubmitButton } from "@/components/submit-button";
+import { followUser } from "../actions/follow-user";
 
 export function FollowUserButton({
   children,
@@ -12,17 +13,24 @@ export function FollowUserButton({
   children: React.ReactNode;
   followedUserId: string;
 }) {
-  const handleFollowUser = async () => {
-    try {
-      await followUser(followedUserId);
-    } catch (error) {
-      console.error('followUser Error:', error);
-    }
-  };
+  const [_, action, isPending] = useActionState(followUser, {
+    success: false,
+    error: "",
+  });
 
   return (
-    <Button disabled={isFollowing} onClick={handleFollowUser} type="button">
-      {children}
-    </Button>
+    <form>
+      <input type="hidden" name="followedUserId" value={followedUserId} />
+
+      <SubmitButton
+        disabled={isFollowing || isPending}
+        formAction={(formData) => {
+          action(formData);
+        }}
+        loadingText="Siguiendo"
+      >
+        {children}
+      </SubmitButton>
+    </form>
   );
 }

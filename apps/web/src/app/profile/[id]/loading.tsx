@@ -1,3 +1,3 @@
 export default function ProfileMoviesLoading() {
-  return <p className="pt-10">Loading...</p>;
+  return <p className="pt-10">Cargando...</p>;
 }

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@/infra/postgres/schema";
+import { QUERY_KEYS } from "@/lib/app.constants";
 
 async function getUser(): Promise<User | null> {
   const response = await fetch("/api/user");
@@ -13,7 +14,7 @@ async function getUser(): Promise<User | null> {
 
 const useUser = () => {
   return useQuery({
-    queryKey: ["user"],
+    queryKey: QUERY_KEYS.USER,
     queryFn: () => getUser(),
     refetchOnWindowFocus: false,
   });

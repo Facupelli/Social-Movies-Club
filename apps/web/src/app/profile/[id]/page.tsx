@@ -29,17 +29,21 @@ import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
 
 export default function ProfilePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ id: string }>;
   searchParams: Promise<{
     sortBy?: UserMoviesSortBy;
     sortOrder?: UserMoviesSortOrder;
     page?: string;
   }>;
 }) {
+  const pageParams = use(params);
   const pageSearchParams = use(searchParams);
+
   const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteQuery(getUserMoviesQueryOptions);
+    useInfiniteQuery(getUserMoviesQueryOptions(pageParams.id));
   const profileMovies = data?.pages.flatMap((page) => page.data);
 
   const [tab, setTab] = useState<string>("grid");
@@ -159,7 +163,7 @@ export default function ProfilePage({
 
       <TabsContent value="grid">
         <MovieGrid>
-          {isPending && <p>Loading...</p>}
+          {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie) => (
             <MovieCard key={movie.id} movie={movie}>
@@ -185,7 +189,7 @@ export default function ProfilePage({
 
       <TabsContent value="list">
         <MovieList>
-          {isPending && <p>Loading...</p>}
+          {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie, idx) => (
             <MovieCard key={movie.id} movie={movie}>

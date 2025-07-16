@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Loader2 } from 'lucide-react';
-import { useFormStatus } from 'react-dom';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import { Button } from "@/components/ui/button";
 
 interface SubmitButtonProps {
   children: React.ReactNode;
@@ -10,24 +10,24 @@ interface SubmitButtonProps {
   showSpinner?: boolean;
   disabled?: boolean;
   variant?:
-    | 'default'
-    | 'destructive'
-    | 'outline'
-    | 'secondary'
-    | 'ghost'
-    | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   formAction?: (formData: FormData) => void;
 }
 
 export function SubmitButton({
   children,
-  loadingText = 'Loading...',
+  loadingText = "Cargando...",
   showSpinner = true,
   disabled = false,
-  variant = 'default',
-  size = 'default',
+  variant = "default",
+  size = "default",
   className,
   formAction,
 }: SubmitButtonProps) {
@@ -42,9 +42,7 @@ export function SubmitButton({
       type="submit"
       variant={variant}
     >
-      {pending && showSpinner && (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      )}
+      {pending && showSpinner && <Loader2 className="size-4 animate-spin" />}
       {pending ? loadingText : children}
     </Button>
   );

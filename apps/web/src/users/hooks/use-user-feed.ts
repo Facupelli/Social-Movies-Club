@@ -2,6 +2,7 @@
 
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import type { FeedItem } from "../user.types";
+import { QUERY_KEYS } from "@/lib/app.constants";
 
 async function getUserFeed({
   cursor,
@@ -21,7 +22,7 @@ async function getUserFeed({
 }
 
 const getUserFeedQueryOptions = infiniteQueryOptions({
-  queryKey: ["user-feed"],
+  queryKey: QUERY_KEYS.USER_FEED,
   queryFn: async ({ pageParam = null }) =>
     await getUserFeed({ cursor: pageParam }),
   initialPageParam: null as string | null,
