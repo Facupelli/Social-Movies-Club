@@ -16,7 +16,7 @@ import {
 import { addRatingToMovie } from "@/movies/actions/add-rating";
 import { SubmitButton } from "../submit-button";
 import { Button } from "../ui/button";
-import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
+import { getUserRatingsQueryOptions } from "@/users/hooks/use-user-ratings";
 
 export function RateDialog({
   movieTMDBId,
@@ -28,17 +28,17 @@ export function RateDialog({
   year: string;
 }) {
   const queryClient = useQueryClient();
-  const { data: userMovies } = useQuery(getUserMoviesQueryOptions);
+  const { data: userRatings } = useQuery(getUserRatingsQueryOptions);
 
   const [state, action] = useActionState(addRatingToMovie, {
     success: false,
     error: "",
   });
 
-  const userMovie = userMovies?.[movieTMDBId];
-  const isMovieRated = userMovie?.isRated;
+  const userRating = userRatings?.[movieTMDBId];
+  const isMovieRated = userRating?.isRated;
 
-  const [rating, setRating] = useState(userMovie?.score ?? 0);
+  const [rating, setRating] = useState(userRating?.score ?? 0);
   const [hoverRating, setHoverRating] = useState(0);
 
   return (

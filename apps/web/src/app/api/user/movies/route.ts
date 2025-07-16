@@ -1,14 +1,18 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { UserService } from "@/users/user.service";
-import type { UserRatings } from "@/users/user.types";
+import type {
+  GetUserRatingMovies,
+  UserMoviesSortBy,
+  UserMoviesSortOrder,
+} from "@/users/user.types";
 
 export type UseUserMoviesMap = Record<
   number,
   { isRated: boolean; score: number }
 >;
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -18,21 +22,24 @@ export async function GET() {
   }
 
   const userService = new UserService();
+  const url = new URL(request.url);
 
-  const res: UserRatings[] = await userService.getUserRatingMovies(
-    session.user.id
+  const page = parseInt(url.searchParams.get("page") || "0", 10);
+  const sortOrder = url.searchParams.get("sortOrder") || "desc";
+  const sortBy = url.searchParams.get("sortBy") || "createdAt";
+
+  const limit = 20;
+  const offset = page * limit;
+
+  const res: GetUserRatingMovies = await userService.getUserRatingMovies(
+    session.user.id,
+    {
+      limit,
+      offset,
+      dir: sortOrder as UserMoviesSortOrder,
+      field: sortBy as UserMoviesSortBy,
+    }
   );
 
-  const statusMap: UseUserMoviesMap = {};
-
-  res.forEach((result) => {
-    if (!statusMap[result.tmdbId]) {
-      statusMap[result.tmdbId] = {
-        isRated: true,
-        score: result.score,
-      };
-    }
-  });
-
-  return Response.json(statusMap);
+  return Response.json(res);
 }

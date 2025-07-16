@@ -54,12 +54,13 @@ Here are the next steps to improve and expand the app:
 - [x] **Make the app responsive**: Ensure the app works seamlessly on all devices, including mobile, tablet, and desktop.
 - [x] **Implement the feed feature**: Build the feed functionality to display the recent ratings of users you follow.
 - [x] **Add pagination**: Add pagination to Feed.
+- [x] **Add pagination to profile**: Add pagination to User Profile.
 - [x] **Add followers and following count**: Add count to user profile.
 - [x] **Check if movie is already scored**: Add rate check to MovieCard.
+- [x] **Show followers**: Show followers user profiles links.
 - [ ] **Handle repeated rated movies**: Add some way to handle repeated rated movies if they are close enough on the feed (maybe an aggregate table).
 - [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
 - [ ] **Add _seenAt_ feature to feed posts**.
-- [ ] **Show followers**: Show followers user profiles links.
 - [ ] **Add series**: Add the same features for series/TV shows.
 
 ---

@@ -1,11 +1,12 @@
 import { sql } from "drizzle-orm";
-import type { SortBy, SortOrder } from "@/app/profile/[id]/page";
 import { withDatabase } from "@/infra/postgres/db-utils";
 import { movies, ratings, type User, users } from "@/infra/postgres/schema";
 import type {
   FeedItem,
   FeedItemRaw,
   GetUserFeedParams,
+  GetUserRatingMovies,
+  GetUserRatingMoviesFilters,
   UserRatings,
 } from "./user.types";
 
@@ -95,18 +96,23 @@ export class UserPgRepository {
     {
       field = "createdAt",
       dir = "desc",
-    }: {
-      field?: SortBy;
-      dir?: SortOrder;
-    } = {}
-  ): Promise<UserRatings[]> {
+      limit,
+      offset,
+    }: GetUserRatingMoviesFilters = {}
+  ): Promise<GetUserRatingMovies> {
     return await withDatabase(async (db) => {
       const orderExpr =
         field === "score"
           ? sql`r.score ${sql.raw(dir)} , r.created_at DESC`
           : sql`r.created_at ${sql.raw(dir)}`;
 
-      const query = sql`
+      const countQuery = sql`
+        SELECT COUNT(*) as count
+        FROM ${ratings} r
+        WHERE r.user_id = ${id};
+      `;
+
+      let dataQuery = sql`
         SELECT
           r.movie_id     AS "movieId",
           r.score        AS "score",
@@ -119,11 +125,24 @@ export class UserPgRepository {
         FROM ${ratings} r
         JOIN ${movies}  m ON m.id = r.movie_id
         WHERE r.user_id = ${id}
-        ORDER BY ${orderExpr};
+        ORDER BY ${orderExpr}
       `;
 
-      const { rows } = await db.execute<UserRatings>(query);
-      return rows;
+      if (limit !== undefined && offset !== undefined) {
+        dataQuery = sql`${dataQuery} LIMIT ${limit} OFFSET ${offset}`;
+      }
+
+      const [_, dataResult] = await Promise.all([
+        db.execute<{ count: number }>(countQuery),
+        db.execute<UserRatings>(dataQuery),
+      ]);
+
+      const nextCursor =
+        limit !== undefined && offset !== undefined
+          ? Math.floor(offset / limit) + 1
+          : null;
+
+      return { data: dataResult.rows, nextCursor };
     });
   }
 

@@ -16,6 +16,11 @@ export type UserRatings = {
   tmdbId: number;
 };
 
+export interface GetUserRatingMovies {
+  data: UserRatings[];
+  nextCursor: number | null;
+}
+
 export type FeedItemRaw = {
   feed_item_id: string;
   actor_id: string;
@@ -49,3 +54,13 @@ export type FeedItem = {
   ratedAt: Date;
   seenAt: Date;
 };
+
+export type UserMoviesSortBy = "score" | "createdAt";
+export type UserMoviesSortOrder = "asc" | "desc";
+
+export interface GetUserRatingMoviesFilters {
+  field?: UserMoviesSortBy;
+  dir?: UserMoviesSortOrder;
+  limit?: number;
+  offset?: number;
+}
