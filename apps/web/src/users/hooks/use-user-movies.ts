@@ -1,15 +1,33 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
-import type { GetUserRatingMovies } from "../user.types";
+import type {
+  GetUserRatingMovies,
+  UserMoviesSortBy,
+  UserMoviesSortOrder,
+} from "../user.types";
 import { dbMovieToView } from "@/movies/movie.adapters";
 import type { MovieView } from "@/components/movies/movie-card";
 import { QUERY_KEYS } from "@/lib/app.constants";
 
 async function getUserMovies(
-  userId: string,
+  {
+    userId,
+    sortBy,
+    sortOrder,
+  }: {
+    userId: string;
+    sortBy: UserMoviesSortBy | null;
+    sortOrder: UserMoviesSortOrder | null;
+  },
   page: number
 ): Promise<{ nextCursor: number | null; data: MovieView[] }> {
   const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
   url.searchParams.set("page", page.toString());
+  if (sortBy !== null) {
+    url.searchParams.set("sortBy", sortBy);
+  }
+  if (sortOrder !== null) {
+    url.searchParams.set("sortOrder", sortOrder);
+  }
 
   const response = await fetch(url);
   if (!response.ok) {
@@ -24,11 +42,15 @@ async function getUserMovies(
   };
 }
 
-const getUserMoviesQueryOptions = (userId: string) =>
+const getUserMoviesQueryOptions = (
+  userId: string,
+  sortBy: UserMoviesSortBy | null,
+  sortOrder: UserMoviesSortOrder | null
+) =>
   infiniteQueryOptions({
-    queryKey: QUERY_KEYS.getUserMovies(userId),
+    queryKey: QUERY_KEYS.getUserMovies(userId, sortBy, sortOrder),
     queryFn: async ({ pageParam = 0 }) =>
-      await getUserMovies(userId, pageParam),
+      await getUserMovies({ userId, sortBy, sortOrder }, pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchOnWindowFocus: false,

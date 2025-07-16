@@ -8,7 +8,7 @@ import {
   Grid2X2,
   Star,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MovieCard } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { MovieList } from "@/components/movies/movie-list";
@@ -30,7 +30,6 @@ import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
 
 export default function ProfilePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{
@@ -40,10 +39,21 @@ export default function ProfilePage({
   }>;
 }) {
   const pageParams = use(params);
-  const pageSearchParams = use(searchParams);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const sortBy = searchParams.get("sortBy") ?? "createdAt";
+  const sortOrder = searchParams.get("sortOrder") ?? "desc";
 
   const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteQuery(getUserMoviesQueryOptions(pageParams.id));
+    useInfiniteQuery(
+      getUserMoviesQueryOptions(
+        pageParams.id,
+        sortBy as UserMoviesSortBy,
+        sortOrder as UserMoviesSortOrder
+      )
+    );
   const profileMovies = data?.pages.flatMap((page) => page.data);
 
   const [tab, setTab] = useState<string>("grid");
@@ -56,9 +66,6 @@ export default function ProfilePage({
     }
   }, []);
 
-  const router = useRouter();
-  const pathname = usePathname();
-
   const updateSearchParams = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
@@ -67,7 +74,7 @@ export default function ProfilePage({
   };
 
   const toggleSortOrder = () => {
-    const newOrder = pageSearchParams.sortOrder === "asc" ? "desc" : "asc";
+    const newOrder = sortOrder === "asc" ? "desc" : "asc";
     updateSearchParams("sortOrder", newOrder);
   };
 
@@ -76,7 +83,7 @@ export default function ProfilePage({
   };
 
   const getSortLabel = () => {
-    return pageSearchParams.sortBy === "score" ? "Puntaje" : "Fecha";
+    return sortBy === "score" ? "Puntaje" : "Fecha";
   };
 
   const onTabChange = (value: string) => {
@@ -103,7 +110,7 @@ export default function ProfilePage({
                 className="h-[calc(100%-1px)] gap-2 bg-transparent"
                 variant="outline"
               >
-                {pageSearchParams.sortBy === "score" ? (
+                {sortBy === "score" ? (
                   <Star className="size-4" />
                 ) : (
                   <Calendar className="size-4" />
@@ -117,7 +124,7 @@ export default function ProfilePage({
             <DropdownMenuContent align="end">
               <DropdownMenuRadioGroup
                 onValueChange={handleSortByChange}
-                value={pageSearchParams.sortBy}
+                value={sortBy}
               >
                 <DropdownMenuRadioItem className="gap-2" value="score">
                   <Star className="size-4" />
@@ -135,10 +142,10 @@ export default function ProfilePage({
             className="h-[calc(100%-1px)] gap-1 bg-transparent"
             onClick={toggleSortOrder}
             size="icon"
-            title={`Sort ${pageSearchParams.sortOrder === "asc" ? "ascending" : "descending"}`}
+            title={`Sort ${sortOrder === "asc" ? "ascending" : "descending"}`}
             variant="outline"
           >
-            {pageSearchParams.sortOrder === "asc" ? (
+            {sortOrder === "asc" ? (
               <ArrowUp className="size-4" />
             ) : (
               <ArrowDown className="size-4" />
