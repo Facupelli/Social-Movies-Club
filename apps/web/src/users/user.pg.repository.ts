@@ -18,7 +18,7 @@ export class UserPgRepository {
 			const usernameQuery = `%${query}%`;
 
 			const { rows } = await db.execute<User>(sql<User>`
-        SELECT * FROM users WHERE ${users.username} ILIKE ${usernameQuery}
+        SELECT id, name, image, username FROM users WHERE ${users.username} ILIKE ${usernameQuery}
       `);
 
 			return rows;

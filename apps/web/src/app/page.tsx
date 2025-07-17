@@ -73,7 +73,7 @@ function SearchInput({ onChange }: { onChange: (values: string) => void }) {
 			<Input
 				className="w-full bg-white px-10"
 				onChange={(e) => onChange(e.target.value)}
-				placeholder="Buscar película..."
+				placeholder="Buscar película, serie o @usuario"
 				type="search"
 			/>
 		</div>
@@ -218,8 +218,29 @@ function UsersList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 	return (
 		<div className="px-4 md:px-10">
 			{users?.map((user) => (
-				<Link key={user.id} prefetch={false} href={`/profile/${user.id}`}>
-					{user.username}
+				<Link
+					key={user.id}
+					prefetch={false}
+					href={`/profile/${user.id}`}
+					className="flex items-center gap-4 hover:bg-muted rounded-md p-2"
+				>
+					{user.image && (
+						<div className="shrink-0 rounded-full bg-secondary-foreground">
+							<Image
+								alt={user.name}
+								className="size-[30px] rounded-full object-cover"
+								height={30}
+								src={user.image}
+								unoptimized
+								width={30}
+							/>
+						</div>
+					)}
+
+					<div className="text-sm">
+						<span className="block">{user.name}</span>
+						<span className="block text-muted-foreground">{user.username}</span>
+					</div>
 				</Link>
 			))}
 		</div>
