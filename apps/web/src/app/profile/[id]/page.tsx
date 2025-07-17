@@ -191,8 +191,8 @@ function RatingFilters() {
 	};
 
 	return (
-		<div className="flex justify-between gap-4 py-4 md:justify-end">
-			<div className="flex h-9 items-center gap-2">
+		<div className="overflow-x-auto flex justify-between gap-4 py-4 md:justify-end">
+			<div className="flex h-9 items-center gap-4">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
@@ -220,51 +220,55 @@ function RatingFilters() {
 					</DropdownMenuContent>
 				</DropdownMenu>
 
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							className="h-[calc(100%-1px)] gap-2 bg-transparent"
-							variant="outline"
-						>
-							{sortBy === "score" ? (
-								<Star className="size-4" />
-							) : (
-								<Calendar className="size-4" />
-							)}
-							<span className="font-normal text-neutral-500">Ordenar por</span>{" "}
-							{getSortLabel()}
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuRadioGroup
-							onValueChange={handleSortByChange}
-							value={sortBy}
-						>
-							<DropdownMenuRadioItem className="gap-2" value="score">
-								<Star className="size-4" />
-								Puntaje
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem className="gap-2" value="createdAt">
-								<Calendar className="size-4" />
-								Fecha agregada
-							</DropdownMenuRadioItem>
-						</DropdownMenuRadioGroup>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<div className="flex items-center h-9 gap-1">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								className="h-[calc(100%-1px)] gap-2 bg-transparent"
+								variant="outline"
+							>
+								{sortBy === "score" ? (
+									<Star className="size-4" />
+								) : (
+									<Calendar className="size-4" />
+								)}
+								<span className="font-normal text-neutral-500">
+									Ordenar por
+								</span>{" "}
+								{getSortLabel()}
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuRadioGroup
+								onValueChange={handleSortByChange}
+								value={sortBy}
+							>
+								<DropdownMenuRadioItem className="gap-2" value="score">
+									<Star className="size-4" />
+									Puntaje
+								</DropdownMenuRadioItem>
+								<DropdownMenuRadioItem className="gap-2" value="createdAt">
+									<Calendar className="size-4" />
+									Fecha agregada
+								</DropdownMenuRadioItem>
+							</DropdownMenuRadioGroup>
+						</DropdownMenuContent>
+					</DropdownMenu>
 
-				<Button
-					className="h-[calc(100%-1px)] gap-1 bg-transparent"
-					onClick={toggleSortOrder}
-					size="icon"
-					title={`Sort ${sortOrder === "asc" ? "ascending" : "descending"}`}
-					variant="outline"
-				>
-					{sortOrder === "asc" ? (
-						<ArrowUp className="size-4" />
-					) : (
-						<ArrowDown className="size-4" />
-					)}
-				</Button>
+					<Button
+						className="h-[calc(100%-1px)] gap-1 bg-transparent"
+						onClick={toggleSortOrder}
+						size="icon"
+						title={`Sort ${sortOrder === "asc" ? "ascending" : "descending"}`}
+						variant="outline"
+					>
+						{sortOrder === "asc" ? (
+							<ArrowUp className="size-4" />
+						) : (
+							<ArrowDown className="size-4" />
+						)}
+					</Button>
+				</div>
 			</div>
 
 			<TabsList>

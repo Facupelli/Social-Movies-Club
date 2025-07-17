@@ -274,11 +274,21 @@ function WatchlistButton() {
 			<input name="type" type="hidden" value={movie.type} />
 
 			{isMovieInWatchlist ? (
-				<SubmitButton className="w-full" formAction={removeAction} size="sm">
+				<SubmitButton
+					hideLoadingText
+					className="w-full"
+					formAction={removeAction}
+					size="sm"
+				>
 					<EyeOff className="size-4 fill-secondary-foreground" />
 				</SubmitButton>
 			) : (
-				<SubmitButton className="w-full" formAction={addAction} size="sm">
+				<SubmitButton
+					hideLoadingText
+					className="w-full"
+					formAction={addAction}
+					size="sm"
+				>
 					<Eye className="size-4" />
 				</SubmitButton>
 			)}

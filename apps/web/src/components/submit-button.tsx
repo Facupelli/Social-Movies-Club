@@ -5,45 +5,47 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 
 interface SubmitButtonProps {
-  children: React.ReactNode;
-  loadingText?: string;
-  showSpinner?: boolean;
-  disabled?: boolean;
-  variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
-  size?: "default" | "sm" | "lg" | "icon";
-  className?: string;
-  formAction?: (formData: FormData) => void;
+	children: React.ReactNode;
+	loadingText?: string;
+	showSpinner?: boolean;
+	disabled?: boolean;
+	hideLoadingText?: boolean;
+	variant?:
+		| "default"
+		| "destructive"
+		| "outline"
+		| "secondary"
+		| "ghost"
+		| "link";
+	size?: "default" | "sm" | "lg" | "icon";
+	className?: string;
+	formAction?: (formData: FormData) => void;
 }
 
 export function SubmitButton({
-  children,
-  loadingText = "Cargando...",
-  showSpinner = true,
-  disabled = false,
-  variant = "default",
-  size = "default",
-  className,
-  formAction,
+	children,
+	loadingText = "Cargando...",
+	showSpinner = true,
+	disabled = false,
+	variant = "default",
+	size = "default",
+	hideLoadingText = false,
+	className,
+	formAction,
 }: SubmitButtonProps) {
-  const { pending } = useFormStatus();
+	const { pending } = useFormStatus();
 
-  return (
-    <Button
-      className={className}
-      disabled={disabled || pending}
-      formAction={formAction}
-      size={size}
-      type="submit"
-      variant={variant}
-    >
-      {pending && showSpinner && <Loader2 className="size-4 animate-spin" />}
-      {pending ? loadingText : children}
-    </Button>
-  );
+	return (
+		<Button
+			className={className}
+			disabled={disabled || pending}
+			formAction={formAction}
+			size={size}
+			type="submit"
+			variant={variant}
+		>
+			{pending && showSpinner && <Loader2 className="size-4 animate-spin" />}
+			{pending && !hideLoadingText ? loadingText : children}
+		</Button>
+	);
 }

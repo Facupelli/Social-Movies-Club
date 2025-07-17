@@ -256,18 +256,20 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 
 	if (isLoading) {
 		return (
-			<MovieGrid>
-				{[...Array(10)].map((_, i) => (
-					// biome-ignore lint: reason
-					<div key={i}>
-						<Skeleton className="h-[240px] w-[150px] rounded-xs md:h-[300px] md:w-[200px]" />
-						<div className="grid gap-1 pt-2">
-							<Skeleton className="h-5 w-[120px]" />
-							<Skeleton className="h-5 w-[70px]" />
+			<div className="px-2 md:px-10">
+				<MovieGrid>
+					{[...Array(10)].map((_, i) => (
+						// biome-ignore lint: reason
+						<div key={i}>
+							<Skeleton className="h-[240px] w-[150px] rounded-xs md:h-[300px] md:w-[200px]" />
+							<div className="grid gap-1 pt-2">
+								<Skeleton className="h-5 w-[120px]" />
+								<Skeleton className="h-5 w-[70px]" />
+							</div>
 						</div>
-					</div>
-				))}
-			</MovieGrid>
+					))}
+				</MovieGrid>
+			</div>
 		);
 	}
 
@@ -276,28 +278,30 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 	}
 
 	return (
-		<MovieGrid>
-			{movies?.map((movie) => (
-				<MovieCard key={movie.tmdbId} movie={movie}>
-					<MovieCard.Poster />
-					<CardContent className="flex flex-col gap-1 px-4 pt-2">
-						<MovieCard.Title />
-						<div className="flex items-center justify-between">
-							<MovieCard.ReleaseDate />
-							<MovieCard.MediaType />
-						</div>
-					</CardContent>
-					<CardFooter className="flex justify-end gap-2 px-4 pb-4">
-						<div className="flex-1 md:flex-initial">
-							<MovieCard.WatchlistButton />
-						</div>
-						<div className="flex-1 md:flex-initial">
-							<MovieCard.Rate />
-						</div>
-					</CardFooter>
-				</MovieCard>
-			))}
-		</MovieGrid>
+		<div className="px-2 md:px-10">
+			<MovieGrid>
+				{movies?.map((movie) => (
+					<MovieCard key={movie.tmdbId} movie={movie}>
+						<MovieCard.Poster />
+						<CardContent className="flex flex-col gap-1 px-4 pt-2">
+							<MovieCard.Title />
+							<div className="flex items-center justify-between">
+								<MovieCard.ReleaseDate />
+								<MovieCard.MediaType />
+							</div>
+						</CardContent>
+						<CardFooter className="flex justify-end gap-2 px-4 pb-4">
+							<div className="flex-1 md:flex-initial">
+								<MovieCard.WatchlistButton />
+							</div>
+							<div className="flex-1 md:flex-initial">
+								<MovieCard.Rate />
+							</div>
+						</CardFooter>
+					</MovieCard>
+				))}
+			</MovieGrid>
+		</div>
 	);
 }
 
