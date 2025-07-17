@@ -13,6 +13,7 @@ export function GridMovieCard({ movie }: { movie: MovieView }) {
           <MovieCard.ReleaseDate />
           <MovieCard.WatchlistButton />
         </div>
+        <MovieCard.WatchProviders />
       </CardContent>
     </MovieCard>
   );
