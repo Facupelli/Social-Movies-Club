@@ -3,6 +3,9 @@
   "ui": "tui",
   "globalDependencies": [".env*"],
   "tasks": {
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
@@ -31,7 +34,10 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^topo"]
+    },
+    "format": {
+      "dependsOn": ["^topo"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
