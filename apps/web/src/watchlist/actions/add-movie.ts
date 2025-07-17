@@ -3,6 +3,8 @@
 import { withAuth } from "@/lib/auth-server-action.middleware";
 import { UserMovieService } from "@/users/user-movie.service";
 import { validateAddMovieToWatchlist } from "../watchlist-validation.service";
+import { revalidateTag } from "next/cache";
+import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 
 export async function addMovieToWatchlist(formData: FormData) {
   return await withAuth(async (session) => {
@@ -17,6 +19,8 @@ export async function addMovieToWatchlist(formData: FormData) {
 
     const userMovieService = new UserMovieService();
     await userMovieService.addMovieToWatchlist(userId, movieTMDBId);
+
+    revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
 
     return { success: true, error: "" };
   });

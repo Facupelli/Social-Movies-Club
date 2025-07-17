@@ -1,5 +1,6 @@
 import type { MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
+import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 import { auth } from "@/lib/auth";
 import { GridMovieCard } from "@/watchlist/components/watchlist-movie-card";
 import { WatchlistService } from "@/watchlist/watchlist.service";
@@ -14,7 +15,7 @@ function getWatchlist(userId: string): Promise<MovieView[]> {
     () => watchlistService.getWatchlist(userId),
     ["user-watchlist", userId],
     {
-      tags: ["watchlist", `watchlist:${userId}`],
+      tags: ["watchlist", NEXT_CACHE_TAGS.getUserWatchlist(userId)],
     }
   )();
 }

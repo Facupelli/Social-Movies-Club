@@ -16,4 +16,8 @@ export const QUERY_KEYS = {
   ) => ["user-movies", { userId }, { sortBy }, { sortOrder }],
 } as const;
 
+export const NEXT_CACHE_TAGS = {
+  getUserWatchlist: (userId: String) => `watchlist:${userId}`,
+} as const;
+
 export const BASE_URL = process.env.VERCEL_SITE_URL || "http://localhost:3000";

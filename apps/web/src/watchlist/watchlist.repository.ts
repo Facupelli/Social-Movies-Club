@@ -1,6 +1,6 @@
-import { sql } from "drizzle-orm";
-import { withDatabase } from "@/infra/postgres/db-utils";
-import { movies, watchlist } from "@/infra/postgres/schema";
+import { sql } from 'drizzle-orm';
+import { withDatabase } from '@/infra/postgres/db-utils';
+import { movies, watchlist } from '@/infra/postgres/schema';
 
 export type UserWatchlist = {
   watchlistId: string;

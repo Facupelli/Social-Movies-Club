@@ -5,6 +5,7 @@ import { WatchlistService } from "../watchlist.service";
 import { validateRemoveMovieFromWatchlist } from "../watchlist-validation.service";
 import { MovieService } from "@/movies/movie.service";
 import { revalidateTag } from "next/cache";
+import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 
 export async function removeMovieFromWatchlist(
   _: { success: boolean; error?: string },
@@ -26,7 +27,7 @@ export async function removeMovieFromWatchlist(
     const movie = await movieService.getMovieByTMDBId(movieTMDBId);
     await watchlistService.removeMovie(userId, movie.id);
 
-    revalidateTag(`watchlist:${userId}`);
+    revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
 
     return { success: true, error: "" };
   });
