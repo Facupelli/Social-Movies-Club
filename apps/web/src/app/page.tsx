@@ -96,7 +96,7 @@ function Feed() {
 
   if (isPending && isEnabled) {
     return (
-      <div className="grid gap-4 px-2 md:px-10">
+      <div className="grid gap-4 px-2 pt-4 md:px-10">
         {[...Array(5)].map((_, idx) => (
           // biome-ignore lint:reason
           <Skeleton key={idx} className="w-full h-[200px] rounded-sm" />

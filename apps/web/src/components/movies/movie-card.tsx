@@ -198,7 +198,7 @@ function WatchProviders() {
 
       {/* JustWatch Attribution */}
       <div className="flex items-center gap-2 text-muted-foreground text-xs">
-        <span>Powered by</span>
+        <span>by</span>
         <a
           className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-80"
           href={"todo"}
@@ -263,7 +263,7 @@ function WatchlistButton() {
 
       {isMovieInWatchlist ? (
         <SubmitButton formAction={removeAction} size="sm" className="w-full">
-          <EyeOff className="size-4 fill-yellow-400" />
+          <EyeOff className="size-4 fill-secondary-foreground" />
         </SubmitButton>
       ) : (
         <SubmitButton formAction={addAction} size="sm" className="w-full">
