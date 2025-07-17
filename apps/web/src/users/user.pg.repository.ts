@@ -130,8 +130,6 @@ export class UserPgRepository {
         WHERE r.user_id = ${id};
       `;
 
-			console.log({ typeFilter });
-
 			let dataQuery = sql`
         SELECT
           r.media_id     AS "movieId",

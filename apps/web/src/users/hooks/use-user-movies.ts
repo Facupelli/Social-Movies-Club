@@ -33,8 +33,6 @@ async function getUserMovies(
 		url.searchParams.set("typeFilter", typeFilter);
 	}
 
-	console.log({ typeFilter });
-
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error("Network response was not ok");

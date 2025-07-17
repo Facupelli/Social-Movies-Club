@@ -30,4 +30,6 @@ export const QUERY_KEYS = {
 
 export const NEXT_CACHE_TAGS = {
 	getUserWatchlist: (userId: string) => `watchlist:${userId}`,
+	getIsFollowingUser: (userId: string) => `is-following-user:${userId}`,
+	getUserProfile: (userId: string) => `user-profile:${userId}`,
 } as const;

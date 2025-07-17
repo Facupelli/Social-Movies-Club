@@ -256,7 +256,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 
 	if (isLoading) {
 		return (
-			<div className="px-2 md:px-10">
+			<div className="px-2 pt-2 md:px-10">
 				<MovieGrid>
 					{[...Array(10)].map((_, i) => (
 						// biome-ignore lint: reason
@@ -278,7 +278,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 	}
 
 	return (
-		<div className="px-2 md:px-10">
+		<div className="px-2 pt-2 md:px-10">
 			<MovieGrid>
 				{movies?.map((movie) => (
 					<MovieCard key={movie.tmdbId} movie={movie}>
