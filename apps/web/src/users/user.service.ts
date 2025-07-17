@@ -14,6 +14,10 @@ export class UserService {
 		this.userPgRepository = new UserPgRepository();
 	}
 
+	async getUsers(query: string): Promise<User[]> {
+		return await this.userPgRepository.getUsers(query);
+	}
+
 	async getUser(userId: string): Promise<User | null> {
 		return await this.userPgRepository.getById(userId);
 	}

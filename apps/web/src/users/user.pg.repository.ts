@@ -13,6 +13,18 @@ import type {
 const MAX_FOLLOWERS_TO_FANOUT = 1000;
 
 export class UserPgRepository {
+	async getUsers(query: string): Promise<User[]> {
+		return await withDatabase(async (db) => {
+			const usernameQuery = `%${query}%`;
+
+			const { rows } = await db.execute<User>(sql<User>`
+        SELECT * FROM users WHERE ${users.username} ILIKE ${usernameQuery}
+      `);
+
+			return rows;
+		});
+	}
+
 	async getById(userId: string): Promise<User> {
 		return await withDatabase(async (db) => {
 			const query = sql<User>`

@@ -15,6 +15,7 @@ import { authClient } from "@/lib/auth-client";
 import dayjs from "@/lib/days";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
+import { useSearchUsers } from "@/media/hooks/use-serach-users";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
 import type { FeedItem } from "@/users/user.types";
 
@@ -30,25 +31,38 @@ export default function HomePage() {
 		});
 	};
 
-	const hasQuery = !!query;
-
 	return (
 		<div className="min-h-svh flex-1 py-6 md:min-h-auto">
 			<div className="px-2 pb-2 md:px-10 md:pb-6">
 				<SearchInput onChange={handleSearch} />
 			</div>
 
-			{hasQuery ? (
-				<div className="px-4 py-2 md:px-10">
-					<MoviesList debouncedSearchTerm={debouncedSearchTerm} />
-				</div>
-			) : (
-				<>
-					<SessionMessage />
-					<Feed />
-				</>
-			)}
+			<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
 		</div>
+	);
+}
+
+function RenderProperSection({
+	debouncedSearchTerm,
+}: {
+	debouncedSearchTerm: string;
+}) {
+	const hasQuery = !!debouncedSearchTerm;
+	const isUserQuery = debouncedSearchTerm.startsWith("@");
+
+	if (isUserQuery) {
+		return <UsersList debouncedSearchTerm={debouncedSearchTerm} />;
+	}
+
+	if (hasQuery) {
+		return <MoviesList debouncedSearchTerm={debouncedSearchTerm} />;
+	}
+
+	return (
+		<>
+			<SessionMessage />
+			<Feed />
+		</>
 	);
 }
 
@@ -195,6 +209,20 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 				</MovieCard>
 			</div>
 		</article>
+	);
+}
+
+function UsersList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
+	const { data: users } = useSearchUsers(debouncedSearchTerm);
+
+	return (
+		<div className="px-4 md:px-10">
+			{users?.map((user) => (
+				<Link key={user.id} prefetch={false} href={`/profile/${user.id}`}>
+					{user.username}
+				</Link>
+			))}
+		</div>
 	);
 }
 

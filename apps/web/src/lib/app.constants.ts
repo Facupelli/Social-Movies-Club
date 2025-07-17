@@ -13,6 +13,7 @@ export const QUERY_KEYS = {
 	USER_FEED: ["user-feed"],
 	USER_RATINGS: ["user-ratings"],
 	USER_WATCHLIST: ["user-watchlist"],
+	getSearchUsers: (query: string) => ["search-users", { query }],
 	getSearchMedia: (query: string) => ["search-media", { query }],
 	getWatchProviders: (mediaId: number, type: string) => [
 		"watch-providers",

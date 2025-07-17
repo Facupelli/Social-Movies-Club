@@ -1,16 +1,16 @@
 import { sql } from "drizzle-orm";
 import {
-  boolean,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  smallint,
-  text,
-  timestamp,
-  pgEnum,
-  unique,
-  uuid,
+	boolean,
+	index,
+	integer,
+	pgEnum,
+	pgTable,
+	primaryKey,
+	smallint,
+	text,
+	timestamp,
+	unique,
+	uuid,
 } from "drizzle-orm/pg-core";
 
 /* ------------------------------------------------------------------ *
@@ -18,68 +18,68 @@ import {
  * ------------------------------------------------------------------ */
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified")
-    .$defaultFn(() => false)
-    .notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	email: text("email").notNull().unique(),
+	emailVerified: boolean("email_verified")
+		.$defaultFn(() => false)
+		.notNull(),
+	image: text("image"),
+	createdAt: timestamp("created_at")
+		.$defaultFn(() => /* @__PURE__ */ new Date())
+		.notNull(),
+	updatedAt: timestamp("updated_at")
+		.$defaultFn(() => /* @__PURE__ */ new Date())
+		.notNull(),
 
-  /* Your domain-specific columns */
-  username: text("username").unique(),
+	/* Your domain-specific columns */
+	username: text("username").unique(),
 });
 
 export type User = typeof users.$inferSelect;
 
 export const sessions = pgTable("sessions", {
-  id: text("id").primaryKey(),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+	id: text("id").primaryKey(),
+	expiresAt: timestamp("expires_at").notNull(),
+	token: text("token").notNull().unique(),
+	createdAt: timestamp("created_at").notNull(),
+	updatedAt: timestamp("updated_at").notNull(),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
+	userId: text("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
 });
 
 export const accounts = pgTable("accounts", {
-  id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+	id: text("id").primaryKey(),
+	accountId: text("account_id").notNull(),
+	providerId: text("provider_id").notNull(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	accessToken: text("access_token"),
+	refreshToken: text("refresh_token"),
+	idToken: text("id_token"),
+	accessTokenExpiresAt: timestamp("access_token_expires_at"),
+	refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+	scope: text("scope"),
+	password: text("password"),
+	createdAt: timestamp("created_at").notNull(),
+	updatedAt: timestamp("updated_at").notNull(),
 });
 
 export const verifications = pgTable("verifications", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
-  updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
+	id: text("id").primaryKey(),
+	identifier: text("identifier").notNull(),
+	value: text("value").notNull(),
+	expiresAt: timestamp("expires_at").notNull(),
+	createdAt: timestamp("created_at").$defaultFn(
+		() => /* @__PURE__ */ new Date(),
+	),
+	updatedAt: timestamp("updated_at").$defaultFn(
+		() => /* @__PURE__ */ new Date(),
+	),
 });
 
 /* ------------------------------------------------------------------ *
@@ -89,19 +89,17 @@ export const verifications = pgTable("verifications", {
 export const mediaTypeEnum = pgEnum("media_type", ["movie", "tv"]);
 
 export const media = pgTable(
-  "media",
-  {
-    id: uuid()
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
-    tmdbId: integer("tmdb_id").unique().notNull(),
-    type: mediaTypeEnum("type").notNull(),
-    title: text("title").notNull(),
-    year: text("year").notNull(),
-    posterPath: text("poster_path").notNull(),
-    overview: text("overview").default("Defecto para no borrar datos"),
-  },
-  (table) => [unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type)]
+	"media",
+	{
+		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+		tmdbId: integer("tmdb_id").unique().notNull(),
+		type: mediaTypeEnum("type").notNull(),
+		title: text("title").notNull(),
+		year: text("year").notNull(),
+		posterPath: text("poster_path").notNull(),
+		overview: text("overview").default("Defecto para no borrar datos"),
+	},
+	(table) => [unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type)],
 );
 
 export type Media = typeof media.$inferSelect;
@@ -112,26 +110,24 @@ export type Media = typeof media.$inferSelect;
  * ------------------------------------------------------------------ */
 
 export const ratings = pgTable(
-  "ratings",
-  {
-    id: uuid()
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    mediaId: uuid("media_id")
-      .notNull()
-      .references(() => media.id, { onDelete: "cascade" }),
-    score: smallint("score").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    unique("ratings_user_media_unique").on(table.userId, table.mediaId),
-    index("ratings_profile_idx").on(table.userId, table.createdAt),
-  ]
+	"ratings",
+	{
+		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		mediaId: uuid("media_id")
+			.notNull()
+			.references(() => media.id, { onDelete: "cascade" }),
+		score: smallint("score").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		unique("ratings_user_media_unique").on(table.userId, table.mediaId),
+		index("ratings_profile_idx").on(table.userId, table.createdAt),
+	],
 );
 
 export type Rating = typeof ratings.$inferSelect;
@@ -141,19 +137,19 @@ export type Rating = typeof ratings.$inferSelect;
  * ------------------------------------------------------------------ */
 
 export const follows = pgTable(
-  "follows",
-  {
-    followerId: text("follower_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    followeeId: text("followee_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-  },
-  (table) => [
-    primaryKey({ columns: [table.followerId, table.followeeId] }),
-    index("follows_reverse_idx").on(table.followeeId),
-  ]
+	"follows",
+	{
+		followerId: text("follower_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		followeeId: text("followee_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+	},
+	(table) => [
+		primaryKey({ columns: [table.followerId, table.followeeId] }),
+		index("follows_reverse_idx").on(table.followeeId),
+	],
 );
 
 export type Follow = typeof follows.$inferSelect;
@@ -165,29 +161,27 @@ export type Follow = typeof follows.$inferSelect;
  * ------------------------------------------------------------------ */
 
 export const feedItems = pgTable(
-  "feed_items",
-  {
-    id: uuid()
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
-    userId: text("user_id") // owner of the feed
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    actorId: text("actor_id") // who performed the action
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    ratingId: uuid("rating_id")
-      .notNull()
-      .references(() => ratings.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    seenAt: timestamp("seen_at", { withTimezone: true }), // null = unseen
-  },
-  (table) => [
-    index("feed_items_user_time_idx").on(table.userId, table.createdAt),
-    index("feed_items_unseen_idx").on(table.userId, table.seenAt),
-  ]
+	"feed_items",
+	{
+		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+		userId: text("user_id") // owner of the feed
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		actorId: text("actor_id") // who performed the action
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		ratingId: uuid("rating_id")
+			.notNull()
+			.references(() => ratings.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+		seenAt: timestamp("seen_at", { withTimezone: true }), // null = unseen
+	},
+	(table) => [
+		index("feed_items_user_time_idx").on(table.userId, table.createdAt),
+		index("feed_items_unseen_idx").on(table.userId, table.seenAt),
+	],
 );
 
 /* ------------------------------------------------------------------ *
@@ -196,20 +190,20 @@ export const feedItems = pgTable(
  * ------------------------------------------------------------------ */
 
 export const watchlist = pgTable(
-  "watchlist",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    mediaId: uuid("media_id")
-      .notNull()
-      .references(() => media.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    unique("watchlist_user_media_unique").on(table.userId, table.mediaId),
-    index("watchlist_profile_idx").on(table.userId, table.createdAt),
-  ]
+	"watchlist",
+	{
+		userId: text("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		mediaId: uuid("media_id")
+			.notNull()
+			.references(() => media.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		unique("watchlist_user_media_unique").on(table.userId, table.mediaId),
+		index("watchlist_profile_idx").on(table.userId, table.createdAt),
+	],
 );
