@@ -110,9 +110,7 @@ async function UserInfo({
 						<FollowUserButton
 							followedUserId={profileUser.id}
 							isFollowing={isFollowing}
-						>
-							{isFollowing ? "Siguiendo" : "Seguir"}
-						</FollowUserButton>
+						/>
 					</div>
 				)}
 			</div>

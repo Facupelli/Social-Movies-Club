@@ -2,35 +2,51 @@
 
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/submit-button";
-import { followUser } from "../actions/follow-user";
+import { followUser, unfollowUser } from "../actions/follow-user";
 
 export function FollowUserButton({
-  children,
-  followedUserId,
-  isFollowing,
+	followedUserId,
+	isFollowing,
 }: {
-  isFollowing: boolean;
-  children: React.ReactNode;
-  followedUserId: string;
+	isFollowing: boolean;
+	followedUserId: string;
 }) {
-  const [_, action, isPending] = useActionState(followUser, {
-    success: false,
-    error: "",
-  });
+	const [_, followAction, followIsPending] = useActionState(followUser, {
+		success: false,
+		error: "",
+	});
 
-  return (
-    <form>
-      <input type="hidden" name="followedUserId" value={followedUserId} />
+	const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUser, {
+		success: false,
+		error: "",
+	});
 
-      <SubmitButton
-        disabled={isFollowing || isPending}
-        formAction={(formData) => {
-          action(formData);
-        }}
-        loadingText="Siguiendo"
-      >
-        {children}
-      </SubmitButton>
-    </form>
-  );
+	return (
+		<form>
+			<input type="hidden" name="followedUserId" value={followedUserId} />
+
+			{isFollowing ? (
+				<SubmitButton
+					disabled={unfollowIsPending}
+					formAction={(formData) => {
+						unfollowAction(formData);
+					}}
+					loadingText="Cargando"
+					variant="secondary"
+				>
+					Dejar de seguir
+				</SubmitButton>
+			) : (
+				<SubmitButton
+					disabled={followIsPending}
+					formAction={(formData) => {
+						followAction(formData);
+					}}
+					loadingText="Siguiendo"
+				>
+					Seguir
+				</SubmitButton>
+			)}
+		</form>
+	);
 }
