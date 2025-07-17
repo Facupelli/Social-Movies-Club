@@ -1,6 +1,6 @@
-import { sql } from "drizzle-orm";
-import { withDatabase } from "@/infra/postgres/db-utils";
-import { movies, ratings, type User, users } from "@/infra/postgres/schema";
+import { sql } from 'drizzle-orm';
+import { withDatabase } from '@/infra/postgres/db-utils';
+import { media, ratings, type User, users } from '@/infra/postgres/schema';
 import type {
   FeedItem,
   FeedItemRaw,
@@ -8,12 +8,12 @@ import type {
   GetUserRatingMovies,
   GetUserRatingMoviesFilters,
   UserRatings,
-} from "./user.types";
+} from './user.types';
 
 const MAX_FOLLOWERS_TO_FANOUT = 1000;
 
 export class UserPgRepository {
-  async getUserById(userId: string): Promise<User> {
+  async getById(userId: string): Promise<User> {
     return await withDatabase(async (db) => {
       const query = sql<User>`
         SELECT * FROM users WHERE ${users.id} = ${userId}
@@ -24,7 +24,7 @@ export class UserPgRepository {
     });
   }
 
-  async getUserFeed({
+  async getFeed({
     userId,
     limit = 20,
     cursor = null,
@@ -42,18 +42,19 @@ export class UserPgRepository {
           actor.name as actor_name,
           actor.username as actor_username,
           actor.image as actor_image,
-          m.id as movie_id,
+          m.id as media_id,
           m.tmdb_id as movie_tmdb_id,
           m.title as movie_title,
           m.year as movie_year,
           m.poster_path as movie_poster,
+          m.type as movie_type,
           m.overview as movie_overview,
           r.score,
           r.created_at as rated_at
         FROM feed_items as fi
         INNER JOIN users actor ON fi.actor_id = actor.id
         INNER JOIN ratings r ON fi.rating_id = r.id
-        INNER JOIN movies m ON r.movie_id = m.id
+        INNER JOIN media m ON r.media_id = m.id
         WHERE fi.user_id = ${userId}
         ${cursor ? sql`AND fi.created_at < ${cursor}` : sql``}
         ORDER BY fi.created_at DESC
@@ -66,22 +67,23 @@ export class UserPgRepository {
         actorName: row.actor_name,
         actorImage: row.actor_image,
         actorUsername: row.actor_username,
-        movieId: row.movie_id,
+        movieId: row.media_id,
         movieOverview: row.movie_overview,
         movieTmdbId: row.movie_tmdb_id,
         movieTitle: row.movie_title,
         movieYear: row.movie_year,
         moviePoster: row.movie_poster,
+        movieType: row.movie_type,
         score: row.score,
         ratedAt: row.rated_at,
         seenAt: row.seen_at,
       }));
 
+      const lastElement = newFeedItems.at(-1);
+
       const nextCursor =
-        newFeedItems.length === limit
-          ? new Date(
-              newFeedItems[newFeedItems.length - 1].ratedAt
-            ).toISOString()
+        lastElement && newFeedItems.length === limit
+          ? new Date(lastElement.ratedAt).toISOString()
           : null;
 
       return {
@@ -91,18 +93,18 @@ export class UserPgRepository {
     });
   }
 
-  async getUserRatingMovies(
+  async getRatingMovies(
     id: string,
     {
-      field = "createdAt",
-      dir = "desc",
+      field = 'createdAt',
+      dir = 'desc',
       limit,
       offset,
     }: GetUserRatingMoviesFilters = {}
   ): Promise<GetUserRatingMovies> {
     return await withDatabase(async (db) => {
       const orderExpr =
-        field === "score"
+        field === 'score'
           ? sql`r.score ${sql.raw(dir)} , r.created_at DESC`
           : sql`r.created_at ${sql.raw(dir)}`;
 
@@ -114,16 +116,17 @@ export class UserPgRepository {
 
       let dataQuery = sql`
         SELECT
-          r.movie_id     AS "movieId",
+          r.media_id     AS "movieId",
           r.score        AS "score",
           r.created_at   AS "createdAt",
           m.title        AS "title",
           m.year         AS "year",
           m.poster_path  AS "posterPath",
           m.overview     AS "overview",
-          m.tmdb_id      AS "tmdbId"
+          m.tmdb_id      AS "tmdbId",
+          m.type         AS "type"
         FROM ${ratings} r
-        JOIN ${movies}  m ON m.id = r.movie_id
+        JOIN ${media}  m ON m.id = r.media_id
         WHERE r.user_id = ${id}
         ORDER BY ${orderExpr}
       `;
@@ -160,20 +163,20 @@ export class UserPgRepository {
     return await withDatabase(async (db) => {
       const createRatingQuery = sql`
           INSERT INTO ${ratings}
-            (user_id, movie_id, score, created_at)
+            (user_id, media_id, score, created_at)
           VALUES
             (${userId}, ${movieId}, ${score}, now())
-          ON CONFLICT (user_id, movie_id)
+          ON CONFLICT (user_id, media_id)
           DO UPDATE SET
             score = EXCLUDED.score,
             created_at = now()
-          RETURNING id, user_id, movie_id, score, created_at
+          RETURNING id, user_id, media_id, score, created_at
         `;
 
       const ratingResult = await db.execute<{
         id: string;
         user_id: string;
-        movie_id: string;
+        media_id: string;
         score: number;
         created_at: Date;
       }>(createRatingQuery);
@@ -185,9 +188,9 @@ export class UserPgRepository {
       const queueServiceUrl = process.env.QUEUE_SERVICE_URL;
       const response = await fetch(`${queueServiceUrl}/feed-item/process`, {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           userId,
           ratingId: rating.id,
@@ -208,20 +211,20 @@ export class UserPgRepository {
     return await withDatabase(async (db) => {
       const createRatingQuery = sql`
           INSERT INTO ${ratings}
-            (user_id, movie_id, score, created_at)
+            (user_id, media_id, score, created_at)
           VALUES
             (${userId}, ${movieId}, ${score}, now())
-          ON CONFLICT (user_id, movie_id)
+          ON CONFLICT (user_id, media_id)
           DO UPDATE SET
             score = EXCLUDED.score,
             created_at = now()
-          RETURNING id, user_id, movie_id, score, created_at
+          RETURNING id, user_id, media_id, score, created_at
         `;
 
       const ratingResult = await db.execute<{
         id: string;
         user_id: string;
-        movie_id: string;
+        media_id: string;
         score: number;
         created_at: Date;
       }>(createRatingQuery);

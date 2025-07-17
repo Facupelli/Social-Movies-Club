@@ -1,21 +1,21 @@
-import { sql } from "drizzle-orm";
-import { withDatabase } from "@/infra/postgres/db-utils";
-import { type Movie, movies } from "@/infra/postgres/schema";
+import { sql } from 'drizzle-orm';
+import { withDatabase } from '@/infra/postgres/db-utils';
+import { type Media, media } from '@/infra/postgres/schema';
 
-export class MoviePgRepository {
-  async upsertMovie(movie: Omit<Movie, "id">): Promise<{ id: bigint }> {
+export class MediaPgRepository {
+  async upsertMedia(movie: Omit<Media, 'id'>): Promise<{ id: bigint }> {
     return await withDatabase(async (db) => {
       const query = sql`
       WITH ins AS (
-        INSERT INTO ${movies} (title, year, overview, poster_path, tmdb_id)
-        VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.tmdbId})
+        INSERT INTO ${media} (title, year, overview, poster_path, tmdb_id, type)
+        VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.tmdbId}, ${movie.type})
         ON CONFLICT (tmdb_id) DO NOTHING
         RETURNING id
       )
       SELECT id FROM ins
       UNION
       SELECT id
-      FROM ${movies}
+      FROM ${media}
       WHERE tmdb_id = ${movie.tmdbId}
       `;
 
@@ -24,23 +24,23 @@ export class MoviePgRepository {
     });
   }
 
-  async getMovieByTMDBId(tmdbId: number): Promise<{ id: string }> {
+  async getMediaByTMDBId(tmdbId: number): Promise<{ id: string }> {
     return await withDatabase(async (db) => {
       const { rows } = await db.execute<{ id: string }>(sql`
-        SELECT id FROM ${movies} WHERE tmdb_id = ${tmdbId};
+        SELECT id FROM ${media} WHERE tmdb_id = ${tmdbId};
       `);
 
       return rows[0];
     });
   }
 
-  async getMovieById(movieId: bigint): Promise<Movie[]> {
+  async getMediaById(movieId: bigint): Promise<Media[]> {
     return await withDatabase(async (db) => {
       const query = sql`
-        SELECT * FROM ${movies} WHERE ${movies.id} = ${movieId};
+        SELECT * FROM ${media} WHERE ${media.id} = ${movieId};
       `;
 
-      const { rows } = await db.execute<Movie>(query);
+      const { rows } = await db.execute<Media>(query);
       return rows;
     });
   }

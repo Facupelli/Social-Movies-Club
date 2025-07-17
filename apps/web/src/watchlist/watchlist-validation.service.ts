@@ -1,11 +1,12 @@
-import z from "zod";
+import z from 'zod';
 
 const addMovieToWatchlistSchema = z.object({
   movieTMDBId: z
     .string()
-    .regex(/^\d+$/, "Movie ID must be a valid number")
+    .regex(/^\d+$/, 'Movie ID must be a valid number')
     .transform(Number),
   userId: z.string().nonempty(),
+  type: z.enum(['movie', 'tv']),
 });
 
 export type AddMovieToWatchlistInput = z.infer<
@@ -22,7 +23,7 @@ export function validateAddMovieToWatchlist(
 const removeMovieToWatchlistSchema = z.object({
   movieTMDBId: z
     .string()
-    .regex(/^\d+$/, "Movie ID must be a valid number")
+    .regex(/^\d+$/, 'Movie ID must be a valid number')
     .transform(Number),
   userId: z.string().nonempty(),
 });

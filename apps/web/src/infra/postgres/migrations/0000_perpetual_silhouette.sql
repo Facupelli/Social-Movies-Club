@@ -1,3 +1,4 @@
+CREATE TYPE "public"."media_type" AS ENUM('movie', 'tv');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -29,23 +30,25 @@ CREATE TABLE "follows" (
 	CONSTRAINT "follows_follower_id_followee_id_pk" PRIMARY KEY("follower_id","followee_id")
 );
 --> statement-breakpoint
-CREATE TABLE "movies" (
+CREATE TABLE "media" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tmdb_id" integer NOT NULL,
+	"type" "media_type" NOT NULL,
 	"title" text NOT NULL,
 	"year" text NOT NULL,
 	"poster_path" text NOT NULL,
 	"overview" text DEFAULT 'Defecto para no borrar datos',
-	CONSTRAINT "movies_tmdb_id_unique" UNIQUE("tmdb_id")
+	CONSTRAINT "media_tmdb_id_unique" UNIQUE("tmdb_id"),
+	CONSTRAINT "media_tmdb_id_type_unique" UNIQUE("tmdb_id","type")
 );
 --> statement-breakpoint
 CREATE TABLE "ratings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
-	"movie_id" uuid NOT NULL,
+	"media_id" uuid NOT NULL,
 	"score" smallint NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "ratings_user_movie_unique" UNIQUE("user_id","movie_id")
+	CONSTRAINT "ratings_user_media_unique" UNIQUE("user_id","media_id")
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
@@ -82,6 +85,13 @@ CREATE TABLE "verifications" (
 	"updated_at" timestamp
 );
 --> statement-breakpoint
+CREATE TABLE "watchlist" (
+	"user_id" text NOT NULL,
+	"media_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "watchlist_user_media_unique" UNIQUE("user_id","media_id")
+);
+--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feed_items" ADD CONSTRAINT "feed_items_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feed_items" ADD CONSTRAINT "feed_items_actor_id_users_id_fk" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -89,9 +99,12 @@ ALTER TABLE "feed_items" ADD CONSTRAINT "feed_items_rating_id_ratings_id_fk" FOR
 ALTER TABLE "follows" ADD CONSTRAINT "follows_follower_id_users_id_fk" FOREIGN KEY ("follower_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "follows" ADD CONSTRAINT "follows_followee_id_users_id_fk" FOREIGN KEY ("followee_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ratings" ADD CONSTRAINT "ratings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "ratings" ADD CONSTRAINT "ratings_movie_id_movies_id_fk" FOREIGN KEY ("movie_id") REFERENCES "public"."movies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "ratings" ADD CONSTRAINT "ratings_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "watchlist" ADD CONSTRAINT "watchlist_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "watchlist" ADD CONSTRAINT "watchlist_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "feed_items_user_time_idx" ON "feed_items" USING btree ("user_id","created_at");--> statement-breakpoint
 CREATE INDEX "feed_items_unseen_idx" ON "feed_items" USING btree ("user_id","seen_at");--> statement-breakpoint
 CREATE INDEX "follows_reverse_idx" ON "follows" USING btree ("followee_id");--> statement-breakpoint
-CREATE INDEX "ratings_profile_idx" ON "ratings" USING btree ("user_id","created_at");
+CREATE INDEX "ratings_profile_idx" ON "ratings" USING btree ("user_id","created_at");--> statement-breakpoint
+CREATE INDEX "watchlist_profile_idx" ON "watchlist" USING btree ("user_id","created_at");

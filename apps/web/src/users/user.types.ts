@@ -1,3 +1,5 @@
+import type { MediaType } from '@/movies/movie.type';
+
 export interface GetUserFeedParams {
   userId: string;
   limit?: number;
@@ -14,6 +16,7 @@ export type UserRatings = {
   posterPath: string;
   overview: string;
   tmdbId: number;
+  type: MediaType;
 };
 
 export interface GetUserRatingMovies {
@@ -27,11 +30,12 @@ export type FeedItemRaw = {
   actor_name: string;
   actor_image: string;
   actor_username?: string;
-  movie_id: number;
+  media_id: number;
   movie_title: string;
   movie_year: string;
   movie_poster: string;
   movie_overview: string;
+  movie_type: MediaType;
   movie_tmdb_id: number;
   score: number;
   rated_at: Date;
@@ -50,13 +54,14 @@ export type FeedItem = {
   moviePoster: string;
   movieTmdbId: number;
   movieOverview: string;
+  movieType: MediaType;
   score: number;
   ratedAt: Date;
   seenAt: Date;
 };
 
-export type UserMoviesSortBy = "score" | "createdAt";
-export type UserMoviesSortOrder = "asc" | "desc";
+export type UserMoviesSortBy = 'score' | 'createdAt';
+export type UserMoviesSortOrder = 'asc' | 'desc';
 
 export interface GetUserRatingMoviesFilters {
   field?: UserMoviesSortBy;

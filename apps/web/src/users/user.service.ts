@@ -1,14 +1,11 @@
-import type { User } from "@/infra/postgres/schema";
-import { UserPgRepository } from "./user.pg.repository";
+import type { User } from '@/infra/postgres/schema';
+import { UserPgRepository } from './user.pg.repository';
 import type {
   FeedItem,
   GetUserFeedParams,
   GetUserRatingMovies,
   GetUserRatingMoviesFilters,
-  UserMoviesSortBy,
-  UserMoviesSortOrder,
-  UserRatings,
-} from "./user.types";
+} from './user.types';
 
 export class UserService {
   private userPgRepository: UserPgRepository;
@@ -18,14 +15,14 @@ export class UserService {
   }
 
   async getUser(userId: string): Promise<User | null> {
-    return await this.userPgRepository.getUserById(userId);
+    return await this.userPgRepository.getById(userId);
   }
 
   async getFeed(params: GetUserFeedParams): Promise<{
     items: FeedItem[];
     nextCursor: string | null;
   }> {
-    return await this.userPgRepository.getUserFeed(params);
+    return await this.userPgRepository.getFeed(params);
   }
 
   // async searchUsers(
@@ -40,6 +37,10 @@ export class UserService {
     userId: string,
     filters?: GetUserRatingMoviesFilters
   ): Promise<GetUserRatingMovies> {
-    return await this.userPgRepository.getUserRatingMovies(userId, filters);
+    return await this.userPgRepository.getRatingMovies(userId, filters);
+  }
+
+  async rateMovie(userId: string, movieId: bigint, score: number) {
+    return await this.userPgRepository.rateMovie(userId, movieId, score);
   }
 }

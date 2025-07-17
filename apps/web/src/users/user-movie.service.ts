@@ -1,52 +1,78 @@
-import type { Movie } from "@/infra/postgres/schema";
-import { WatchlistPgRepository } from "@/watchlist/watchlist.repository";
-import { TmdbRepository } from "@/infra/TMDB/tmdb.repository";
-import { MoviePgRepository } from "@/movies/movie.pg.repository";
-import { UserPgRepository } from "./user.pg.repository";
+import type { Media } from '@/infra/postgres/schema';
+import { TmdbService } from '@/infra/TMDB/tmdb.service';
+import { MediaService } from '@/movies/movie.service';
+import type { MediaType, TMDbMediaMultiSearch } from '@/movies/movie.type';
+import { WatchlistService } from '@/watchlist/watchlist.service';
+import { UserService } from './user.service';
 
-export class UserMovieService {
+export class UserMediaService {
   constructor(
-    private readonly watchlistRepository = new WatchlistPgRepository(),
-    private readonly movies = new MoviePgRepository(),
-    private readonly users = new UserPgRepository(),
-    private readonly tmdb = new TmdbRepository(
-      process.env.TMDB_ACCESS_TOKEN as string
-    )
+    private readonly watchlistService = new WatchlistService(),
+    private readonly mediaService = new MediaService(),
+    private readonly userService = new UserService(),
+    private readonly tmdbService = new TmdbService()
   ) {}
 
-  async rateMovie(
-    userId: string,
-    tmdbId: number,
-    rating: number
-  ): Promise<void> {
-    const { data: movie } = await this.tmdb.getDetail(tmdbId);
+  async rateMovie({
+    userId,
+    tmdbId,
+    rating,
+    type,
+  }: {
+    userId: string;
+    tmdbId: number;
+    rating: number;
+    type: MediaType;
+  }): Promise<void> {
+    const media = await this.getMediaDetail(tmdbId, type);
 
-    const movieData: Omit<Movie, "id"> = {
-      posterPath: movie.posterPath,
-      title: movie.title,
-      year: movie.year,
-      tmdbId: movie.id,
-      overview: movie.overview,
+    const movieData: Omit<Media, 'id'> = {
+      posterPath: media.posterPath,
+      title: media.title,
+      year: media.year,
+      tmdbId: media.id,
+      overview: media.overview,
+      type,
     };
 
-    const { id: movieId } = await this.movies.upsertMovie(movieData);
+    const { id: movieId } = await this.mediaService.upsertMedia(movieData);
 
-    await this.users.rateMovie(userId, movieId, rating);
+    await this.userService.rateMovie(userId, movieId, rating);
   }
 
-  async addMovieToWatchlist(userId: string, tmdbId: number) {
-    const { data: movie } = await this.tmdb.getDetail(tmdbId);
+  async addMediaToWatchlist(userId: string, tmdbId: number, type: MediaType) {
+    const media = await this.getMediaDetail(tmdbId, type);
 
-    const movieData: Omit<Movie, "id"> = {
-      posterPath: movie.posterPath,
-      title: movie.title,
-      year: movie.year,
-      tmdbId: movie.id,
-      overview: movie.overview,
+    const movieData: Omit<Media, 'id'> = {
+      posterPath: media.posterPath,
+      title: media.title,
+      year: media.year,
+      tmdbId: media.id,
+      overview: media.overview,
+      type,
     };
 
-    const { id: movieId } = await this.movies.upsertMovie(movieData);
+    const { id: movieId } = await this.mediaService.upsertMedia(movieData);
 
-    return this.watchlistRepository.addMovie(userId, movieId);
+    return this.watchlistService.addMedia(userId, movieId);
+  }
+
+  private async getMediaDetail(
+    tmdbId: number,
+    type: MediaType
+  ): Promise<TMDbMediaMultiSearch> {
+    let data: { data: TMDbMediaMultiSearch } | undefined;
+
+    if (type === 'movie') {
+      data = await this.tmdbService.getMovieDetail(tmdbId);
+    } else if (type === 'tv') {
+      data = await this.tmdbService.getTvDetail(tmdbId);
+    }
+
+    if (!data?.data) {
+      throw new Error('Invalid media type');
+    }
+
+    return data.data;
   }
 }

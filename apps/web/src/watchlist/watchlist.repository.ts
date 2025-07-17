@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/infra/postgres/db-utils';
-import { movies, watchlist } from '@/infra/postgres/schema';
+import { media, watchlist } from '@/infra/postgres/schema';
+import type { MediaType } from '@/movies/movie.type';
 
 export type UserWatchlist = {
   watchlistId: string;
@@ -10,24 +11,25 @@ export type UserWatchlist = {
   movieOverview: string;
   moviePosterPath: string;
   movieYear: string;
+  movieType: MediaType;
 };
 
 export class WatchlistPgRepository {
-  async addMovie(userId: string, movieId: bigint): Promise<void> {
-    return withDatabase(async (db) => {
+  async addMedia(userId: string, mediaId: bigint): Promise<void> {
+    return await withDatabase(async (db) => {
       const query = sql`
-        INSERT INTO ${watchlist} (user_id, movie_id)
-        VALUES (${userId}, ${movieId})
+        INSERT INTO ${watchlist} (user_id, media_id)
+        VALUES (${userId}, ${mediaId})
       `;
       await db.execute(query);
     });
   }
 
-  async removeMovie(userId: string, movieId: string): Promise<void> {
-    return withDatabase(async (db) => {
+  async removeMedia(userId: string, mediaId: string): Promise<void> {
+    return await withDatabase(async (db) => {
       const query = sql`
         DELETE FROM ${watchlist}
-        WHERE user_id = ${userId} AND movie_id = ${movieId}
+        WHERE user_id = ${userId} AND media_id = ${mediaId}
       `;
 
       await db.execute(query);
@@ -35,18 +37,18 @@ export class WatchlistPgRepository {
   }
 
   async getWatchlist(userId: string): Promise<UserWatchlist[]> {
-    return withDatabase(async (db) => {
+    return await withDatabase(async (db) => {
       const query = sql`
         SELECT
-          w.id AS "watchlistId",
           m.id AS "movieId",
           m.tmdb_id AS "movieTmdbId",
           m.title AS "movieTitle",
           m.overview AS "movieOverview",
           m.poster_path AS "moviePosterPath",
-          m.year AS "movieYear"
+          m.year AS "movieYear",
+          m.type AS "movieType"
         FROM ${watchlist} w  
-        JOIN ${movies} m ON m.id = w.movie_id 
+        JOIN ${media} m ON m.id = w.media_id 
         WHERE user_id = ${userId}
         ORDER BY w.created_at DESC;
       `;

@@ -1,7 +1,7 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { UserService } from "@/users/user.service";
-import type { GetUserRatingMovies } from "@/users/user.types";
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { UserService } from '@/users/user.service';
+import type { GetUserRatingMovies } from '@/users/user.types';
 
 export type UseUserMoviesMap = Record<
   number,
@@ -14,7 +14,7 @@ export async function GET() {
   });
 
   if (!session) {
-    return Response.json({ success: false, error: "Unauthorized" });
+    return Response.json({ success: false, error: 'Unauthorized' });
   }
 
   const userService = new UserService();
@@ -25,14 +25,16 @@ export async function GET() {
 
   const statusMap: UseUserMoviesMap = {};
 
-  res.data.forEach((result) => {
-    if (!statusMap[result.tmdbId]) {
-      statusMap[result.tmdbId] = {
-        isRated: true,
-        score: result.score,
-      };
+  for (const result of res.data) {
+    if (statusMap[result.tmdbId]) {
+      continue;
     }
-  });
+
+    statusMap[result.tmdbId] = {
+      isRated: true,
+      score: result.score,
+    };
+  }
 
   return Response.json(statusMap);
 }

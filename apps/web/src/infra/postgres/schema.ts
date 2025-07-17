@@ -8,6 +8,7 @@ import {
   smallint,
   text,
   timestamp,
+  pgEnum,
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -82,25 +83,32 @@ export const verifications = pgTable("verifications", {
 });
 
 /* ------------------------------------------------------------------ *
- *  movies                                                             *
+ *  Media                                                             *
  * ------------------------------------------------------------------ */
 
-export const movies = pgTable("movies", {
-  id: uuid()
-    .default(sql`gen_random_uuid()`)
-    .primaryKey(),
-  tmdbId: integer("tmdb_id").unique().notNull(),
-  title: text("title").notNull(),
-  year: text("year").notNull(),
-  posterPath: text("poster_path").notNull(),
-  overview: text("overview").default("Defecto para no borrar datos"),
-});
+export const mediaTypeEnum = pgEnum("media_type", ["movie", "tv"]);
 
-export type Movie = typeof movies.$inferSelect;
+export const media = pgTable(
+  "media",
+  {
+    id: uuid()
+      .default(sql`gen_random_uuid()`)
+      .primaryKey(),
+    tmdbId: integer("tmdb_id").unique().notNull(),
+    type: mediaTypeEnum("type").notNull(),
+    title: text("title").notNull(),
+    year: text("year").notNull(),
+    posterPath: text("poster_path").notNull(),
+    overview: text("overview").default("Defecto para no borrar datos"),
+  },
+  (table) => [unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type)]
+);
+
+export type Media = typeof media.$inferSelect;
 
 /* ------------------------------------------------------------------ *
  *  ratings                                                            *
- *  - a user can rate a movie once                                     *
+ *  - a user can rate media once                                     *
  * ------------------------------------------------------------------ */
 
 export const ratings = pgTable(
@@ -112,16 +120,16 @@ export const ratings = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    movieId: uuid("movie_id")
+    mediaId: uuid("media_id")
       .notNull()
-      .references(() => movies.id, { onDelete: "cascade" }),
+      .references(() => media.id, { onDelete: "cascade" }),
     score: smallint("score").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (table) => [
-    unique("ratings_user_movie_unique").on(table.userId, table.movieId),
+    unique("ratings_user_media_unique").on(table.userId, table.mediaId),
     index("ratings_profile_idx").on(table.userId, table.createdAt),
   ]
 );
@@ -193,15 +201,15 @@ export const watchlist = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    movieId: uuid("movie_id")
+    mediaId: uuid("media_id")
       .notNull()
-      .references(() => movies.id, { onDelete: "cascade" }),
+      .references(() => media.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (table) => [
-    unique("watchlist_user_movie_unique").on(table.userId, table.movieId),
+    unique("watchlist_user_media_unique").on(table.userId, table.mediaId),
     index("watchlist_profile_idx").on(table.userId, table.createdAt),
   ]
 );

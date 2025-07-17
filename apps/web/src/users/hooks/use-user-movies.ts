@@ -1,12 +1,12 @@
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions } from '@tanstack/react-query';
+import type { MovieView } from '@/components/movies/movie-card';
+import { QUERY_KEYS } from '@/lib/app.constants';
+import { dbMovieToView } from '@/movies/movie.adapters';
 import type {
   GetUserRatingMovies,
   UserMoviesSortBy,
   UserMoviesSortOrder,
-} from "../user.types";
-import { dbMovieToView } from "@/movies/movie.adapters";
-import type { MovieView } from "@/components/movies/movie-card";
-import { QUERY_KEYS } from "@/lib/app.constants";
+} from '../user.types';
 
 async function getUserMovies(
   {
@@ -21,17 +21,17 @@ async function getUserMovies(
   page: number
 ): Promise<{ nextCursor: number | null; data: MovieView[] }> {
   const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
-  url.searchParams.set("page", page.toString());
+  url.searchParams.set('page', page.toString());
   if (sortBy !== null) {
-    url.searchParams.set("sortBy", sortBy);
+    url.searchParams.set('sortBy', sortBy);
   }
   if (sortOrder !== null) {
-    url.searchParams.set("sortOrder", sortOrder);
+    url.searchParams.set('sortOrder', sortOrder);
   }
 
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    throw new Error('Network response was not ok');
   }
 
   const data: GetUserRatingMovies = await response.json();
