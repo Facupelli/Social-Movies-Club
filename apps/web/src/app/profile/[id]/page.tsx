@@ -137,7 +137,7 @@ export default function ProfilePage({
 										</div>
 									</div>
 
-									<div className="self-center px-2 md:px-4">
+									<div className="ml-auto self-center px-2 md:px-4">
 										<MovieCard.Score />
 									</div>
 								</div>
