@@ -19,5 +19,3 @@ export const QUERY_KEYS = {
 export const NEXT_CACHE_TAGS = {
   getUserWatchlist: (userId: String) => `watchlist:${userId}`,
 } as const;
-
-export const BASE_URL = process.env.VERCEL_SITE_URL || "http://localhost:3000";
