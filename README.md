@@ -59,11 +59,12 @@ Here are the next steps to improve and expand the app:
 - [x] **Check if movie is already scored**: Add rate check to MovieCard.
 - [x] **Show followers**: Show followers user profiles links.
 - [x] **Add watchlist feature**: Implement watchlist feature: add, remove and list watchlist.
+- [x] **Add series**: Add the same features for series/TV shows.
+- [ ] **Add media-type filter**: Add media-type filter to search bar.
 - [ ] **Add optimistic Uis**: Add optimistic updates for add-to-watchlist, remove-from-watchlist, follow-user.
 - [ ] **Handle repeated rated movies**: Add some way to handle repeated rated movies if they are close enough on the feed (maybe an aggregate table).
 - [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
 - [ ] **Add _seenAt_ feature to feed posts**.
-- [ ] **Add series**: Add the same features for series/TV shows.
 
 ---
 

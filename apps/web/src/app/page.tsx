@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import dayjs from "@/lib/days";
 import useDebounce from "@/media/hooks/use-debounce";
-import { useSearchMovies } from "@/media/hooks/use-search-movies";
+import { useSearchMovies } from "@/media/hooks/use-search-media";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
 import type { FeedItem } from "@/users/user.types";
 

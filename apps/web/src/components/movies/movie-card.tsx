@@ -8,7 +8,7 @@ import { createContext, useActionState, useContext } from "react";
 import { QUERY_KEYS } from "@/lib/app.constants";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { useMovieWatchProviders } from "@/media/hooks/use-media-watch-providers";
+import { useMediaWatchProviders } from "@/media/hooks/use-media-watch-providers";
 import { type MediaType, MediaTypeEnum } from "@/media/media.type";
 import { getUserWatchlistQueryOptions } from "@/users/hooks/use-user-watchlist";
 import { addMovieToWatchlist } from "@/watchlist/actions/add-movie";
@@ -154,7 +154,7 @@ function WatchProviders() {
 		isLoading,
 		error,
 		refetch,
-	} = useMovieWatchProviders(movie.tmdbId);
+	} = useMediaWatchProviders(movie.tmdbId, movie.type);
 
 	if (error) {
 		return (

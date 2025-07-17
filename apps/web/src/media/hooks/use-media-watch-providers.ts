@@ -16,7 +16,7 @@ async function getMovieWatchProviders(
 	return response.json();
 }
 
-export function useMovieWatchProviders(
+export function useMediaWatchProviders(
 	mediaId: number,
 	type: MediaType,
 	fetch = false,
