@@ -1,7 +1,7 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import type { MovieView } from "@/components/movies/movie-card";
 import { QUERY_KEYS } from "@/lib/app.constants";
-import { dbMovieToView } from "@/movies/movie.adapters";
+import { dbMovieToView } from "@/media/media.adapters";
 import type {
 	GetUserRatingMovies,
 	UserMoviesSortBy,

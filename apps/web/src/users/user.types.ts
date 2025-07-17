@@ -1,4 +1,4 @@
-import type { MediaType } from "@/movies/movie.type";
+import type { MediaType } from "@/media/media.type";
 
 export interface GetUserFeedParams {
 	userId: string;

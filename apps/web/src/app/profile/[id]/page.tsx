@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
-import { TYPE_FILTER_DICT } from "@/movies/media.constants";
+import { TYPE_FILTER_DICT } from "@/media/media.constants";
 import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
 import type {
 	UserMoviesSortBy,

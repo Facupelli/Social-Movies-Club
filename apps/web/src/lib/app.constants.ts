@@ -13,6 +13,11 @@ export const QUERY_KEYS = {
 	USER_FEED: ["user-feed"],
 	USER_RATINGS: ["user-ratings"],
 	USER_WATCHLIST: ["user-watchlist"],
+	getWatchProviders: (mediaId: number, type: string) => [
+		"watch-providers",
+		{ mediaId },
+		{ type },
+	],
 	getUserMovies: (
 		userId: string,
 		sortBy: UserMoviesSortBy | null,
