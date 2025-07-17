@@ -6,128 +6,133 @@ import { redirect } from "next/navigation";
 import ProfileNav from "@/components/profile-nav";
 import { FollowService } from "@/follows/follow.service";
 import { auth } from "@/lib/auth";
-import { FollowUserButton } from "@/users/components/follow-user-button";
 import {
-  getIsFollowingUser,
-  getUserProfile,
+	getIsFollowingUser,
+	getUserProfile,
 } from "@/users/actions/get-user-info";
+import { UpsertUsernameDialog } from "@/users/components/create-username-dialog";
+import { FollowUserButton } from "@/users/components/follow-user-button";
 
 export default async function ProfileLayout(
-  props: Readonly<{
-    children: React.ReactNode;
-    params: Promise<{ id: string }>;
-  }>
+	props: Readonly<{
+		children: React.ReactNode;
+		params: Promise<{ id: string }>;
+	}>,
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
 
-  if (!session) {
-    redirect("/");
-  }
+	if (!session) {
+		redirect("/");
+	}
 
-  const params = await props.params;
-  const profileUserId = params.id;
+	const params = await props.params;
+	const profileUserId = params.id;
 
-  return (
-    <div className="min-h-svh">
-      <div className="bg-card px-2 py-2 md:px-10">
-        <Link href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
+	return (
+		<div className="min-h-svh">
+			<div className="bg-card px-2 py-2 md:px-10">
+				<Link href="/">
+					<ArrowLeft />
+				</Link>
+			</div>
 
-      <div className="px-4 md:px-10">
-        <UserInfo
-          profileUserId={profileUserId}
-          sessionUserId={session.user.id}
-        />
+			<div className="px-4 md:px-10">
+				<UserInfo
+					profileUserId={profileUserId}
+					sessionUserId={session.user.id}
+				/>
 
-        <ProfileNav userId={profileUserId} />
+				<ProfileNav userId={profileUserId} />
 
-        {props.children}
-      </div>
-    </div>
-  );
+				{props.children}
+			</div>
+		</div>
+	);
 }
 
 async function getUserInfo(profileUserId: string, sessionUserId: string) {
-  const followService = new FollowService();
+	const followService = new FollowService();
 
-  const profileUserPromise = getUserProfile(profileUserId);
+	const profileUserPromise = getUserProfile(profileUserId);
 
-  const profileFollowsInfoPromise =
-    followService.getUserFollowsInfo(profileUserId);
-  const isFollowingUserPromise = getIsFollowingUser(
-    sessionUserId,
-    profileUserId
-  );
+	const profileFollowsInfoPromise =
+		followService.getUserFollowsInfo(profileUserId);
+	const isFollowingUserPromise = getIsFollowingUser(
+		sessionUserId,
+		profileUserId,
+	);
 
-  const [profileUser, profileFollowsInfo, isFollowing] = await Promise.all([
-    profileUserPromise,
-    profileFollowsInfoPromise,
-    isFollowingUserPromise,
-  ]);
+	const [profileUser, profileFollowsInfo, isFollowing] = await Promise.all([
+		profileUserPromise,
+		profileFollowsInfoPromise,
+		isFollowingUserPromise,
+	]);
 
-  return { profileUser, profileFollowsInfo, isFollowing };
+	return { profileUser, profileFollowsInfo, isFollowing };
 }
 
 async function UserInfo({
-  profileUserId,
-  sessionUserId,
+	profileUserId,
+	sessionUserId,
 }: {
-  profileUserId: string;
-  sessionUserId: string;
+	profileUserId: string;
+	sessionUserId: string;
 }) {
-  const { isFollowing, profileFollowsInfo, profileUser } = await getUserInfo(
-    profileUserId,
-    sessionUserId
-  );
+	const { isFollowing, profileFollowsInfo, profileUser } = await getUserInfo(
+		profileUserId,
+		sessionUserId,
+	);
 
-  if (!profileUser) {
-    redirect("/");
-  }
+	if (!profileUser) {
+		redirect("/");
+	}
 
-  return (
-    <div className="grid gap-2 py-4">
-      <div className="flex items-center justify-between">
-        {profileUser.image && (
-          <div className="shrink-0 rounded-full bg-secondary-foreground">
-            <Image
-              alt={profileUser.name}
-              className="size-[100px] rounded-full object-cover"
-              height={100}
-              src={profileUser.image}
-              unoptimized
-              priority
-              width={100}
-            />
-          </div>
-        )}
-        {sessionUserId !== profileUser.id && (
-          <div>
-            <FollowUserButton
-              followedUserId={profileUser.id}
-              isFollowing={isFollowing}
-            >
-              {isFollowing ? "Siguiendo" : "Seguir"}
-            </FollowUserButton>
-          </div>
-        )}
-      </div>
-      <div>
-        <p className="font-bold">{profileUser.name}</p>
-      </div>
-      <div className="flex items-center gap-2 font-bold text-sm">
-        <p>
-          {profileFollowsInfo.followingCount}{" "}
-          <span className="font-normal text-neutral-500">Siguiendo</span>
-        </p>
-        <p>
-          {profileFollowsInfo.followerCount}{" "}
-          <span className="font-normal text-neutral-500">Seguidores</span>
-        </p>
-      </div>
-    </div>
-  );
+	return (
+		<div className="grid gap-2 py-4">
+			<div className="flex items-center justify-between">
+				{profileUser.image && (
+					<div className="shrink-0 rounded-full bg-secondary-foreground">
+						<Image
+							alt={profileUser.name}
+							className="size-[100px] rounded-full object-cover"
+							height={100}
+							src={profileUser.image}
+							unoptimized
+							priority
+							width={100}
+						/>
+					</div>
+				)}
+				{sessionUserId !== profileUser.id && (
+					<div>
+						<FollowUserButton
+							followedUserId={profileUser.id}
+							isFollowing={isFollowing}
+						>
+							{isFollowing ? "Siguiendo" : "Seguir"}
+						</FollowUserButton>
+					</div>
+				)}
+			</div>
+			<div>
+				<p className="font-bold">{profileUser.name}</p>
+				<UpsertUsernameDialog
+					username={profileUser.username}
+					profileUserId={profileUser.id}
+				/>
+			</div>
+			<div className="flex items-center gap-2 font-bold text-sm">
+				<p>
+					{profileFollowsInfo.followingCount}{" "}
+					<span className="font-normal text-neutral-500">Siguiendo</span>
+				</p>
+				<p>
+					{profileFollowsInfo.followerCount}{" "}
+					<span className="font-normal text-neutral-500">Seguidores</span>
+				</p>
+			</div>
+		</div>
+	);
 }

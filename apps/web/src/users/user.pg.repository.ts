@@ -284,4 +284,16 @@ export class UserPgRepository {
 			});
 		});
 	}
+
+	async updatetUsername(userId: string, username: string): Promise<void> {
+		return await withDatabase(async (db) => {
+			const newUsername = `@${username}`;
+
+			await db.execute(sql`
+			  UPDATE ${users}
+				SET username = ${newUsername}
+			  WHERE id = ${userId}
+			`);
+		});
+	}
 }

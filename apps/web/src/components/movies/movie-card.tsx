@@ -251,7 +251,7 @@ function WatchlistButton() {
 			});
 		}
 
-		return { success: true, error: "" };
+		return result;
 	};
 
 	const [_, addAction] = useActionState(handleAddMovieToWatchlist, {

@@ -3,6 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useDeferredValue, useState, useTransition } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
@@ -146,7 +147,11 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 	return (
 		<article className="px-2 py-4" key={item.feedItemId}>
 			<div className="flex items-start gap-2 md:gap-4">
-				<div className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]">
+				<Link
+					href={`/profile/${item.actorId}`}
+					prefetch={false}
+					className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
+				>
 					<Image
 						alt={item.actorName}
 						className="h-auto rounded-full object-cover"
@@ -155,13 +160,13 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 						unoptimized
 						width={50}
 					/>
-				</div>
+				</Link>
 
 				<MovieCard
 					className="flex-1 border-none bg-transparent"
 					movie={movieView}
 				>
-					<div>
+					<Link href={`/profile/${item.actorId}`} prefetch={false}>
 						{item.actorName}{" "}
 						<span className="text-secondary-foreground/30 text-sm">
 							calificó hace
@@ -169,7 +174,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 						<span className="text-secondary-foreground/30 text-sm">
 							{formatFeedItemTime(item.ratedAt)}
 						</span>
-					</div>
+					</Link>
 
 					<div className="flex gap-4 md:pt-4">
 						<MovieCard.Poster size="small" />
