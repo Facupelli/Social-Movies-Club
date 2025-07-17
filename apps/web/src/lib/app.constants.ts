@@ -15,3 +15,5 @@ export const QUERY_KEYS = {
     sortOrder: UserMoviesSortOrder | null
   ) => ["user-movies", { userId }, { sortBy }, { sortOrder }],
 } as const;
+
+export const BASE_URL = process.env.VERCEL_SITE_URL || "http://localhost:3000";

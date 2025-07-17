@@ -4,7 +4,7 @@ import { withAuth } from "@/lib/auth-server-action.middleware";
 import { WatchlistService } from "../watchlist.service";
 import { validateRemoveMovieFromWatchlist } from "../watchlist-validation.service";
 import { MovieService } from "@/movies/movie.service";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 export async function removeMovieFromWatchlist(
   _: { success: boolean; error?: string },
@@ -26,7 +26,7 @@ export async function removeMovieFromWatchlist(
     const movie = await movieService.getMovieByTMDBId(movieTMDBId);
     await watchlistService.removeMovie(userId, movie.id);
 
-    revalidatePath(`/profile/${userId}/watchlist`);
+    revalidateTag(`watchlist:${userId}`);
 
     return { success: true, error: "" };
   });

@@ -7,7 +7,10 @@ import ProfileNav from "@/components/profile-nav";
 import { FollowService } from "@/follows/follow.service";
 import { auth } from "@/lib/auth";
 import { FollowUserButton } from "@/users/components/follow-user-button";
-import { UserService } from "@/users/user.service";
+import {
+  getIsFollowingUser,
+  getUserProfile,
+} from "@/users/actions/get-user-info";
 
 export default async function ProfileLayout(
   props: Readonly<{
@@ -49,13 +52,13 @@ export default async function ProfileLayout(
 }
 
 async function getUserInfo(profileUserId: string, sessionUserId: string) {
-  const userService = new UserService();
   const followService = new FollowService();
 
-  const profileUserPromise = userService.getUser(profileUserId);
+  const profileUserPromise = getUserProfile(profileUserId);
+
   const profileFollowsInfoPromise =
     followService.getUserFollowsInfo(profileUserId);
-  const isFollowingUserPromise = followService.isFollowingUser(
+  const isFollowingUserPromise = getIsFollowingUser(
     sessionUserId,
     profileUserId
   );

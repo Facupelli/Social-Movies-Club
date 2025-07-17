@@ -3,12 +3,20 @@ import { MovieGrid } from "@/components/movies/movie-grid";
 import { auth } from "@/lib/auth";
 import { GridMovieCard } from "@/watchlist/components/watchlist-movie-card";
 import { WatchlistService } from "@/watchlist/watchlist.service";
+import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-function getUserWatchlist(userId: string): Promise<MovieView[]> {
+function getWatchlist(userId: string): Promise<MovieView[]> {
   const watchlistService = new WatchlistService();
-  return watchlistService.getWatchlist(userId);
+
+  return unstable_cache(
+    () => watchlistService.getWatchlist(userId),
+    ["user-watchlist", userId],
+    {
+      tags: ["watchlist", `watchlist:${userId}`],
+    }
+  )();
 }
 
 export default async function WatchlistPage(
@@ -25,7 +33,9 @@ export default async function WatchlistPage(
   }
 
   const params = await props.params;
-  const watchlist = await getUserWatchlist(params.id);
+  const userId = params.id;
+
+  const watchlist = await getWatchlist(userId);
 
   return (
     <section className="py-10">
