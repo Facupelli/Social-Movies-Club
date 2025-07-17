@@ -8,7 +8,7 @@ export interface WatchProvider {
 export interface WatchProviderResult {
   link: string;
   buy: WatchProvider[];
-  flatrate: WatchProvider[];
+  flatrate?: WatchProvider[];
   rent: WatchProvider[];
 }
 

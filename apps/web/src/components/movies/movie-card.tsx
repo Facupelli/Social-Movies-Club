@@ -162,6 +162,9 @@ function WatchProviders() {
     );
   }
 
+  const hasFlatRateProviders =
+    watchProviders?.data?.flatrate && watchProviders.data.flatrate.length > 0;
+
   return (
     <div className="md:space-y-2">
       <Button className="h-auto p-0" onClick={() => refetch()} variant="link">
@@ -181,18 +184,24 @@ function WatchProviders() {
 
       {watchProviders?.data && (
         <div className="flex flex-wrap gap-1">
-          {watchProviders?.data.flatrate.map((provider) => (
-            <div key={provider.provider_id}>
-              <Image
-                alt={provider.provider_name}
-                className={clsx("h-auto rounded-sm")}
-                height={30}
-                src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                unoptimized
-                width={30}
-              />
+          {hasFlatRateProviders ? (
+            watchProviders.data.flatrate?.map((provider) => (
+              <div key={provider.provider_id}>
+                <Image
+                  alt={provider.provider_name}
+                  className={clsx("h-auto rounded-sm")}
+                  height={30}
+                  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                  unoptimized
+                  width={30}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="text-muted-foreground text-xs">
+              No esta en ninguna plataforma :(
             </div>
-          ))}
+          )}
         </div>
       )}
 
