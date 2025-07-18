@@ -7,6 +7,7 @@ export const LOCAL_STORAGE_KEYS: { [key: string]: string } = {
 export const QUERY_KEYS = {
 	USER: ["user"],
 	USER_FEED: ["user-feed"],
+	USER_AGGREGATED_FEED: ["user-aggregated-feed"],
 	USER_RATINGS: ["user-ratings"],
 	USER_WATCHLIST: ["user-watchlist"],
 	getSearchUsers: (query: string) => ["search-users", { query }],

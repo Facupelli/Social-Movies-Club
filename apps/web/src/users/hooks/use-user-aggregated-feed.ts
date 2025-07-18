@@ -2,14 +2,14 @@
 
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/app.constants";
-import type { FeedItem } from "../user.types";
+import type { AggregatedFeedItem } from "../feed.types";
 
 async function getUserFeed({
 	cursor,
 }: {
 	cursor: string | null;
-}): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
-	const url = new URL("/api/user/feed", window.location.origin);
+}): Promise<{ items: AggregatedFeedItem[]; nextCursor: string | null }> {
+	const url = new URL("/api/user/feed/aggregated", window.location.origin);
 	if (cursor) {
 		url.searchParams.set("cursor", cursor);
 	}
@@ -21,8 +21,8 @@ async function getUserFeed({
 	return response.json();
 }
 
-const getUserFeedQueryOptions = infiniteQueryOptions({
-	queryKey: QUERY_KEYS.USER_FEED,
+const getUserAggregatedFeedQueryOptions = infiniteQueryOptions({
+	queryKey: QUERY_KEYS.USER_AGGREGATED_FEED,
 	queryFn: async ({ pageParam = null }) =>
 		await getUserFeed({ cursor: pageParam }),
 	initialPageParam: null as string | null,
@@ -31,4 +31,4 @@ const getUserFeedQueryOptions = infiniteQueryOptions({
 	refetchOnWindowFocus: false,
 });
 
-export { getUserFeedQueryOptions, getUserFeed };
+export { getUserAggregatedFeedQueryOptions };

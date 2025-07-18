@@ -1,4 +1,5 @@
 import type { User } from "@/infra/postgres/schema";
+import type { AggregatedFeedItem } from "./feed.types";
 import { UserPgRepository } from "./user.pg.repository";
 import type {
 	FeedItem,
@@ -20,6 +21,13 @@ export class UserService {
 
 	async getUser(userId: string): Promise<User | null> {
 		return await this.userPgRepository.getById(userId);
+	}
+
+	async getAggregatedFeed(params: GetUserFeedParams): Promise<{
+		items: AggregatedFeedItem[];
+		nextCursor: string | null;
+	}> {
+		return await this.userPgRepository.getAggregatedFeed(params);
 	}
 
 	async getFeed(params: GetUserFeedParams): Promise<{

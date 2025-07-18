@@ -62,8 +62,9 @@ Here are the next steps to improve and expand the app:
 - [x] **Add series**: Add the same features for series/TV shows.
 - [x] **Show diff between profiles**: Filter out rated movies when visiting another profiles.
 - [x] **Add media-type filter**: Add media-type filter to search bar.
-- [ ] **Add optimistic Uis**: Add optimistic updates for add-to-watchlist, remove-from-watchlist, follow-user.
 - [ ] **Handle repeated rated movies**: Add some way to handle repeated rated movies if they are close enough on the feed (maybe an aggregate table).
+- [ ] **Add block movie from feed**: Handle blocked movies from feed according to user preference.
+- [ ] **Add optimistic Uis**: Add optimistic updates for add-to-watchlist, remove-from-watchlist, follow-user.
 - [ ] **Add movie country flag**: Add the movie country flag to the Movie Card.
 - [ ] **Add _seenAt_ feature to feed posts**.
 

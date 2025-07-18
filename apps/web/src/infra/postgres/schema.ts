@@ -185,6 +185,62 @@ export const feedItems = pgTable(
 );
 
 /* ------------------------------------------------------------------ *
+ *  feedBucker
+ *
+ * ------------------------------------------------------------------ */
+
+export const feedMediaBucket = pgTable(
+	"feed_media_bucket",
+	{
+		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+		userId: text("user_id") // the user who owns the feed
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		mediaId: uuid("media_id")
+			.notNull()
+			.references(() => media.id, { onDelete: "cascade" }),
+		ratingCount: integer("rating_count").notNull().default(1),
+		lastRatingAt: timestamp("last_rating_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+		firstRatingAt: timestamp("first_rating_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+		seenAt: timestamp("seen_at", { withTimezone: true }), // null = unseen
+	},
+	(table) => [
+		unique("agg_feed_user_movie_unique").on(table.userId, table.mediaId),
+		index("feed_movie_bucket_user_updated_idx").on(
+			table.userId,
+			table.lastRatingAt,
+		),
+	],
+);
+
+export const feedItemRatings = pgTable(
+	"feed_item_ratings",
+	{
+		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+		aggregatedFeedItemId: uuid("aggregated_feed_item_id")
+			.notNull()
+			.references(() => feedMediaBucket.id, { onDelete: "cascade" }),
+		ratingId: uuid("rating_id")
+			.notNull()
+			.references(() => ratings.id, { onDelete: "cascade" }),
+		addedAt: timestamp("added_at", { withTimezone: true })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		unique("feed_item_rating_unique").on(
+			table.aggregatedFeedItemId,
+			table.ratingId,
+		),
+		index("feed_item_ratings_feed_idx").on(table.aggregatedFeedItemId),
+	],
+);
+
+/* ------------------------------------------------------------------ *
  *  watchlist
  *
  * ------------------------------------------------------------------ */

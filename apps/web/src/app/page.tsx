@@ -16,6 +16,8 @@ import dayjs from "@/lib/days";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
+import type { AggregatedFeedItem } from "@/users/feed.types";
+import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
 import type { FeedItem } from "@/users/user.types";
 
@@ -61,6 +63,7 @@ function RenderProperSection({
 	return (
 		<>
 			<SessionMessage />
+			{/* <AggregatedFeed /> */}
 			<Feed />
 		</>
 	);
@@ -95,6 +98,76 @@ function SessionMessage() {
 	}
 
 	return null;
+}
+
+function AggregatedFeed() {
+	const { data: session } = authClient.useSession();
+
+	const {
+		data,
+		isPending,
+		isFetchingNextPage,
+		fetchNextPage,
+		hasNextPage,
+		isEnabled,
+	} = useInfiniteQuery({
+		...getUserAggregatedFeedQueryOptions,
+		enabled: !!session,
+	});
+
+	if (isPending && isEnabled) {
+		return (
+			<div className="grid gap-4 px-2 pt-4 md:px-10">
+				{[...Array(5)].map((_, idx) => (
+					// biome-ignore lint:reason
+					<Skeleton className="w-full h-[200px] rounded-sm" key={idx} />
+				))}
+			</div>
+		);
+	}
+
+	const flatItems = data?.pages.flatMap((page) => page.items);
+
+	return (
+		<div>
+			<div className="divide-y divide-accent-foreground">
+				{flatItems &&
+					flatItems.length > 0 &&
+					flatItems.map((item) => (
+						<div className="px-2 md:px-10" key={item.bucketId}>
+							<AggregatedFeedItemCard item={item} />
+						</div>
+					))}
+			</div>
+
+			{hasNextPage && (
+				<button
+					disabled={isFetchingNextPage}
+					onClick={() => fetchNextPage()}
+					type="button"
+				>
+					{isFetchingNextPage ? "Cargando más..." : "Cargar más"}
+				</button>
+			)}
+		</div>
+	);
+}
+
+function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
+	return (
+		<article className="px-2 py-4">
+			<p>{item.media.title}</p>
+			<p>{item.ratingCount}</p>
+			<div>
+				{item.ratings.map((rating) => (
+					<div key={rating.ratingId}>
+						<p>{rating.user.name}</p>
+						<p>{rating.score}</p>
+					</div>
+				))}
+			</div>
+		</article>
+	);
 }
 
 function Feed() {

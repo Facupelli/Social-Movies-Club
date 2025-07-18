@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import type { AggregatedFeedItem } from "@/users/feed.types";
 import { UserService } from "@/users/user.service";
-import type { FeedItem } from "@/users/user.types";
 import { validateGetUserFeedQuery } from "@/users/user-validation.service";
 
 export async function GET(request: Request) {
@@ -18,8 +18,8 @@ export async function GET(request: Request) {
 
 	const userService = new UserService();
 
-	const res: { items: FeedItem[]; nextCursor: string | null } =
-		await userService.getFeed({
+	const res: { items: AggregatedFeedItem[]; nextCursor: string | null } =
+		await userService.getAggregatedFeed({
 			userId: session.user.id,
 			cursor,
 		});

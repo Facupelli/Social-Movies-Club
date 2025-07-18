@@ -1,7 +1,17 @@
 import { waitUntil } from "@vercel/functions";
 import { sql } from "drizzle-orm";
 import { withDatabase } from "@/infra/postgres/db-utils";
-import { media, ratings, type User, users } from "@/infra/postgres/schema";
+import {
+	feedItemRatings,
+	feedItems,
+	feedMediaBucket,
+	follows,
+	media,
+	ratings,
+	type User,
+	users,
+} from "@/infra/postgres/schema";
+import type { AggregatedFeedItem } from "./feed.types";
 import type {
 	FeedItem,
 	FeedItemRaw,
@@ -34,6 +44,128 @@ export class UserPgRepository {
 
 			const { rows } = await db.execute<User>(query);
 			return rows[0];
+		});
+	}
+
+	// this query repeats every time this
+	// - scan all ratings of every follower
+	// - group/aggregate them per media
+	// - joinn users and media
+	async getAggregatedFeedOnTheFly(
+		userId: string,
+		cursor: string | null = null,
+		limit: number = 20,
+	) {
+		return await withDatabase(async (db) => {
+			const query = sql`
+				WITH latest AS (
+					SELECT
+						r.media_id,
+						jsonb_agg(
+							jsonb_build_object(
+								'userId', r.user_id,
+								'score', r.score,
+								'createdAt', r.created_at,
+								'user', jsonb_build_object(
+									'name',  u.name,
+									'image', u.image
+								)
+							) ORDER BY r.created_at DESC
+						) AS ratings,
+						MAX(r.created_at) AS updated_at
+					FROM ${ratings} r
+					JOIN ${users} u ON u.id = r.user_id
+					WHERE r.user_id IN (
+						SELECT followee_id
+						FROM ${follows}
+						WHERE follower_id = ${userId}
+					)
+					${cursor ? sql`AND r.created_at < ${cursor}::timestamptz` : sql``}
+					GROUP BY r.media_id
+				)
+			SELECT
+				m.id as "mediaId",
+				m.title,
+				m.poster_path as "posterPath",
+				l.ratings,
+				l.updated_at as "udpatedAt"
+			FROM latest l
+			JOIN ${media} m ON m.id = l.media_id
+			ORDER BY l.updated_at DESC, m.id DESC
+			LIMIT ${limit}
+			`;
+
+			const { rows } = await db.execute(query);
+			return rows;
+		});
+	}
+
+	async getAggregatedFeed({
+		userId,
+		limit = 20,
+		cursor = null,
+	}: GetUserFeedParams): Promise<{
+		items: AggregatedFeedItem[];
+		nextCursor: string | null;
+	}> {
+		return withDatabase(async (db) => {
+			const query = sql`
+				SELECT
+					fmb.id as "bucketId",
+					fmb.media_id as "mediaId",
+					fmb.rating_count as "ratingCount",
+					fmb.last_rating_at as "lastRatingAt",
+					fmb.seen_at as "seenAt",
+					jsonb_build_object(
+						'id',         m.id,
+						'tmdbId',     m.tmdb_id,
+						'type',       m.type,
+						'title',      m.title,
+						'year',       m.year,
+						'posterPath', m.poster_path,
+						'overview',   m.overview
+					) AS media,
+					(
+						SELECT json_agg(
+							json_build_object(
+								'ratingId', r.id,
+								'score', r.score,
+								'createdAt', r.created_at,
+								'user', jsonb_build_object(
+									'id',         u.id,
+									'name',       u.name,
+									'image',      u.image,
+									'username',   u.username
+								)
+							) 
+							ORDER BY r.created_at DESC
+						) 
+						FROM ${feedItemRatings} fir
+						JOIN ${ratings} r ON fir.rating_id = r.id
+						JOIN ${users} u ON u.id = r.user_id
+						WHERE fir.aggregated_feed_item_id = fmb.id
+					) as ratings
+				FROM ${feedMediaBucket} fmb
+				JOIN ${media} m ON m.id = fmb.media_id
+				WHERE fmb.user_id = ${userId}
+				${cursor ? sql`AND fmb.last_rating_at < ${cursor}` : sql``}
+				ORDER BY fmb.last_rating_at DESC
+				LIMIT ${limit}
+			`;
+
+			const { rows: feedItems } = await db.execute<AggregatedFeedItem>(query);
+
+			const lastElement = feedItems.at(-1);
+
+			const nextCursor =
+				lastElement && feedItems.length === limit
+					? new Date(lastElement.lastRatingAt).toISOString()
+					: null;
+
+			return {
+				items: feedItems,
+				nextCursor,
+			};
 		});
 	}
 
@@ -294,15 +426,43 @@ export class UserPgRepository {
 					let feedItemsCreated = 0;
 					if (followersToProcess.length > 0) {
 						await tx.execute(sql`
-          INSERT INTO feed_items (user_id, actor_id, rating_id)
-          VALUES ${sql.join(
-						followersToProcess.map(
-							(follower) =>
-								sql`(${follower.follower_id}, ${userId}, ${rating.id})`,
-						),
-						sql`, `,
-					)}
-      `);
+							INSERT INTO ${feedItems} (user_id, actor_id, rating_id)
+							VALUES ${sql.join(
+								followersToProcess.map(
+									(follower) =>
+										sql`(${follower.follower_id}, ${userId}, ${rating.id})`,
+								),
+								sql`, `,
+							)}
+      			`);
+
+						// AGGREGATED TABLE
+						const { rows: bucketResults } = await tx.execute<{
+							id: string;
+						}>(sql`
+							INSERT INTO ${feedMediaBucket} (user_id, media_id, rating_count)
+							VALUES ${sql.join(
+								followersToProcess.map(
+									(follower) =>
+										sql`(${follower.follower_id}, ${rating.media_id}, 1)`,
+								),
+								sql`, `,
+							)}
+						  ON CONFLICT (user_id, media_id)
+							DO UPDATE SET
+								rating_count = ${feedMediaBucket.ratingCount} + 1,
+								last_rating_at = now()
+							RETURNING id
+						`);
+
+						const bucketResult = bucketResults[0];
+
+						await tx.execute(sql`
+								INSERT INTO ${feedItemRatings} (aggregated_feed_item_id, rating_id, added_at)
+								VALUES (${bucketResult.id}, ${rating.id}, now())
+								ON CONFLICT DO NOTHING
+						`);
+						// -------------------------
 
 						feedItemsCreated = followersToProcess.length;
 					}
