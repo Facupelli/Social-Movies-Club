@@ -1,4 +1,4 @@
-export const TYPE_FILTER_DICT: { [key: string]: string } = {
+export const TYPE_FILTER_DICT = {
 	all: "Filtrar",
 	movie: "Películas",
 	tv: "Series",

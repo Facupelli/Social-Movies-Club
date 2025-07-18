@@ -11,7 +11,12 @@ import {
 	Users,
 	UserX,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+	useParams,
+	usePathname,
+	useRouter,
+	useSearchParams,
+} from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { MovieCard } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
@@ -27,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { TYPE_FILTER_DICT } from "@/media/media.constants";
 import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
@@ -147,9 +153,14 @@ export default function ProfilePage({
 }
 
 function RatingFilters() {
+	const { data: session } = authClient.useSession();
+	const params = useParams<{ id: string }>();
+
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+
+	const isOwner = session?.user.id === params.id;
 
 	const { filters } = useUserMoviesFilters();
 
@@ -186,26 +197,29 @@ function RatingFilters() {
 	return (
 		<div className="overflow-x-auto flex justify-between gap-4 py-4 md:justify-end">
 			<div className="flex h-9 items-center gap-4">
-				<Button
-					className={cn(
-						"h-[calc(100%-1px)] gap-2 bg-transparent transition-colors",
-						hideSharedRatings && "bg-primary/10 text-primary border-primary/20",
-					)}
-					onClick={toggleSharedRatings}
-					title={
-						hideSharedRatings ? "Ocultar compartidas" : "Mostrar compartidas"
-					}
-					variant="outline"
-				>
-					{hideSharedRatings ? (
-						<Users className="size-4" />
-					) : (
-						<UserX className="size-4" />
-					)}
-					<span className="font-normal text-neutral-500">
-						{hideSharedRatings ? "Mostrar" : "Ocultar"} compartidas
-					</span>
-				</Button>
+				{!isOwner && (
+					<Button
+						className={cn(
+							"h-[calc(100%-1px)] gap-2 bg-transparent transition-colors",
+							hideSharedRatings &&
+								"bg-primary/10 text-primary border-primary/20",
+						)}
+						onClick={toggleSharedRatings}
+						title={
+							hideSharedRatings ? "Ocultar compartidas" : "Mostrar compartidas"
+						}
+						variant="outline"
+					>
+						{hideSharedRatings ? (
+							<Users className="size-4" />
+						) : (
+							<UserX className="size-4" />
+						)}
+						<span className="font-normal text-neutral-500">
+							{hideSharedRatings ? "Mostrar" : "Ocultar"} compartidas
+						</span>
+					</Button>
+				)}
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -215,7 +229,7 @@ function RatingFilters() {
 						>
 							{filters.typeFilter
 								? TYPE_FILTER_DICT[filters.typeFilter]
-								: "lol"}
+								: TYPE_FILTER_DICT.all}
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
