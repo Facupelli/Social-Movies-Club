@@ -1,3 +1,4 @@
+import { waitUntil } from "@vercel/functions";
 import { sql } from "drizzle-orm";
 import { withDatabase } from "@/infra/postgres/db-utils";
 import { media, ratings, type User, users } from "@/infra/postgres/schema";
@@ -6,7 +7,7 @@ import type {
 	FeedItemRaw,
 	GetUserFeedParams,
 	GetUserRatingMovies,
-	GetUserRatingMoviesFilters,
+	UserMoviesServerFilters,
 	UserRatings,
 } from "./user.types";
 
@@ -106,29 +107,37 @@ export class UserPgRepository {
 	}
 
 	async getRatingMovies(
-		id: string,
+		userId: string,
 		{
-			field = "createdAt",
-			dir = "desc",
+			sortBy = "createdAt",
+			sortOrder = "desc",
 			typeFilter = "all",
 			limit,
 			offset,
-		}: GetUserRatingMoviesFilters = {},
+			bothRated = false,
+		}: UserMoviesServerFilters = {},
+		sessionUserId?: string,
 	): Promise<GetUserRatingMovies> {
 		return await withDatabase(async (db) => {
 			const orderExpr =
-				field === "score"
-					? sql`r.score ${sql.raw(dir)} , r.created_at DESC`
-					: sql`r.created_at ${sql.raw(dir)}`;
+				sortBy === "score"
+					? sql`r.score ${sql.raw(sortOrder)} , r.created_at DESC`
+					: sql`r.created_at ${sql.raw(sortOrder)}`;
 
 			const typeFilterExpr =
 				typeFilter === "all" ? sql`` : sql`AND m.type = ${typeFilter}`;
 
-			const countQuery = sql`
-        SELECT COUNT(*) as count
-        FROM ${ratings} r
-        WHERE r.user_id = ${id};
-      `;
+			const bothRatedExpr =
+				bothRated && sessionUserId && sessionUserId !== userId
+					? sql`AND NOT EXISTS(
+							SELECT 1
+							FROM ratings r1
+							JOIN ratings r2 ON r1.media_id = r2.media_id
+							WHERE r1.user_id = ${userId} 
+								AND r2.user_id = ${sessionUserId}
+								AND r1.media_id = r.media_id
+				  )`
+					: sql``;
 
 			let dataQuery = sql`
         SELECT
@@ -143,8 +152,14 @@ export class UserPgRepository {
           m.type         AS "type"
         FROM ${ratings} r
         JOIN ${media}  m ON m.id = r.media_id
-        WHERE r.user_id = ${id} ${typeFilterExpr}
+        WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}
         ORDER BY ${orderExpr}
+      `;
+
+			const countQuery = sql`
+        SELECT COUNT(*) as count
+        FROM ${ratings} r
+        WHERE r.user_id = ${userId};
       `;
 
 			if (limit !== undefined && offset !== undefined) {
@@ -249,32 +264,36 @@ export class UserPgRepository {
 			// biome-ignore lint: debugin logs
 			console.log(`✅ Rating created/updated: ${rating.id}`);
 
-			await db.transaction(async (tx) => {
-				// HANDLED BY QUEUE
-				const { rows: followers } = await tx.execute<{
-					follower_id: string;
-				}>(sql`
+			waitUntil(
+				db.transaction(async (tx) => {
+					// HANDLED BY QUEUE
+					const { rows: followers } = await tx.execute<{
+						follower_id: string;
+					}>(sql`
             SELECT follower_id
             FROM follows
             WHERE followee_id = ${userId}
             LIMIT ${MAX_FOLLOWERS_TO_FANOUT + 1}
           `);
 
-				const followersSkipped = Math.max(
-					0,
-					followers.length - MAX_FOLLOWERS_TO_FANOUT,
-				);
-				const followersToProcess = followers.slice(0, MAX_FOLLOWERS_TO_FANOUT);
-
-				if (followersSkipped > 0) {
-					console.warn(
-						`⚠️  Skipping ${followersSkipped} followers for rating ${rating.id} (over limit)`,
+					const followersSkipped = Math.max(
+						0,
+						followers.length - MAX_FOLLOWERS_TO_FANOUT,
 					);
-				}
+					const followersToProcess = followers.slice(
+						0,
+						MAX_FOLLOWERS_TO_FANOUT,
+					);
 
-				let feedItemsCreated = 0;
-				if (followersToProcess.length > 0) {
-					await tx.execute(sql`
+					if (followersSkipped > 0) {
+						console.warn(
+							`⚠️  Skipping ${followersSkipped} followers for rating ${rating.id} (over limit)`,
+						);
+					}
+
+					let feedItemsCreated = 0;
+					if (followersToProcess.length > 0) {
+						await tx.execute(sql`
           INSERT INTO feed_items (user_id, actor_id, rating_id)
           VALUES ${sql.join(
 						followersToProcess.map(
@@ -285,13 +304,14 @@ export class UserPgRepository {
 					)}
       `);
 
-					feedItemsCreated = followersToProcess.length;
-				}
+						feedItemsCreated = followersToProcess.length;
+					}
 
-				console.log(
-					`📢 Created ${feedItemsCreated} feed items for rating ${rating.id}`,
-				);
-			});
+					console.log(
+						`📢 Created ${feedItemsCreated} feed items for rating ${rating.id}`,
+					);
+				}),
+			);
 		});
 	}
 

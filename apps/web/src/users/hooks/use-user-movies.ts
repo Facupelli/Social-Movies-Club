@@ -4,34 +4,28 @@ import { QUERY_KEYS } from "@/lib/app.constants";
 import { dbMovieToView } from "@/media/media.adapters";
 import type {
 	GetUserRatingMovies,
-	UserMoviesSortBy,
-	UserMoviesSortOrder,
-	UserMoviesTypeFilter,
+	UserMoviesClientFilters,
+	UserMoviesServerFilters,
 } from "../user.types";
-
-interface UserMoviesFilters {
-	userId: string;
-	sortBy: UserMoviesSortBy | null;
-	sortOrder: UserMoviesSortOrder | null;
-	typeFilter: UserMoviesTypeFilter | null;
-}
+import { userMoviesFiltersUrlParser } from "../utils/filter-user-movies-parser";
+import { userMoviesFiltersTransformer } from "../utils/filter-user-movies-transformer";
 
 async function getUserMovies(
-	{ userId, sortBy, sortOrder, typeFilter }: UserMoviesFilters,
-	page: number,
+	userId: string,
+	filters: UserMoviesServerFilters,
 ): Promise<{ nextCursor: number | null; data: MovieView[] }> {
-	const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
-	url.searchParams.set("page", page.toString());
+	const allParams = userMoviesFiltersUrlParser.toSearchParams(filters);
+	allParams.set(
+		"page",
+		((filters.offset || 0) / (filters.limit || 20)).toString(),
+	);
 
-	if (sortBy !== null) {
-		url.searchParams.set("sortBy", sortBy);
-	}
-	if (sortOrder !== null) {
-		url.searchParams.set("sortOrder", sortOrder);
-	}
-	if (typeFilter !== null) {
-		url.searchParams.set("typeFilter", typeFilter);
-	}
+	console.log({ allParams });
+
+	const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
+	url.search = allParams.toString();
+
+	console.log({ url });
 
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -46,16 +40,22 @@ async function getUserMovies(
 	};
 }
 
-const getUserMoviesQueryOptions = ({
-	userId,
-	sortBy,
-	sortOrder,
-	typeFilter,
-}: UserMoviesFilters) =>
+const getUserMoviesQueryOptions = (
+	filters: UserMoviesClientFilters & { userId: string },
+) =>
 	infiniteQueryOptions({
-		queryKey: QUERY_KEYS.getUserMovies(userId, sortBy, sortOrder, typeFilter),
-		queryFn: async ({ pageParam = 0 }) =>
-			await getUserMovies({ userId, sortBy, sortOrder, typeFilter }, pageParam),
+		queryKey: QUERY_KEYS.getUserMovies(filters),
+		queryFn: async ({ pageParam = 0 }) => {
+			const serverFilters = userMoviesFiltersTransformer.clientToServer(
+				filters,
+				{
+					page: pageParam,
+					limit: 20,
+				},
+			);
+
+			return await getUserMovies(filters.userId, serverFilters);
+		},
 		initialPageParam: 0,
 		getNextPageParam: (lastPage) => lastPage.nextCursor,
 		refetchOnWindowFocus: false,

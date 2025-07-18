@@ -1,8 +1,4 @@
-import type {
-	UserMoviesSortBy,
-	UserMoviesSortOrder,
-	UserMoviesTypeFilter,
-} from "@/users/user.types";
+import type { UserMoviesClientFilters } from "@/users/user.types";
 
 export const LOCAL_STORAGE_KEYS: { [key: string]: string } = {
 	PROFILE_TAB_VIEW: "profile-tab-view",
@@ -20,12 +16,14 @@ export const QUERY_KEYS = {
 		{ mediaId },
 		{ type },
 	],
-	getUserMovies: (
-		userId: string,
-		sortBy: UserMoviesSortBy | null,
-		sortOrder: UserMoviesSortOrder | null,
-		typeFilter: UserMoviesTypeFilter | null,
-	) => ["user-movies", { userId }, { sortBy }, { sortOrder }, { typeFilter }],
+	getUserMovies: (filters: UserMoviesClientFilters & { userId: string }) => [
+		"user-movies",
+		{ userId: filters.userId },
+		{ sortBy: filters.sortBy },
+		{ sortOrder: filters.sortOrder },
+		{ typeFilter: filters.typeFilter },
+		{ bothRatedFilter: filters.bothRated },
+	],
 } as const;
 
 export const NEXT_CACHE_TAGS = {

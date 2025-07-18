@@ -60,14 +60,29 @@ export type FeedItem = {
 	seenAt: Date;
 };
 
+export type UserMoviesBothRatedFilter = "true" | "false";
 export type UserMoviesTypeFilter = "all" | "movie" | "tv";
 export type UserMoviesSortBy = "score" | "createdAt";
 export type UserMoviesSortOrder = "asc" | "desc";
 
-export interface GetUserRatingMoviesFilters {
-	field?: UserMoviesSortBy;
-	dir?: UserMoviesSortOrder;
+// Client-side filter interface
+export interface UserMoviesClientFilters {
+	sortBy?: UserMoviesSortBy;
+	sortOrder?: UserMoviesSortOrder;
+	typeFilter?: UserMoviesTypeFilter;
+	bothRated?: boolean;
+}
+
+// Server-side filter interface
+export interface UserMoviesServerFilters extends UserMoviesClientFilters {
 	limit?: number;
 	offset?: number;
-	typeFilter?: UserMoviesTypeFilter;
+}
+
+// URL search params interface
+export interface UserMoviesUrlParams {
+	sortBy?: string;
+	sortOrder?: string;
+	type?: string;
+	bothRatedFilter?: string;
 }

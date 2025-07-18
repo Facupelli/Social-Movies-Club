@@ -8,6 +8,8 @@ import {
 	Calendar,
 	Grid2X2,
 	Star,
+	Users,
+	UserX,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
@@ -25,40 +27,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
+import { cn } from "@/lib/utils";
 import { TYPE_FILTER_DICT } from "@/media/media.constants";
 import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
-import type {
-	UserMoviesSortBy,
-	UserMoviesSortOrder,
-	UserMoviesTypeFilter,
-} from "@/users/user.types";
+import { useUserMoviesFilters } from "@/users/hooks/use-user-movies-filter";
 
 export default function ProfilePage({
 	params,
 }: {
 	params: Promise<{ id: string }>;
-	searchParams: Promise<{
-		sortBy?: UserMoviesSortBy;
-		sortOrder?: UserMoviesSortOrder;
-		page?: string;
-	}>;
 }) {
 	const pageParams = use(params);
-	const searchParams = useSearchParams();
-
-	const typeFilter = searchParams.get("type") ?? "all";
-	const sortBy = searchParams.get("sortBy") ?? "createdAt";
-	const sortOrder = searchParams.get("sortOrder") ?? "desc";
+	const { filters } = useUserMoviesFilters();
 
 	const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
 		useInfiniteQuery(
 			getUserMoviesQueryOptions({
 				userId: pageParams.id,
-				sortBy: sortBy as UserMoviesSortBy,
-				sortOrder: sortOrder as UserMoviesSortOrder,
-				typeFilter: typeFilter as UserMoviesTypeFilter,
+				...filters,
 			}),
 		);
+
 	const profileMovies = data?.pages.flatMap((page) => page.data);
 
 	const [tab, setTab] = useState<string>("grid");
@@ -162,9 +151,7 @@ function RatingFilters() {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
-	const typeFilter = searchParams.get("type") ?? "all";
-	const sortBy = searchParams.get("sortBy") ?? "createdAt";
-	const sortOrder = searchParams.get("sortOrder") ?? "desc";
+	const { filters } = useUserMoviesFilters();
 
 	const updateSearchParams = (key: string, value: string) => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -173,8 +160,14 @@ function RatingFilters() {
 		router.push(`${pathname}?${params.toString()}`);
 	};
 
+	const hideSharedRatings = !!filters.bothRated;
+	const toggleSharedRatings = () => {
+		const newBothRated = !filters.bothRated;
+		updateSearchParams("bothRated", newBothRated.toString());
+	};
+
 	const toggleSortOrder = () => {
-		const newOrder = sortOrder === "asc" ? "desc" : "asc";
+		const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
 		updateSearchParams("sortOrder", newOrder);
 	};
 
@@ -187,25 +180,48 @@ function RatingFilters() {
 	};
 
 	const getSortLabel = () => {
-		return sortBy === "score" ? "Puntaje" : "Fecha";
+		return filters.sortBy === "score" ? "Puntaje" : "Fecha";
 	};
 
 	return (
 		<div className="overflow-x-auto flex justify-between gap-4 py-4 md:justify-end">
 			<div className="flex h-9 items-center gap-4">
+				<Button
+					className={cn(
+						"h-[calc(100%-1px)] gap-2 bg-transparent transition-colors",
+						hideSharedRatings && "bg-primary/10 text-primary border-primary/20",
+					)}
+					onClick={toggleSharedRatings}
+					title={
+						hideSharedRatings ? "Ocultar compartidas" : "Mostrar compartidas"
+					}
+					variant="outline"
+				>
+					{hideSharedRatings ? (
+						<Users className="size-4" />
+					) : (
+						<UserX className="size-4" />
+					)}
+					<span className="font-normal text-neutral-500">
+						{hideSharedRatings ? "Mostrar" : "Ocultar"} compartidas
+					</span>
+				</Button>
+
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							className="h-[calc(100%-1px)] gap-2 bg-transparent"
 							variant="outline"
 						>
-							{TYPE_FILTER_DICT[typeFilter]}
+							{filters.typeFilter
+								? TYPE_FILTER_DICT[filters.typeFilter]
+								: "lol"}
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuRadioGroup
 							onValueChange={handleFilterByChange}
-							value={typeFilter}
+							value={filters.typeFilter}
 						>
 							<DropdownMenuRadioItem className="gap-2" value="all">
 								Todo
@@ -227,7 +243,7 @@ function RatingFilters() {
 								className="h-[calc(100%-1px)] gap-2 bg-transparent"
 								variant="outline"
 							>
-								{sortBy === "score" ? (
+								{filters.sortBy === "score" ? (
 									<Star className="size-4" />
 								) : (
 									<Calendar className="size-4" />
@@ -241,7 +257,7 @@ function RatingFilters() {
 						<DropdownMenuContent align="end">
 							<DropdownMenuRadioGroup
 								onValueChange={handleSortByChange}
-								value={sortBy}
+								value={filters.sortBy}
 							>
 								<DropdownMenuRadioItem className="gap-2" value="score">
 									<Star className="size-4" />
@@ -259,10 +275,10 @@ function RatingFilters() {
 						className="h-[calc(100%-1px)] gap-1 bg-transparent"
 						onClick={toggleSortOrder}
 						size="icon"
-						title={`Sort ${sortOrder === "asc" ? "ascending" : "descending"}`}
+						title={`Sort ${filters.sortOrder === "asc" ? "ascending" : "descending"}`}
 						variant="outline"
 					>
-						{sortOrder === "asc" ? (
+						{filters.sortOrder === "asc" ? (
 							<ArrowUp className="size-4" />
 						) : (
 							<ArrowDown className="size-4" />

@@ -4,7 +4,7 @@ import type {
 	FeedItem,
 	GetUserFeedParams,
 	GetUserRatingMovies,
-	GetUserRatingMoviesFilters,
+	UserMoviesServerFilters,
 } from "./user.types";
 
 export class UserService {
@@ -39,9 +39,14 @@ export class UserService {
 
 	async getUserRatingMovies(
 		userId: string,
-		filters?: GetUserRatingMoviesFilters,
+		filters?: UserMoviesServerFilters,
+		sessionUserId?: string,
 	): Promise<GetUserRatingMovies> {
-		return await this.userPgRepository.getRatingMovies(userId, filters);
+		return await this.userPgRepository.getRatingMovies(
+			userId,
+			filters,
+			sessionUserId,
+		);
 	}
 
 	async rateMovie(userId: string, movieId: bigint, score: number) {

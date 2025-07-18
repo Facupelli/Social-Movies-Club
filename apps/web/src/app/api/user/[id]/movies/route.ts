@@ -1,12 +1,9 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { UserService } from "@/users/user.service";
-import type {
-	GetUserRatingMovies,
-	UserMoviesSortBy,
-	UserMoviesSortOrder,
-	UserMoviesTypeFilter,
-} from "@/users/user.types";
+import type { GetUserRatingMovies } from "@/users/user.types";
+import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
+import { userMoviesFiltersTransformer } from "@/users/utils/filter-user-movies-transformer";
 
 export type UseUserMoviesMap = Record<
 	number,
@@ -26,27 +23,24 @@ export async function GET(
 	}
 
 	const routeParams = await params;
-
-	const userService = new UserService();
 	const url = new URL(request.url);
 
+	const clientFilters = userMoviesFiltersUrlParser.parseUrl(url);
 	const page = parseInt(url.searchParams.get("page") || "0", 10);
-	const sortOrder = url.searchParams.get("sortOrder") || "desc";
-	const sortBy = url.searchParams.get("sortBy") || "createdAt";
-	const typeFilter = url.searchParams.get("typeFilter") || "all";
 
-	const limit = 20;
-	const offset = page * limit;
+	const serverFilters = userMoviesFiltersTransformer.clientToServer(
+		clientFilters,
+		{
+			page,
+			limit: 20,
+		},
+	);
 
+	const userService = new UserService();
 	const res: GetUserRatingMovies = await userService.getUserRatingMovies(
 		routeParams.id,
-		{
-			limit,
-			offset,
-			dir: sortOrder as UserMoviesSortOrder,
-			field: sortBy as UserMoviesSortBy,
-			typeFilter: typeFilter as UserMoviesTypeFilter,
-		},
+		serverFilters,
+		session.user.id,
 	);
 
 	return Response.json(res);
