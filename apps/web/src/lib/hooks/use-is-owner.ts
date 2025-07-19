@@ -8,5 +8,7 @@ export function useIsOwner() {
 	const { data: session } = authClient.useSession();
 
 	const isOwner = session?.user.id === params.id;
-	return isOwner;
+	const isProfilePage = params.id != null;
+
+	return { isOwner, isProfilePage };
 }

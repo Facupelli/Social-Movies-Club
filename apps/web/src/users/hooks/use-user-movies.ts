@@ -20,12 +20,8 @@ async function getUserMovies(
 		((filters.offset || 0) / (filters.limit || 20)).toString(),
 	);
 
-	console.log({ allParams });
-
 	const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
 	url.search = allParams.toString();
-
-	console.log({ url });
 
 	const response = await fetch(url);
 	if (!response.ok) {

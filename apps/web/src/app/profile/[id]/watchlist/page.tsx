@@ -5,14 +5,15 @@ import type { MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 import { auth } from "@/lib/auth/auth";
+import { type ApiResponse, execute } from "@/lib/safe-execute";
 import { GridMovieCard } from "@/watchlist/components/watchlist-movie-card";
 import { WatchlistService } from "@/watchlist/watchlist.service";
 
-function getWatchlist(userId: string): Promise<MovieView[]> {
+function getWatchlist(userId: string): Promise<ApiResponse<MovieView[]>> {
 	const watchlistService = new WatchlistService();
 
 	return unstable_cache(
-		() => watchlistService.getWatchlist(userId),
+		() => execute<MovieView[]>(() => watchlistService.getWatchlist(userId)),
 		["user-watchlist", userId],
 		{
 			tags: ["watchlist", NEXT_CACHE_TAGS.getUserWatchlist(userId)],
@@ -36,7 +37,13 @@ export default async function WatchlistPage(
 	const params = await props.params;
 	const userId = params.id;
 
-	const watchlist = await getWatchlist(userId);
+	const watchlistResult = await getWatchlist(userId);
+
+	if (!watchlistResult.success) {
+		return <section className="py-10">{watchlistResult.error}</section>;
+	}
+
+	const watchlist = watchlistResult.data;
 
 	return (
 		<section className="py-10">

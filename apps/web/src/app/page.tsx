@@ -34,6 +34,7 @@ import { useIsMobile } from "@/lib/hooks/use-mobile";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
+import { TYPE_DICT } from "@/media/media.constants";
 import { WelcomeDialog } from "@/users/components/welcome-dialog";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
@@ -245,7 +246,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 								variant="secondary"
 								className="absolute top-2 right-2 text-xs font-medium bg-black/60 text-white border-0"
 							>
-								{item.media.type === "movie" ? "Movie" : "TV Show"}
+								{TYPE_DICT[item.media.type]}
 							</Badge>
 							<div className="absolute bottom-3 left-3 right-3 text-white">
 								<p className="text-xs font-medium opacity-90">

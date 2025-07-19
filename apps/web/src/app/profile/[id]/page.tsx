@@ -152,7 +152,7 @@ function RatingFilters() {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
-	const isOwner = useIsOwner();
+	const { isOwner } = useIsOwner();
 	const { filters } = useUserMoviesFilters();
 
 	const updateSearchParams = (key: string, value: string) => {

@@ -2,11 +2,14 @@
 
 import { revalidateTag } from "next/cache";
 import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
-import { withAuth } from "@/lib/auth-server-action.middleware";
+import { withAuth } from "@/lib/auth/auth-server-action.middleware";
+import { type ApiResponse, execute } from "@/lib/safe-execute";
 import { UserMediaService } from "@/users/user-movie.service";
 import { validateAddMovieToWatchlist } from "../watchlist-validation.service";
 
-export async function addMovieToWatchlist(formData: FormData) {
+export async function addMovieToWatchlist(
+	formData: FormData,
+): Promise<ApiResponse<void>> {
 	return await withAuth(async (session) => {
 		const { movieTMDBId, userId, type } = validateAddMovieToWatchlist(formData);
 
@@ -17,11 +20,15 @@ export async function addMovieToWatchlist(formData: FormData) {
 			};
 		}
 
-		const userMediaService = new UserMediaService();
-		await userMediaService.addMediaToWatchlist(userId, movieTMDBId, type);
+		const result = await execute<void>(async () => {
+			const userMediaService = new UserMediaService();
+			await userMediaService.addMediaToWatchlist(userId, movieTMDBId, type);
+		});
 
-		revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+		if (result.success) {
+			revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+		}
 
-		return { success: true, error: "" };
+		return result;
 	});
 }

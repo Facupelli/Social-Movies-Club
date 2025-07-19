@@ -9,7 +9,7 @@ export const QUERY_KEYS = {
 	USER_FEED: ["user-feed"],
 	USER_AGGREGATED_FEED: ["user-aggregated-feed"],
 	USER_RATINGS: ["user-ratings"],
-	USER_WATCHLIST: ["user-watchlist"],
+	USER_WATCHLIST: ["user-watchlist"], // session-user watchlit handles: isMovieRated?
 	getSearchUsers: (query: string) => ["search-users", { query }],
 	getSearchMedia: (query: string) => ["search-media", { query }],
 	getWatchProviders: (mediaId: number, type: string) => [

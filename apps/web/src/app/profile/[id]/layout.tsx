@@ -10,8 +10,8 @@ import {
 	getIsFollowingUser,
 	getUserProfile,
 } from "@/users/actions/get-user-info";
-import { UpsertUsernameDialog } from "@/users/components/create-username-dialog";
 import { FollowUserButton } from "@/users/components/follow-user-button";
+import { UpsertUsernameDialog } from "@/users/components/upsert-username-dialog";
 
 export default async function ProfileLayout(
 	props: Readonly<{

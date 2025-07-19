@@ -17,12 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/auth-client";
 import { useIsOwner } from "@/lib/hooks/use-is-owner";
+import type { ApiResponse } from "@/lib/safe-execute";
 import { updateUserName } from "../actions/update-username";
-
-const initialState = {
-	success: false,
-	error: "",
-};
 
 export function UpsertUsernameDialog({
 	isOpen,
@@ -34,11 +30,11 @@ export function UpsertUsernameDialog({
 	const { data: session } = authClient.useSession();
 	const [open, setOpen] = useState(!!isOpen);
 
-	const isOwner = useIsOwner();
+	const { isOwner } = useIsOwner();
 	const username = session?.user.username;
 
 	const handleUpdateUsername = async (
-		_state: typeof initialState,
+		_state: ApiResponse<void>,
 		formData: FormData,
 	) => {
 		const result = await updateUserName(formData);

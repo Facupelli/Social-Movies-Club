@@ -7,6 +7,8 @@ import Image from "next/image";
 import { createContext, useActionState, useContext } from "react";
 import { QUERY_KEYS } from "@/lib/app.constants";
 import { authClient } from "@/lib/auth/auth-client";
+import { useIsOwner } from "@/lib/hooks/use-is-owner";
+import type { ApiResponse } from "@/lib/safe-execute";
 import { cn } from "@/lib/utils";
 import { useMediaWatchProviders } from "@/media/hooks/use-media-watch-providers";
 import { type MediaType, MediaTypeEnum } from "@/media/media.type";
@@ -232,19 +234,16 @@ function WatchProviders() {
 	);
 }
 
-const initialState = {
-	success: false,
-	error: "",
-};
-
 function WatchlistButton() {
 	const queryClient = useQueryClient();
 	const { movie } = useMovieCardContext();
 	const { data: session } = authClient.useSession();
 	const { data: userWatchlist } = useQuery(getUserWatchlistQueryOptions);
 
+	const { isProfilePage } = useIsOwner();
+
 	const handleAddMovieToWatchlist = async (
-		_state: typeof initialState,
+		_state: ApiResponse<void>,
 		formData: FormData,
 	) => {
 		const result = await addMovieToWatchlist(formData);
@@ -277,14 +276,16 @@ function WatchlistButton() {
 			<input name="type" type="hidden" value={movie.type} />
 
 			{isMovieInWatchlist ? (
-				<SubmitButton
-					hideLoadingText
-					className="w-full"
-					formAction={removeAction}
-					size="sm"
-				>
-					<EyeOff className="size-4 fill-secondary-foreground" />
-				</SubmitButton>
+				!isProfilePage && (
+					<SubmitButton
+						hideLoadingText
+						className="w-full"
+						formAction={removeAction}
+						size="sm"
+					>
+						<EyeOff className="size-4 fill-secondary-foreground" />
+					</SubmitButton>
+				)
 			) : (
 				<SubmitButton
 					hideLoadingText

@@ -14,13 +14,14 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { QUERY_KEYS } from "@/lib/app.constants";
+import type { ApiResponse } from "@/lib/safe-execute";
 import { addRatingToMovie } from "@/media/actions/add-rating";
 import type { MediaType } from "@/media/media.type";
 import { getUserRatingsQueryOptions } from "@/users/hooks/use-user-ratings";
 import { SubmitButton } from "../submit-button";
 import { Button } from "../ui/button";
 
-const initialState = {
+const initialState: ApiResponse<void> = {
 	success: false,
 	error: "",
 };
@@ -40,7 +41,7 @@ export function RateDialog({
 	const { data: userRatings } = useQuery(getUserRatingsQueryOptions);
 
 	const handleAddRatingToMovie = async (
-		_state: typeof initialState,
+		_state: ApiResponse<void>,
 		formData: FormData,
 	) => {
 		const result = await addRatingToMovie(formData);
@@ -99,7 +100,6 @@ export function RateDialog({
 							{[...Array(10)].map((_, index) => {
 								const ratingValue = index + 1;
 								return (
-									// biome-ignore lint: reason
 									<label
 										className="cursor-pointer"
 										key={ratingValue}

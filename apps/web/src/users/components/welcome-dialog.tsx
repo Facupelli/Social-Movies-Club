@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { UpsertUsernameDialog } from "./create-username-dialog";
+import { UpsertUsernameDialog } from "./upsert-username-dialog";
 
 export function WelcomeDialog() {
 	const searchParams = useSearchParams();

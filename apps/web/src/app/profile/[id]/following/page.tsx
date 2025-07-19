@@ -2,13 +2,18 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { FollowService } from "@/follows/follow.service";
+import type { GetFollowingUsers } from "@/follows/follows.type";
 import { auth } from "@/lib/auth/auth";
+import { execute } from "@/lib/safe-execute";
 import { FollowUserButton } from "@/users/components/follow-user-button";
 
 const fetchFollowingUsers = async (userId: string) => {
 	const followService = new FollowService();
-	const followingUsers = await followService.getFollowingUsers(userId);
-	return followingUsers;
+
+	return await execute<GetFollowingUsers[]>(async () => {
+		const followingUsers = await followService.getFollowingUsers(userId);
+		return followingUsers;
+	});
 };
 
 function showFollowButton(
@@ -38,7 +43,13 @@ export default async function FollowingPage(
 	const params = await props.params;
 	const profileUserId = params.id;
 
-	const followingUsers = await fetchFollowingUsers(profileUserId);
+	const followingUsersResult = await fetchFollowingUsers(profileUserId);
+
+	if (!followingUsersResult.success) {
+		return <div>{followingUsersResult.error}</div>;
+	}
+
+	const followingUsers = followingUsersResult.data;
 
 	if (followingUsers.length === 0) {
 		return (
