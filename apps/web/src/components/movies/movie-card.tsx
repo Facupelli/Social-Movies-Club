@@ -100,7 +100,7 @@ function Title({ className }: { className?: string }) {
 	return (
 		<p
 			className={cn(
-				"line-clamp-2 font-semibold leading-tight md:text-lg",
+				"line-clamp-2 font-semibold text-pretty leading-tight md:text-lg",
 				className,
 			)}
 		>
@@ -169,12 +169,33 @@ function WatchProviders() {
 
 	return (
 		<div className="md:space-y-2">
-			<Button className="h-auto p-0" onClick={() => refetch()} variant="link">
-				Donde ver?
-			</Button>
+			<div className="flex gap-2">
+				<Button className="h-auto p-0" onClick={() => refetch()} variant="link">
+					Donde ver?
+				</Button>
+
+				{/* JustWatch Attribution */}
+				<div className="flex items-center gap-2 text-muted-foreground text-xs">
+					<span>by</span>
+					<a
+						className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-80"
+						href={"todo"}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						<Image
+							alt="JustWatch"
+							className="h-auto"
+							height={10}
+							src="https://widget.justwatch.com/assets/JW_logo_color_10px.svg"
+							width={60}
+						/>
+					</a>
+				</div>
+			</div>
 
 			{isLoading && (
-				<div className="flex flex-wrap gap-1 pt-2">
+				<div className="flex flex-wrap gap-1 py-1">
 					{[...Array(3)].map((_, idx) => (
 						// biome-ignore lint:reason
 						<div key={idx}>
@@ -185,7 +206,7 @@ function WatchProviders() {
 			)}
 
 			{watchProviders?.data && (
-				<div className="flex flex-wrap gap-1">
+				<div className="flex flex-wrap py-1 gap-1">
 					{hasFlatRateProviders ? (
 						watchProviders.data.flatrate?.map((provider) => (
 							<div key={provider.provider_id}>
@@ -206,25 +227,6 @@ function WatchProviders() {
 					)}
 				</div>
 			)}
-
-			{/* JustWatch Attribution */}
-			<div className="flex items-center gap-2 text-muted-foreground text-xs">
-				<span>by</span>
-				<a
-					className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-80"
-					href={"todo"}
-					rel="noopener noreferrer"
-					target="_blank"
-				>
-					<Image
-						alt="JustWatch"
-						className="h-auto"
-						height={10}
-						src="https://widget.justwatch.com/assets/JW_logo_color_10px.svg"
-						width={60}
-					/>
-				</a>
-			</div>
 		</div>
 	);
 }

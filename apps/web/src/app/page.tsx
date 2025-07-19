@@ -1,14 +1,31 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Calendar, ChevronDown, Search, Star, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useState, useTransition } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import SignInButton from "@/components/sign-in-button";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
@@ -63,8 +80,8 @@ function RenderProperSection({
 	return (
 		<>
 			<SessionMessage />
-			{/* <AggregatedFeed /> */}
-			<Feed />
+			<AggregatedFeed />
+			{/* <Feed /> */}
 		</>
 	);
 }
@@ -154,19 +171,227 @@ function AggregatedFeed() {
 }
 
 function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
+	const lastRating = item.ratings.at(0);
+
+	if (!lastRating) {
+		return null;
+	}
+
+	const otherRatings = item.ratings.slice(1);
+	const hasMoreRatings = otherRatings.length > 0;
+
+	const movieView: MovieView = {
+		tmdbId: item.media.tmdbId,
+		posterPath: item.media.posterPath,
+		score: lastRating.score,
+		title: item.media.title,
+		year: item.media.year,
+		overview: item.media.overview,
+		type: item.media.type,
+	};
+
 	return (
-		<article className="px-2 py-4">
-			<p>{item.media.title}</p>
-			<p>{item.ratingCount}</p>
-			<div>
-				{item.ratings.map((rating) => (
-					<div key={rating.ratingId}>
-						<p>{rating.user.name}</p>
-						<p>{rating.score}</p>
+		<MovieCard
+			movie={movieView}
+			className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent"
+		>
+			<div className="flex flex-col md:flex-row gap-2 md:gap-6">
+				<div className="md:block hidden">
+					<Link
+						href={`/profile/${lastRating.user.id}`}
+						prefetch={false}
+						className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
+					>
+						<Avatar className="size-7 md:size-10">
+							<AvatarImage
+								src={lastRating.user.image || "/placeholder.svg"}
+								alt={lastRating.user.name}
+							/>
+							<AvatarFallback>
+								{lastRating.user.name.charAt(0).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+					</Link>
+				</div>
+
+				<div className="relative flex-shrink-0 w-full md:w-48">
+					<div className="sticky top-0">
+						<div className="relative">
+							<Image
+								unoptimized
+								src={
+									`https://image.tmdb.org/t/p/original${item.media.posterPath}` ||
+									"/placeholder.svg?height=288&width=192"
+								}
+								alt={item.media.title}
+								width={192}
+								height={288}
+								className="rounded-xs object-cover w-full h-auto max-h-[250px]"
+							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xs" />
+							<Badge
+								variant="secondary"
+								className="absolute top-2 right-2 text-xs font-medium bg-black/60 text-white border-0"
+							>
+								{item.media.type === "movie" ? "Movie" : "TV Show"}
+							</Badge>
+							<div className="absolute bottom-3 left-3 right-3 text-white">
+								<p className="text-xs font-medium opacity-90">
+									{item.media.year}
+								</p>
+							</div>
+						</div>
 					</div>
+				</div>
+
+				<div className="flex-1  flex flex-col">
+					<div className="grid ">
+						<div className="flex items-baseline">
+							<div className="flex-1">
+								<MovieCard.Title className="md:text-xl" />
+							</div>
+							<div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+								<span>hace</span>
+								{formatFeedItemTime(item.lastRatingAt)}
+							</div>
+						</div>
+
+						<div className="flex-1 pt-2">
+							<Accordion collapsible type="single">
+								<AccordionItem value="item-1">
+									<AccordionTrigger className="py-0 pb-2">
+										Sinopsis
+									</AccordionTrigger>
+									<AccordionContent>{item.media.overview}</AccordionContent>
+								</AccordionItem>
+							</Accordion>
+							<MovieCard.WatchProviders />
+						</div>
+					</div>
+
+					<div className="mt-auto pt-4 md:pt-2">
+						{/* Latest Rating */}
+						<div className="flex items-center gap-2 md:gap-4 p-3 bg-muted/50 rounded-sm">
+							<div className="flex-1 flex md:justify-between gap-3 md:gap-0 items-center pr-2">
+								<Avatar className="size-7 md:size-10">
+									<AvatarImage
+										src={lastRating.user.image || "/placeholder.svg"}
+										alt={lastRating.user.name}
+									/>
+									<AvatarFallback>
+										{lastRating.user.name.charAt(0).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+								<div>
+									<div className="flex lead items-center gap-2">
+										<span className="font-semibold text-sm">
+											{lastRating.user.name}
+										</span>
+									</div>
+									<span className="text-xs lead text-muted-foreground">
+										{lastRating.user.username}
+									</span>
+								</div>
+							</div>
+
+							{/* Dropdown for Additional Ratings */}
+							{hasMoreRatings && (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											size="sm"
+											className="text-muted-foreground hover:text-foreground"
+										>
+											<Users className="w-4 h-4 mr-1" />+{otherRatings.length}
+											<ChevronDown className="w-3 h-3 ml-1" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="w-80">
+										<DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+											Otras calificaciones
+										</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										{otherRatings.map((rating) => (
+											<DropdownMenuItem
+												key={rating.ratingId}
+												className="p-3 focus:bg-muted/50"
+											>
+												<div className="flex items-center gap-3 w-full">
+													<Avatar className="w-8 h-8">
+														<AvatarImage
+															src={rating.user.image || "/placeholder.svg"}
+															alt={rating.user.name}
+														/>
+														<AvatarFallback className="text-xs">
+															{rating.user.name.charAt(0).toUpperCase()}
+														</AvatarFallback>
+													</Avatar>
+
+													<div className="flex-1 min-w-0">
+														<div className="flex items-center gap-2 mb-1">
+															<span className="font-medium text-sm truncate">
+																{rating.user.name}
+															</span>
+															<span className="text-xs text-muted-foreground">
+																{rating.user.username}
+															</span>
+														</div>
+														<div className="flex items-center justify-between">
+															<ScoreDisplay score={rating.score} />
+															<span className="text-xs text-muted-foreground">
+																{formatFeedItemTime(rating.createdAt)}
+															</span>
+														</div>
+													</div>
+												</div>
+											</DropdownMenuItem>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
+							)}
+
+							<MovieCard.Score />
+						</div>
+
+						{/* Stats */}
+						<div className="flex items-center justify-end gap-4 pt-2 text-xs text-muted-foreground">
+							<div className="flex items-center gap-1">
+								<Users className="w-3 h-3" />
+								{item.ratingCount} total
+							</div>
+							{item.seenAt && (
+								<div className="flex items-center gap-1">
+									<Calendar className="w-3 h-3" />
+									Seen {formatFeedItemTime(item.seenAt)}
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+		</MovieCard>
+	);
+}
+
+function ScoreDisplay({ score }: { score: number }) {
+	const stars = Math.round(score / 2); // Assuming score is out of 10, convert to 5 stars
+
+	return (
+		<div className="flex items-center gap-1">
+			<div className="flex">
+				{[...Array(5)].map((_, i) => (
+					<Star
+						// biome-ignore lint:reason
+						key={i}
+						className={`size-3 ${i < stars ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+					/>
 				))}
 			</div>
-		</article>
+			<span className="text-sm font-medium text-muted-foreground ml-1">
+				{score}/10
+			</span>
+		</div>
 	);
 }
 
