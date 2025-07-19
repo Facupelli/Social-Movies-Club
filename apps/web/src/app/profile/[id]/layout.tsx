@@ -5,7 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ProfileNav from "@/components/profile-nav";
 import { FollowService } from "@/follows/follow.service";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import {
 	getIsFollowingUser,
 	getUserProfile,
@@ -116,10 +116,7 @@ async function UserInfo({
 			</div>
 			<div>
 				<p className="font-bold">{profileUser.name}</p>
-				<UpsertUsernameDialog
-					username={profileUser.username}
-					profileUserId={profileUser.id}
-				/>
+				<UpsertUsernameDialog />
 			</div>
 			<div className="flex items-center gap-2 font-bold text-sm">
 				<p>

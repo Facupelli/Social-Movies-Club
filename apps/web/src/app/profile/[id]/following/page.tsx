@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { FollowService } from "@/follows/follow.service";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { FollowUserButton } from "@/users/components/follow-user-button";
 
 const fetchFollowingUsers = async (userId: string) => {

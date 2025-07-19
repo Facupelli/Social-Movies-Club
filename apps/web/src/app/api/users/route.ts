@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import type { User } from "@/infra/postgres/schema";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { UserService } from "@/users/user.service";
 
 export async function GET(request: NextRequest) {

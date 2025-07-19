@@ -1,16 +1,16 @@
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth";
 
 export async function withAuth<T>(
-  action: (session: { user: { id: string } }) => Promise<T>
+	action: (session: { user: { id: string } }) => Promise<T>,
 ): Promise<T | { success: false; error: string }> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
 
-  if (!session) {
-    return { success: false, error: 'Unauthorized' };
-  }
+	if (!session) {
+		return { success: false, error: "Unauthorized" };
+	}
 
-  return action(session);
+	return action(session);
 }

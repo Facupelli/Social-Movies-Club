@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { UserService } from "@/users/user.service";
 import type { GetUserRatingMovies } from "@/users/user.types";
 import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";

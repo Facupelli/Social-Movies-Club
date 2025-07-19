@@ -1,19 +1,19 @@
 import { headers } from "next/headers";
 import type { User } from "@/infra/postgres/schema";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { UserService } from "@/users/user.service";
 
 export async function GET() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
 
-  if (!session) {
-    return Response.json({ success: false, error: "Unauthorized" });
-  }
+	if (!session) {
+		return Response.json({ success: false, error: "Unauthorized" });
+	}
 
-  const userService = new UserService();
+	const userService = new UserService();
 
-  const res: User | null = await userService.getUser(session.user.id);
-  return Response.json(res);
+	const res: User | null = await userService.getUser(session.user.id);
+	return Response.json(res);
 }

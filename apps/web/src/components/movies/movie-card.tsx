@@ -6,7 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { createContext, useActionState, useContext } from "react";
 import { QUERY_KEYS } from "@/lib/app.constants";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { cn } from "@/lib/utils";
 import { useMediaWatchProviders } from "@/media/hooks/use-media-watch-providers";
 import { type MediaType, MediaTypeEnum } from "@/media/media.type";

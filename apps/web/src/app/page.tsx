@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Calendar, ChevronDown, Search, Star, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useState, useTransition } from "react";
+import { Suspense, useDeferredValue, useState, useTransition } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import SignInButton from "@/components/sign-in-button";
@@ -28,12 +28,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import dayjs from "@/lib/days";
-import { useIsMobile } from "@/lib/use-mobile";
+import { useIsMobile } from "@/lib/hooks/use-mobile";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
+import { WelcomeDialog } from "@/users/components/welcome-dialog";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
@@ -52,13 +53,19 @@ export default function HomePage() {
 	};
 
 	return (
-		<div className="min-h-svh flex-1 py-6 md:min-h-auto">
-			<div className="px-2 pb-2 md:px-10 md:pb-6">
-				<SearchInput onChange={handleSearch} />
-			</div>
+		<>
+			<Suspense>
+				<WelcomeDialog />
+			</Suspense>
 
-			<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
-		</div>
+			<div className="min-h-svh flex-1 py-6 md:min-h-auto">
+				<div className="px-2 pb-2 md:px-10 md:pb-6">
+					<SearchInput onChange={handleSearch} />
+				</div>
+
+				<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
+			</div>
+		</>
 	);
 }
 
@@ -217,7 +224,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 					</Link>
 				</div>
 
-				<div className="relative flex-shrink-0 w-full md:w-48">
+				<div className="relative flex-shrink-0 w-full md:w-44">
 					<div className="sticky top-0">
 						<div className="relative">
 							<Image
@@ -231,7 +238,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 								alt={item.media.title}
 								width={192}
 								height={288}
-								className="rounded-xs object-cover w-full h-auto max-h-[250px]"
+								className="rounded-xs object-cover w-full h-auto max-h-[250px] md:max-h-[300px]"
 							/>
 							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xs" />
 							<Badge

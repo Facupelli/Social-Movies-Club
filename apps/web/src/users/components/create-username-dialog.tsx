@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
+import { useIsOwner } from "@/lib/hooks/use-is-owner";
 import { updateUserName } from "../actions/update-username";
 
 const initialState = {
@@ -24,14 +25,17 @@ const initialState = {
 };
 
 export function UpsertUsernameDialog({
-	username,
-	profileUserId,
+	isOpen,
+	showTrigger,
 }: {
-	username: string | null;
-	profileUserId: string;
+	isOpen?: boolean;
+	showTrigger?: boolean;
 }) {
-	const [open, setOpen] = useState(false);
 	const { data: session } = authClient.useSession();
+	const [open, setOpen] = useState(!!isOpen);
+
+	const isOwner = useIsOwner();
+	const username = session?.user.username;
 
 	const handleUpdateUsername = async (
 		_state: typeof initialState,
@@ -52,24 +56,26 @@ export function UpsertUsernameDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild className="cursor-pointer">
-				<Button
-					size="sm"
-					disabled={!session || session.user.id !== profileUserId}
-					className="px-0 h-auto"
-					variant="link"
-				>
-					{username ? username : "Crear nombre de usuario"}
-				</Button>
-			</DialogTrigger>
+			{showTrigger !== false && (
+				<DialogTrigger asChild className="cursor-pointer">
+					<Button
+						size="sm"
+						disabled={!session || !isOwner}
+						className="px-0 h-auto"
+						variant="link"
+					>
+						{username ? username : "Crear nombre de usuario"}
+					</Button>
+				</DialogTrigger>
+			)}
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
 						{username ? "Actualizar" : "Crear"} nombre de usuario
 					</DialogTitle>
 					<DialogDescription>
-						Al crear un nombre de usuario, los demás cinéfilos podrán buscarte
-						en el buscador principal escribiendo tu @ para seguirte!
+						Al crear un nombre de usuario, los demás usuarios podrán buscarte en
+						el buscador principal escribiendo tu @ para seguirte!
 					</DialogDescription>
 
 					<form className="pt-4">

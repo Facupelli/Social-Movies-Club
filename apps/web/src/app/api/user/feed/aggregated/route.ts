@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { UserService } from "@/users/user.service";
 import { validateGetUserFeedQuery } from "@/users/user-validation.service";

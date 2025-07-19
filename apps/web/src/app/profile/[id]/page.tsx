@@ -11,12 +11,7 @@ import {
 	Users,
 	UserX,
 } from "lucide-react";
-import {
-	useParams,
-	usePathname,
-	useRouter,
-	useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { MovieCard } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
@@ -32,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
-import { authClient } from "@/lib/auth-client";
+import { useIsOwner } from "@/lib/hooks/use-is-owner";
 import { cn } from "@/lib/utils";
 import { TYPE_FILTER_DICT } from "@/media/media.constants";
 import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
@@ -153,15 +148,11 @@ export default function ProfilePage({
 }
 
 function RatingFilters() {
-	const { data: session } = authClient.useSession();
-	const params = useParams<{ id: string }>();
-
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
-	const isOwner = session?.user.id === params.id;
-
+	const isOwner = useIsOwner();
 	const { filters } = useUserMoviesFilters();
 
 	const updateSearchParams = (key: string, value: string) => {
