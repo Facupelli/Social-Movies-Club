@@ -10,6 +10,7 @@ export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {
 		title: m.title,
 		year: m.year,
 		posterPath: m.posterPath,
+		backdropPath: m.backdropPath,
 		overview: m.overview,
 		type: m.type,
 	};
@@ -22,6 +23,7 @@ export function dbMovieToView(r: UserRatings): MovieView {
 		title: r.title,
 		year: r.year,
 		posterPath: r.posterPath,
+		backdropPath: r.backdropPath,
 		score: r.score,
 		overview: r.overview,
 		type: r.type,
@@ -35,6 +37,7 @@ export function dbWatchlistMovieToView(w: UserWatchlist): MovieView {
 		title: w.movieTitle,
 		year: w.movieYear,
 		posterPath: w.moviePosterPath,
+		backdropPath: w.movieBackdropPath,
 		overview: w.movieOverview,
 		type: w.movieType,
 	};

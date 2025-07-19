@@ -97,6 +97,7 @@ export const media = pgTable(
 		title: text("title").notNull(),
 		year: text("year").notNull(),
 		posterPath: text("poster_path").notNull(),
+		backdropPath: text("backdrop_path").notNull(),
 		overview: text("overview").default("Defecto para no borrar datos"),
 	},
 	(table) => [unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type)],

@@ -28,6 +28,7 @@ export class UserMediaService {
 
 		const movieData: Omit<Media, "id"> = {
 			posterPath: media.posterPath,
+			backdropPath: media.backdropPath,
 			title: media.title,
 			year: media.year,
 			tmdbId: media.id,
@@ -45,6 +46,7 @@ export class UserMediaService {
 
 		const movieData: Omit<Media, "id"> = {
 			posterPath: media.posterPath,
+			backdropPath: media.backdropPath,
 			title: media.title,
 			year: media.year,
 			tmdbId: media.id,

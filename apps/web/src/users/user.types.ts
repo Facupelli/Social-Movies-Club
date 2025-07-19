@@ -14,6 +14,7 @@ export type UserRatings = {
 	title: string;
 	year: string;
 	posterPath: string;
+	backdropPath: string;
 	overview: string;
 	tmdbId: number;
 	type: MediaType;
@@ -34,6 +35,7 @@ export type FeedItemRaw = {
 	movie_title: string;
 	movie_year: string;
 	movie_poster: string;
+	movie_backdrop: string;
 	movie_overview: string;
 	movie_type: MediaType;
 	movie_tmdb_id: number;
@@ -52,6 +54,7 @@ export type FeedItem = {
 	movieTitle: string;
 	movieYear: string;
 	moviePoster: string;
+	movieBackdrop: string;
 	movieTmdbId: number;
 	movieOverview: string;
 	movieType: MediaType;

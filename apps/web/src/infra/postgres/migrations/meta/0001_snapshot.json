@@ -1,6 +1,6 @@
 {
-  "id": "4664d5b6-e89d-4bee-8e24-ed742265719e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "ba50eb1d-3d55-4e1c-a80e-86096d00d44d",
+  "prevId": "4664d5b6-e89d-4bee-8e24-ed742265719e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -565,6 +565,12 @@
         },
         "poster_path": {
           "name": "poster_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "backdrop_path": {
+          "name": "backdrop_path",
           "type": "text",
           "primaryKey": false,
           "notNull": true

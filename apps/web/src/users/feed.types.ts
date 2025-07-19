@@ -15,6 +15,7 @@ export interface MediaCompact {
 	tmdbId: number;
 	overview: string;
 	posterPath: string;
+	backdropPath: string;
 }
 
 export interface RatingInFeed {

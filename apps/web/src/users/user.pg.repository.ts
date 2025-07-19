@@ -87,6 +87,7 @@ export class UserPgRepository {
 				m.id as "mediaId",
 				m.title,
 				m.poster_path as "posterPath",
+				m.backdrop_path as "backdropPath",
 				l.ratings,
 				l.updated_at as "udpatedAt"
 			FROM latest l
@@ -117,13 +118,14 @@ export class UserPgRepository {
 					fmb.last_rating_at as "lastRatingAt",
 					fmb.seen_at as "seenAt",
 					jsonb_build_object(
-						'id',         m.id,
-						'tmdbId',     m.tmdb_id,
-						'type',       m.type,
-						'title',      m.title,
-						'year',       m.year,
-						'posterPath', m.poster_path,
-						'overview',   m.overview
+						'id',           m.id,
+						'tmdbId',       m.tmdb_id,
+						'type',         m.type,
+						'title',        m.title,
+						'year',         m.year,
+						'posterPath',   m.poster_path,
+						'backdropPath', m.backdrop_path,
+						'overview',     m.overview
 					) AS media,
 					(
 						SELECT json_agg(
@@ -192,6 +194,7 @@ export class UserPgRepository {
           m.title as movie_title,
           m.year as movie_year,
           m.poster_path as movie_poster,
+					m.backdrop_path as movie_backdrop,
           m.type as movie_type,
           m.overview as movie_overview,
           r.score,
@@ -218,6 +221,7 @@ export class UserPgRepository {
 				movieTitle: row.movie_title,
 				movieYear: row.movie_year,
 				moviePoster: row.movie_poster,
+				movieBackdrop: row.movie_backdrop,
 				movieType: row.movie_type,
 				score: row.score,
 				ratedAt: row.rated_at,
@@ -273,15 +277,16 @@ export class UserPgRepository {
 
 			let dataQuery = sql`
         SELECT
-          r.media_id     AS "movieId",
-          r.score        AS "score",
-          r.created_at   AS "createdAt",
-          m.title        AS "title",
-          m.year         AS "year",
-          m.poster_path  AS "posterPath",
-          m.overview     AS "overview",
-          m.tmdb_id      AS "tmdbId",
-          m.type         AS "type"
+          r.media_id       AS "movieId",
+          r.score,
+          r.created_at     AS "createdAt",
+          m.title,
+          m.year,
+          m.poster_path    AS "posterPath",
+          m.backdrop_path  AS "backdropPath",
+          m.overview,
+          m.tmdb_id        AS "tmdbId",
+          m.type           
         FROM ${ratings} r
         JOIN ${media}  m ON m.id = r.media_id
         WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}

@@ -30,6 +30,7 @@ export interface MovieView {
 	title: string;
 	year: string;
 	posterPath: string;
+	backdropPath: string;
 	score?: number;
 	overview: string;
 	type: MediaType;
@@ -169,7 +170,7 @@ function WatchProviders() {
 
 	return (
 		<div className="md:space-y-2">
-			<div className="flex gap-2">
+			<div className="flex flex-wrap gap-x-2">
 				<Button className="h-auto p-0" onClick={() => refetch()} variant="link">
 					Donde ver?
 				</Button>

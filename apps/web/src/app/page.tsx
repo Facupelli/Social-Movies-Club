@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import dayjs from "@/lib/days";
+import { useIsMobile } from "@/lib/use-mobile";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
@@ -171,6 +172,7 @@ function AggregatedFeed() {
 }
 
 function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
+	const isMobile = useIsMobile();
 	const lastRating = item.ratings.at(0);
 
 	if (!lastRating) {
@@ -183,6 +185,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 	const movieView: MovieView = {
 		tmdbId: item.media.tmdbId,
 		posterPath: item.media.posterPath,
+		backdropPath: item.media.backdropPath,
 		score: lastRating.score,
 		title: item.media.title,
 		year: item.media.year,
@@ -220,7 +223,9 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 							<Image
 								unoptimized
 								src={
-									`https://image.tmdb.org/t/p/original${item.media.posterPath}` ||
+									(isMobile
+										? `https://image.tmdb.org/t/p/w500${item.media.backdropPath}`
+										: `https://image.tmdb.org/t/p/original${item.media.posterPath}`) ||
 									"/placeholder.svg?height=288&width=192"
 								}
 								alt={item.media.title}
@@ -449,6 +454,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 	const movieView: MovieView = {
 		tmdbId: item.movieTmdbId,
 		posterPath: item.moviePoster,
+		backdropPath: item.movieBackdrop,
 		score: item.score,
 		title: item.movieTitle,
 		year: item.movieYear,

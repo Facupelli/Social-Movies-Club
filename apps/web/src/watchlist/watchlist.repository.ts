@@ -10,6 +10,7 @@ export type UserWatchlist = {
 	movieTitle: string;
 	movieOverview: string;
 	moviePosterPath: string;
+	movieBackdropPath: string;
 	movieYear: string;
 	movieType: MediaType;
 };
@@ -45,6 +46,7 @@ export class WatchlistPgRepository {
           m.title AS "movieTitle",
           m.overview AS "movieOverview",
           m.poster_path AS "moviePosterPath",
+          m.backdrop_path AS "movieBackdropPath",
           m.year AS "movieYear",
           m.type AS "movieType"
         FROM ${watchlist} w  
