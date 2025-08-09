@@ -47,6 +47,10 @@ export default function HomePage() {
 	const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
 	const handleSearch = (value: string) => {
+		if (value.length !== 0 && value.length < 4) {
+			return;
+		}
+
 		startTransition(() => {
 			setQuery(value);
 		});
