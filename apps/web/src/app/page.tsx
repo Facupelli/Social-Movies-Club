@@ -35,7 +35,7 @@ import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
 import { TYPE_DICT } from "@/media/media.constants";
-import { WelcomeDialog } from "@/users/components/welcome-dialog";
+import { UpsertUsernameDialog } from "@/users/components/upsert-username-dialog";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
@@ -56,7 +56,7 @@ export default function HomePage() {
 	return (
 		<>
 			<Suspense>
-				<WelcomeDialog />
+				<UpsertUsernameDialog showTrigger={false} />
 			</Suspense>
 
 			<div className="min-h-svh flex-1 py-6 md:min-h-auto">
@@ -181,7 +181,6 @@ function AggregatedFeed() {
 
 function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 	const isMobile = useIsMobile();
-	console.log("AGGRGEATTED ITEM", { item });
 	const lastRating = item.ratings?.at(0);
 
 	if (!lastRating) {
