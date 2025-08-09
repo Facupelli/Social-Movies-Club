@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Calendar, ChevronDown, Search, Star, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useDeferredValue, useState, useTransition } from "react";
+import { useDeferredValue, useState, useTransition } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import SignInButton from "@/components/sign-in-button";
@@ -35,7 +35,6 @@ import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
 import { TYPE_DICT } from "@/media/media.constants";
-import { UpsertUsernameDialog } from "@/users/components/upsert-username-dialog";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
@@ -54,19 +53,13 @@ export default function HomePage() {
 	};
 
 	return (
-		<>
-			<Suspense>
-				<UpsertUsernameDialog showTrigger={false} />
-			</Suspense>
-
-			<div className="min-h-svh flex-1 py-6 md:min-h-auto">
-				<div className="px-2 pb-2 md:px-10 md:pb-6">
-					<SearchInput onChange={handleSearch} />
-				</div>
-
-				<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
+		<div className="min-h-svh flex-1 py-6 md:min-h-auto">
+			<div className="px-2 pb-2 md:px-10 md:pb-6">
+				<SearchInput onChange={handleSearch} />
 			</div>
-		</>
+
+			<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
+		</div>
 	);
 }
 

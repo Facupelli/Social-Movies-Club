@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,41 +18,20 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/auth-client";
 import { useIsOwner } from "@/lib/hooks/use-is-owner";
 import type { ApiResponse } from "@/lib/safe-execute";
-import { updateUserName } from "../actions/update-username";
+import { updateUsername } from "../actions/update-username";
 
-export function UpsertUsernameDialog({
-	showTrigger,
-}: {
-	isOpen?: boolean;
-	showTrigger?: boolean;
-}) {
-	const router = useRouter();
+export function UpsertUsernameDialog() {
 	const { data: session } = authClient.useSession();
-	const searchParams = useSearchParams();
 	const [open, setOpen] = useState(false);
 
 	const { isOwner } = useIsOwner();
 	const username = session?.user.username;
 
-	useEffect(() => {
-		if (!session?.user) {
-			router.push("/");
-		}
-	}, [session, router.push]);
-
-	useEffect(() => {
-		const welcomeParam = searchParams.get("welcome");
-
-		if (welcomeParam === "true") {
-			setOpen(true);
-		}
-	}, [searchParams.get]);
-
 	const handleUpdateUsername = async (
 		_state: ApiResponse<void>,
 		formData: FormData,
 	) => {
-		const result = await updateUserName(formData);
+		const result = await updateUsername(formData);
 		if (result.success) {
 			setOpen(false);
 		}
@@ -68,18 +46,16 @@ export function UpsertUsernameDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			{showTrigger !== false && (
-				<DialogTrigger asChild className="cursor-pointer">
-					<Button
-						size="sm"
-						disabled={!session || !isOwner}
-						className="px-0 h-auto"
-						variant="link"
-					>
-						{username ? username : "Crear nombre de usuario"}
-					</Button>
-				</DialogTrigger>
-			)}
+			<DialogTrigger asChild className="cursor-pointer">
+				<Button
+					size="sm"
+					disabled={!session || !isOwner}
+					className="px-0 h-auto"
+					variant="link"
+				>
+					{username ? username : "Crear nombre de usuario"}
+				</Button>
+			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
