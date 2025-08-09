@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
@@ -27,19 +27,27 @@ export function UpsertUsernameDialog({
 	isOpen?: boolean;
 	showTrigger?: boolean;
 }) {
+	const router = useRouter();
 	const { data: session } = authClient.useSession();
 	const searchParams = useSearchParams();
-	const welcomeSearchParam = searchParams.get("welcome");
 	const [open, setOpen] = useState(false);
 
 	const { isOwner } = useIsOwner();
 	const username = session?.user.username;
 
 	useEffect(() => {
-		if (welcomeSearchParam === "true") {
+		if (!session?.user) {
+			router.push("/");
+		}
+	}, [session, router.push]);
+
+	useEffect(() => {
+		const welcomeParam = searchParams.get("welcome");
+
+		if (welcomeParam === "true") {
 			setOpen(true);
 		}
-	}, [welcomeSearchParam]);
+	}, [searchParams.get]);
 
 	const handleUpdateUsername = async (
 		_state: ApiResponse<void>,
