@@ -181,6 +181,7 @@ function AggregatedFeed() {
 
 function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 	const isMobile = useIsMobile();
+	console.log("AGGRGEATTED ITEM", { item });
 	const lastRating = item.ratings.at(0);
 
 	if (!lastRating) {

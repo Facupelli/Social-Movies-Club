@@ -19,6 +19,8 @@ export default function GlobalError({
 				<button type="button" onClick={handleGlobalError}>
 					Try again
 				</button>
+
+				<div>{JSON.stringify(error)}</div>
 			</body>
 		</html>
 	);
