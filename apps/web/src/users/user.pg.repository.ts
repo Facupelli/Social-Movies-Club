@@ -457,16 +457,21 @@ export class UserPgRepository {
 							DO UPDATE SET
 								rating_count = ${feedMediaBucket.ratingCount} + 1,
 								last_rating_at = now()
-							RETURNING id
+							RETURNING id, user_id
 						`);
 
-						const bucketResult = bucketResults[0];
-
-						await tx.execute(sql`
+						if (bucketResults.length > 0) {
+							await tx.execute(sql`
 								INSERT INTO ${feedItemRatings} (aggregated_feed_item_id, rating_id, added_at)
-								VALUES (${bucketResult.id}, ${rating.id}, now())
-								ON CONFLICT DO NOTHING
+								VALUES ${sql.join(
+									bucketResults.map(
+										(bucket) => sql`(${bucket.id}, ${rating.id}, now())`,
+									),
+									sql`, `,
+								)}
+							ON CONFLICT (aggregated_feed_item_id, rating_id) DO NOTHING
 						`);
+						}
 						// -------------------------
 
 						feedItemsCreated = followersToProcess.length;
