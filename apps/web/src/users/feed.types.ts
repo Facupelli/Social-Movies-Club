@@ -32,7 +32,7 @@ export type AggregatedFeedItem = {
 	lastRatingAt: string; // ISO-8601
 	seenAt: string | null;
 	media: MediaCompact;
-	ratings: RatingInFeed[];
+	ratings: RatingInFeed[] | null;
 };
 
 export interface AggregatedFeedResponse {

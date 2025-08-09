@@ -182,14 +182,14 @@ function AggregatedFeed() {
 function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 	const isMobile = useIsMobile();
 	console.log("AGGRGEATTED ITEM", { item });
-	const lastRating = item.ratings.at(0);
+	const lastRating = item.ratings?.at(0);
 
 	if (!lastRating) {
 		return null;
 	}
 
-	const otherRatings = item.ratings.slice(1);
-	const hasMoreRatings = otherRatings.length > 0;
+	const otherRatings = item.ratings?.slice(1);
+	const hasMoreRatings = otherRatings && otherRatings.length > 0;
 
 	const movieView: MovieView = {
 		tmdbId: item.media.tmdbId,
