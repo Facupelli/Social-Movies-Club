@@ -7,7 +7,7 @@ export default function SignInButton() {
 			provider: "google",
 			callbackURL: "/",
 			errorCallbackURL: "/error",
-			newUserCallbackURL: "/?welcome=true",
+			newUserCallbackURL: "/onboarding/username",
 			// disableRedirect: true,
 		});
 	};
