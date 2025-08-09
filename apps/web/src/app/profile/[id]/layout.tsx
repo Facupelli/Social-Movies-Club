@@ -116,7 +116,7 @@ async function UserInfo({
 			</div>
 			<div>
 				<p className="font-bold">{profileUser.name}</p>
-				<UpsertUsernameDialog />
+				<UpsertUsernameDialog username={profileUser.username} />
 			</div>
 			<div className="flex items-center gap-2 font-bold text-sm">
 				<p>

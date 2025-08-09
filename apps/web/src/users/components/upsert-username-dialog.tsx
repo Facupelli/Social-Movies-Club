@@ -20,12 +20,15 @@ import { useIsOwner } from "@/lib/hooks/use-is-owner";
 import type { ApiResponse } from "@/lib/safe-execute";
 import { updateUsername } from "../actions/update-username";
 
-export function UpsertUsernameDialog() {
+export function UpsertUsernameDialog({
+	username,
+}: {
+	username: string | null;
+}) {
 	const { data: session } = authClient.useSession();
 	const [open, setOpen] = useState(false);
 
 	const { isOwner } = useIsOwner();
-	const username = session?.user.username;
 
 	const handleUpdateUsername = async (
 		_state: ApiResponse<void>,
