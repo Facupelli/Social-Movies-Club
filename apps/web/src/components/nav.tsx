@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Bell, Home, Info, User2Icon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { getUserNotificationsCountQueryOptions } from "@/users/hooks/use-user-notifications-count";
@@ -26,22 +27,27 @@ export function Nav() {
 		<nav className="fixed z-10 bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar p-4 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:p-8">
 			<ul className="flex gap-16 md:grid md:gap-4">
 				<li>
-					<a className="flex items-center gap-2" href="/">
+					<Link prefetch={false} className="flex items-center gap-2" href="/">
 						<Home />
 						<span className="hidden md:block">Inicio</span>
-					</a>
+					</Link>
 				</li>
 				<li>
-					<a
+					<Link
+						prefetch={false}
 						className="flex items-center gap-2"
 						href={`/profile/${session?.user.id}`}
 					>
 						<User2Icon />
 						<span className="hidden md:block">Perfil</span>
-					</a>
+					</Link>
 				</li>
 				<li>
-					<a className="flex items-center gap-2" href="/notifications">
+					<Link
+						prefetch={false}
+						className="flex items-center gap-2"
+						href="/notifications"
+					>
 						<div className="relative">
 							{notificationsCount && notificationsCount > 0 ? (
 								<div className="absolute -right-1 -top-1 bg-primary size-4 rounded-full flex items-center justify-center text-sm">
@@ -51,13 +57,17 @@ export function Nav() {
 							<Bell />
 						</div>
 						<span className="hidden md:block">Notificaciones</span>
-					</a>
+					</Link>
 				</li>
 				<li>
-					<a className="flex items-center gap-2" href="/credits">
+					<Link
+						prefetch={false}
+						className="flex items-center gap-2"
+						href="/credits"
+					>
 						<Info />
 						<span className="hidden md:block">Créditos</span>
-					</a>
+					</Link>
 				</li>
 			</ul>
 
