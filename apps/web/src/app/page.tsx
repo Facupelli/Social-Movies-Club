@@ -29,8 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth/auth-client";
-import dayjs from "@/lib/days";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
+import { formatFeedItemTime } from "@/lib/utils";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
 import { useSearchUsers } from "@/media/hooks/use-serach-users";
@@ -612,35 +612,4 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 			</MovieGrid>
 		</div>
 	);
-}
-
-function formatFeedItemTime(utcTimestamp: dayjs.ConfigType): string {
-	const local = dayjs.utc(utcTimestamp).local();
-
-	const now = dayjs();
-
-	const diffMinutes = now.diff(local, "minute");
-	const diffHours = now.diff(local, "hour");
-	const diffDays = now.diff(local, "day");
-
-	/* Today */
-	if (local.isToday()) {
-		if (diffMinutes < 60) {
-			return `${diffMinutes}m`;
-		}
-		return `${diffHours}h`;
-	}
-
-	/* Yesterday */
-	if (local.isYesterday()) {
-		return "1d";
-	}
-
-	/* This week (2-6 days ago) */
-	if (diffDays < 7) {
-		return `${diffDays}d`;
-	}
-
-	/* Older than a week */
-	return local.format("YYYY/MM/DD");
 }

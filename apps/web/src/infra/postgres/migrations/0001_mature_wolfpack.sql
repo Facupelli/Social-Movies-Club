@@ -1,1 +1,0 @@
-ALTER TABLE "media" ADD COLUMN "backdrop_path" text NOT NULL;

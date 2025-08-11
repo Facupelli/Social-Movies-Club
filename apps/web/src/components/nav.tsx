@@ -1,21 +1,25 @@
 "use client";
 
-import { Home, Info, User2Icon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Bell, Home, Info, User2Icon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
+import { getUserNotificationsCountQueryOptions } from "@/users/hooks/use-user-notifications-count";
 import SignInButton from "./sign-in-button";
 import { Button } from "./ui/button";
 
 export function Nav() {
-	const {
-		data: session,
-		// isPending, //loading state
-		// error, //error object
-		// refetch, //refetch the session
-	} = authClient.useSession();
+	const router = useRouter();
+	const { data: session } = authClient.useSession();
+
+	const { data: notificationsCount } = useQuery(
+		getUserNotificationsCountQueryOptions,
+	);
 
 	const handleLogOut = async () => {
 		await authClient.signOut();
+		router.push("/");
 	};
 
 	return (
@@ -34,6 +38,19 @@ export function Nav() {
 					>
 						<User2Icon />
 						<span className="hidden md:block">Perfil</span>
+					</a>
+				</li>
+				<li>
+					<a className="flex items-center gap-2" href="/notifications">
+						<div className="relative">
+							{notificationsCount && notificationsCount > 0 ? (
+								<div className="absolute -right-1 -top-1 bg-primary size-4 rounded-full flex items-center justify-center text-sm">
+									{notificationsCount}
+								</div>
+							) : null}
+							<Bell />
+						</div>
+						<span className="hidden md:block">Notificaciones</span>
 					</a>
 				</li>
 				<li>

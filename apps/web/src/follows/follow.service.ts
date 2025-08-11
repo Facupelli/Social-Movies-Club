@@ -1,5 +1,16 @@
+import {
+	NotificationEventRegistry,
+	type UserFollowedEvent,
+} from "@/notifications/notification-event-handler";
+import { NotificationService } from "@/notifications/notifications.service";
+import { UserService } from "@/users/user.service";
 import { FollowsPgRepository } from "./follows.pg.repository";
 import type { GetFollowingUsers, GetUserFollowsInfoMap } from "./follows.type";
+
+const notificationService = new NotificationService();
+const eventRegistry = new NotificationEventRegistry(notificationService);
+
+const userService = new UserService();
 
 export class FollowService {
 	private followPgRepository: FollowsPgRepository;
@@ -36,7 +47,27 @@ export class FollowService {
 			throw new Error("User is already being followed");
 		}
 
-		await this.followPgRepository.followUser(userId, followedUserId);
+		try {
+			await this.followPgRepository.followUser(userId, followedUserId);
+
+			const user = await userService.getUser(userId);
+
+			if (!user || !user.username) {
+				return;
+			}
+
+			const event: UserFollowedEvent = {
+				followerId: userId,
+				followedUserId,
+				followerUsername: user.username,
+				followerImage: user.image,
+				timestamp: new Date(),
+			};
+
+			await eventRegistry.handleEvent("user_followed", event);
+		} catch (error) {
+			console.log({ error });
+		}
 	}
 
 	async unfollowUser(userId: string, followedUserId: string): Promise<void> {
