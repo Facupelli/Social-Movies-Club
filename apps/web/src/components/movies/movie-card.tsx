@@ -15,6 +15,7 @@ import { type MediaType, MediaTypeEnum } from "@/media/media.type";
 import { getUserWatchlistQueryOptions } from "@/users/hooks/use-user-watchlist";
 import { addMovieToWatchlist } from "@/watchlist/actions/add-movie";
 import { removeMovieFromWatchlist } from "@/watchlist/actions/remove-movie";
+import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-button";
 import { SubmitButton } from "../submit-button";
 import {
 	Accordion,
@@ -167,6 +168,14 @@ function WatchProviders() {
 		);
 	}
 
+	if (!watchProviders?.data) {
+		return (
+			<div className="text-muted-foreground text-xs">
+				No esta en ninguna plataforma :(
+			</div>
+		);
+	}
+
 	const hasFlatRateProviders =
 		watchProviders?.data?.flatrate && watchProviders.data.flatrate.length > 0;
 
@@ -235,69 +244,8 @@ function WatchProviders() {
 }
 
 function WatchlistButton() {
-	const queryClient = useQueryClient();
 	const { movie } = useMovieCardContext();
-	const { data: session } = authClient.useSession();
-	const { data: userWatchlist } = useQuery(getUserWatchlistQueryOptions);
-
-	const { isProfilePage } = useIsOwner();
-
-	const handleAddMovieToWatchlist = async (
-		_state: ApiResponse<void>,
-		formData: FormData,
-	) => {
-		const result = await addMovieToWatchlist(formData);
-		if (result.success) {
-			queryClient.invalidateQueries({
-				queryKey: QUERY_KEYS.USER_WATCHLIST,
-			});
-		}
-
-		return result;
-	};
-
-	const [_, addAction] = useActionState(handleAddMovieToWatchlist, {
-		success: false,
-		error: "",
-	});
-
-	const [__, removeAction] = useActionState(removeMovieFromWatchlist, {
-		success: false,
-		error: "",
-	});
-
-	const userMovie = userWatchlist?.[movie.tmdbId];
-	const isMovieInWatchlist = !!userMovie;
-
-	return (
-		<form>
-			<input name="movieTMDBId" type="hidden" value={movie.tmdbId} />
-			<input name="userId" type="hidden" value={session?.user.id} />
-			<input name="type" type="hidden" value={movie.type} />
-
-			{isMovieInWatchlist ? (
-				!isProfilePage && (
-					<SubmitButton
-						hideLoadingText
-						className="w-full"
-						formAction={removeAction}
-						size="sm"
-					>
-						<EyeOff className="size-4 fill-secondary-foreground" />
-					</SubmitButton>
-				)
-			) : (
-				<SubmitButton
-					hideLoadingText
-					className="w-full"
-					formAction={addAction}
-					size="sm"
-				>
-					<Eye className="size-4" />
-				</SubmitButton>
-			)}
-		</form>
-	);
+	return <AddToWatchlistButton tmdbId={movie.tmdbId} type={movie.type} />;
 }
 
 function Rate() {

@@ -33,12 +33,13 @@ import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { formatFeedItemTime } from "@/lib/utils";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
-import { useSearchUsers } from "@/media/hooks/use-serach-users";
+import { useSearchUsers } from "@/media/hooks/use-search-users";
 import { TYPE_DICT } from "@/media/media.constants";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
 import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
 import type { FeedItem } from "@/users/user.types";
+import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-button";
 
 export default function HomePage() {
 	const [query, setQuery] = useState("");
@@ -86,8 +87,8 @@ function RenderProperSection({
 	return (
 		<>
 			<SessionMessage />
-			<AggregatedFeed />
-			{/* <Feed /> */}
+			{/* <AggregatedFeed /> */}
+			<Feed />
 		</>
 	);
 }
@@ -456,6 +457,8 @@ function Feed() {
 }
 
 function FeedItemCard({ item }: { item: FeedItem }) {
+	const isMobile = useIsMobile();
+
 	const movieView: MovieView = {
 		tmdbId: item.movieTmdbId,
 		posterPath: item.moviePoster,
@@ -468,56 +471,134 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 	};
 
 	return (
-		<article className="px-2 py-4" key={item.feedItemId}>
-			<div className="flex items-start gap-2 md:gap-4">
-				<Link
-					href={`/profile/${item.actorId}`}
-					prefetch={false}
-					className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
-				>
-					<Image
-						alt={item.actorName}
-						className="h-auto rounded-full object-cover"
-						height={50}
-						src={item.actorImage}
-						unoptimized
-						width={50}
-					/>
-				</Link>
-
-				<MovieCard
-					className="flex-1 border-none bg-transparent"
-					movie={movieView}
-				>
-					<Link href={`/profile/${item.actorId}`} prefetch={false}>
-						{item.actorName}{" "}
-						<span className="text-secondary-foreground/30 text-sm">
-							calificó hace
-						</span>{" "}
-						<span className="text-secondary-foreground/30 text-sm">
-							{formatFeedItemTime(item.ratedAt)}
-						</span>
+		<MovieCard
+			movie={movieView}
+			className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent"
+		>
+			<div className="flex flex-col md:flex-row gap-2 md:gap-6">
+				<div className="md:block hidden">
+					<Link
+						href={`/profile/${item.actorId}`}
+						prefetch={false}
+						className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
+					>
+						<Avatar className="size-7 md:size-10">
+							<AvatarImage
+								src={item.actorImage || "/placeholder.svg"}
+								alt={item.actorName}
+							/>
+							<AvatarFallback>
+								{item.actorName.charAt(0).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
 					</Link>
+				</div>
 
-					<div className="flex gap-4 md:pt-4">
-						<MovieCard.Poster size="small" />
-						<div className="space-y-2">
-							<MovieCard.Title />
-							<div className="flex flex-col gap-2 md:flex-row md:gap-4">
-								<div className="space-y-2">
-									<MovieCard.ReleaseDate />
-									<MovieCard.Score />
-								</div>
-								<div>
-									<MovieCard.Overview />
-									<MovieCard.WatchProviders />
-								</div>
+				<div className="relative flex-shrink-0 w-full md:w-44">
+					<div className="sticky top-0">
+						<div className="relative">
+							<Image
+								unoptimized
+								src={
+									(isMobile
+										? `https://image.tmdb.org/t/p/w500${item.movieBackdrop}`
+										: `https://image.tmdb.org/t/p/original${item.moviePoster}`) ||
+									"/placeholder.svg?height=288&width=192"
+								}
+								alt={item.movieTitle}
+								width={192}
+								height={288}
+								className="rounded-xs object-cover w-full h-auto max-h-[250px] md:max-h-[300px]"
+							/>
+
+							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xs" />
+
+							<Badge
+								variant="secondary"
+								className="absolute top-2 right-2 text-xs font-medium bg-black/60 text-white border-0"
+							>
+								{TYPE_DICT[item.movieType]}
+							</Badge>
+							<div className="absolute bottom-3 left-3 right-3 text-white">
+								<p className="text-xs font-medium opacity-90">
+									{item.movieYear}
+								</p>
+							</div>
+
+							<div className="absolute right-2 bottom-2">
+								<AddToWatchlistButton
+									tmdbId={item.movieTmdbId}
+									type={item.movieType}
+									variant="secondary"
+									className="bg-secondary/50"
+								/>
 							</div>
 						</div>
 					</div>
-				</MovieCard>
+				</div>
+
+				<div className="flex-1  flex flex-col">
+					<div className="grid ">
+						<div className="flex items-baseline">
+							<div className="flex-1">
+								<MovieCard.Title className="md:text-xl" />
+							</div>
+							<div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+								<span>hace</span>
+								{formatFeedItemTime(item.ratedAt)}
+							</div>
+						</div>
+
+						<div className="flex-1 pt-2">
+							<Accordion collapsible type="single">
+								<AccordionItem value="item-1">
+									<AccordionTrigger className="py-0 pb-2">
+										Sinopsis
+									</AccordionTrigger>
+									<AccordionContent>{item.movieOverview}</AccordionContent>
+								</AccordionItem>
+							</Accordion>
+							<MovieCard.WatchProviders />
+						</div>
+					</div>
+
+					<div className="mt-auto pt-4 md:pt-2">
+						<div className="flex items-center gap-2 md:gap-4 p-3 bg-muted/50 rounded-sm">
+							<Link
+								href={`/profile/${item.actorId}`}
+								prefetch={false}
+								className="size-[30px] rounded-full bg-accent-foreground md:size-[50px] md:hidden"
+							>
+								<Avatar className="size-7 md:size-10">
+									<AvatarImage
+										src={item.actorImage || "/placeholder.svg"}
+										alt={item.actorName}
+									/>
+									<AvatarFallback>
+										{item.actorName.charAt(0).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+							</Link>
+
+							<div className="flex-1 flex md:justify-between gap-3 md:gap-0 items-center pr-2">
+								<div className="grid md:gap-1">
+									<div className="flex lead items-center gap-2">
+										<span className="font-semibold text-sm">
+											{item.actorName}
+										</span>
+									</div>
+									<span className="text-xs lead text-muted-foreground">
+										{item.actorUsername}
+									</span>
+								</div>
+							</div>
+
+							<MovieCard.Score />
+						</div>
+					</div>
+				</div>
 			</div>
-		</article>
+		</MovieCard>
 	);
 }
 
