@@ -444,13 +444,15 @@ function Feed() {
 			</div>
 
 			{hasNextPage && (
-				<button
-					disabled={isFetchingNextPage}
-					onClick={() => fetchNextPage()}
-					type="button"
-				>
-					{isFetchingNextPage ? "Cargando más..." : "Cargar más"}
-				</button>
+				<div className="flex justify-center py-4">
+					<Button
+						disabled={isFetchingNextPage}
+						onClick={() => fetchNextPage()}
+						type="button"
+					>
+						{isFetchingNextPage ? "Cargando más..." : "Cargar más"}
+					</Button>
+				</div>
 			)}
 		</div>
 	);
