@@ -158,6 +158,8 @@ function WatchProviders() {
 		isLoading,
 		error,
 		refetch,
+		isEnabled,
+		isFetched,
 	} = useMediaWatchProviders(movie.tmdbId, movie.type);
 
 	if (error) {
@@ -168,7 +170,7 @@ function WatchProviders() {
 		);
 	}
 
-	if (!watchProviders?.data) {
+	if (!watchProviders?.data && isEnabled) {
 		return (
 			<div className="text-muted-foreground text-xs">
 				No esta en ninguna plataforma :(
@@ -217,10 +219,10 @@ function WatchProviders() {
 				</div>
 			)}
 
-			{watchProviders?.data && (
-				<div className="flex flex-wrap py-1 gap-1">
-					{hasFlatRateProviders ? (
-						watchProviders.data.flatrate?.map((provider) => (
+			{isFetched &&
+				(hasFlatRateProviders ? (
+					<div className="flex flex-wrap py-1 gap-1">
+						{watchProviders.data.flatrate?.map((provider) => (
 							<div key={provider.provider_id}>
 								<Image
 									alt={provider.provider_name}
@@ -231,14 +233,34 @@ function WatchProviders() {
 									width={30}
 								/>
 							</div>
-						))
+						))}
+					</div>
+				) : (
+					<div className="text-muted-foreground text-xs">
+						No esta en ninguna plataforma :(
+					</div>
+				))}
+
+			{/* {watchProviders?.data && hasFlatRateProviders && (
+				<div className="flex flex-wrap py-1 gap-1">
+			
+					{	watchProviders.data.flatrate?.map((provider) => (
+							<div key={provider.provider_id}>
+								<Image
+									alt={provider.provider_name}
+									className={clsx("h-auto rounded-sm")}
+									height={30}
+									src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+									unoptimized
+									width={30}
+								/>
+							</div>
+))}
 					) : (
-						<div className="text-muted-foreground text-xs">
-							No esta en ninguna plataforma :(
-						</div>
+					
 					)}
-				</div>
-			)}
+				</div> */}
+			{/* )} */}
 		</div>
 	);
 }
