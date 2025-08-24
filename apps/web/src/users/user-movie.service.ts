@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import type { Media } from "@/infra/postgres/schema";
 import { TmdbService } from "@/infra/TMDB/tmdb.service";
+import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 import { MediaService } from "@/media/media.service";
 import type { MediaType, TMDbMediaMultiSearch } from "@/media/media.type";
 import { WatchlistService } from "@/watchlist/watchlist.service";
@@ -36,9 +38,15 @@ export class UserMediaService {
 			type,
 		};
 
-		const { id: movieId } = await this.mediaService.upsertMedia(movieData);
+		const { id: mediaId } = await this.mediaService.upsertMedia(movieData);
 
-		await this.userService.rateMovie(userId, movieId, rating);
+		await this.userService.rateMovie(userId, mediaId, rating);
+
+		const isInWatchList = await this.watchlistService.hasMedia(userId, mediaId);
+		if (isInWatchList) {
+			await this.watchlistService.removeMedia(userId, mediaId);
+			revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+		}
 	}
 
 	async addMediaToWatchlist(userId: string, tmdbId: number, type: MediaType) {

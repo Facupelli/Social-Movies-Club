@@ -49,8 +49,6 @@ export class NotificationRepository {
 				conditions.push(isNull(notifications.readAt));
 			}
 
-			console.log({ includeRead, lol: !includeRead });
-
 			if (typeId) {
 				conditions.push(eq(notifications.typeId, typeId));
 			}

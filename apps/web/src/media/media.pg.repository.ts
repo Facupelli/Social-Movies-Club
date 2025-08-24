@@ -3,7 +3,7 @@ import { withDatabase } from "@/infra/postgres/db-utils";
 import { type Media, media } from "@/infra/postgres/schema";
 
 export class MediaPgRepository {
-	async upsertMedia(movie: Omit<Media, "id">): Promise<{ id: bigint }> {
+	async upsertMedia(movie: Omit<Media, "id">): Promise<{ id: string }> {
 		return await withDatabase(async (db) => {
 			const query = sql`
       WITH ins AS (
@@ -19,7 +19,7 @@ export class MediaPgRepository {
       WHERE tmdb_id = ${movie.tmdbId}
       `;
 
-			const { rows } = await db.execute<{ id: bigint }>(query);
+			const { rows } = await db.execute<{ id: string }>(query);
 			return rows[0];
 		});
 	}

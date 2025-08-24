@@ -1,22 +1,12 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { createContext, useActionState, useContext } from "react";
-import { QUERY_KEYS } from "@/lib/app.constants";
-import { authClient } from "@/lib/auth/auth-client";
-import { useIsOwner } from "@/lib/hooks/use-is-owner";
-import type { ApiResponse } from "@/lib/safe-execute";
+import { createContext, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { useMediaWatchProviders } from "@/media/hooks/use-media-watch-providers";
 import { type MediaType, MediaTypeEnum } from "@/media/media.type";
-import { getUserWatchlistQueryOptions } from "@/users/hooks/use-user-watchlist";
-import { addMovieToWatchlist } from "@/watchlist/actions/add-movie";
-import { removeMovieFromWatchlist } from "@/watchlist/actions/remove-movie";
 import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-button";
-import { SubmitButton } from "../submit-button";
 import {
 	Accordion,
 	AccordionContent,

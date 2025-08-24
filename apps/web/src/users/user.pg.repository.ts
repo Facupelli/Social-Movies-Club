@@ -373,7 +373,7 @@ export class UserPgRepository {
 	// Use this method untile QUEUE-SYSTEM app is deployed
 	async rateMovie(
 		userId: string,
-		movieId: bigint,
+		movieId: string,
 		score: number,
 	): Promise<void> {
 		return await withDatabase(async (db) => {

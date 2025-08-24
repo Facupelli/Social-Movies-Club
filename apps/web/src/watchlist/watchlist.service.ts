@@ -7,7 +7,11 @@ export class WatchlistService {
 		private readonly repo: WatchlistPgRepository = new WatchlistPgRepository(),
 	) {}
 
-	async addMedia(userId: string, mediaId: bigint) {
+	async hasMedia(userId: string, mediaId: string) {
+		return await this.repo.getExists(userId, mediaId);
+	}
+
+	async addMedia(userId: string, mediaId: string) {
 		return await this.repo.addMedia(userId, mediaId);
 	}
 

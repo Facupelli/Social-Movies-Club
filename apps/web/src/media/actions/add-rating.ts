@@ -13,15 +13,13 @@ export async function addRatingToMovie(
 
 		const userMediaService = new UserMediaService();
 
-		const result = await execute<void>(async () => {
-			await userMediaService.rateMovie({
+		return await execute<void>(async () => {
+			return await userMediaService.rateMovie({
 				userId: session.user.id,
 				tmdbId: movieTMDBId,
 				rating,
 				type,
 			});
 		});
-
-		return result;
 	});
 }

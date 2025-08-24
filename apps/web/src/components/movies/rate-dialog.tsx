@@ -45,11 +45,14 @@ export function RateDialog({
 		formData: FormData,
 	) => {
 		const result = await addRatingToMovie(formData);
-		if (result.success) {
-			queryClient.invalidateQueries({
-				queryKey: QUERY_KEYS.USER_RATINGS,
-			});
+		if (!result.success) {
+			return result;
 		}
+
+		queryClient.invalidateQueries({
+			queryKey: QUERY_KEYS.USER_RATINGS,
+		});
+
 		return result;
 	};
 

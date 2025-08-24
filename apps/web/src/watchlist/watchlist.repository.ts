@@ -16,7 +16,7 @@ export type UserWatchlist = {
 };
 
 export class WatchlistPgRepository {
-	async addMedia(userId: string, mediaId: bigint): Promise<void> {
+	async addMedia(userId: string, mediaId: string): Promise<void> {
 		return await withDatabase(async (db) => {
 			const query = sql`
         INSERT INTO ${watchlist} (user_id, media_id)
@@ -34,6 +34,21 @@ export class WatchlistPgRepository {
       `;
 
 			await db.execute(query);
+		});
+	}
+
+	async getExists(userId: string, movieId: string): Promise<boolean> {
+		return await withDatabase(async (db) => {
+			const query = sql`
+				SELECT EXISTS(
+					SELECT 1
+					FROM ${watchlist}
+					WHERE user_id = ${userId} AND media_id = ${movieId}
+				)
+			`;
+
+			const { rows } = await db.execute<{ exists: boolean }>(query);
+			return rows[0]?.exists;
 		});
 	}
 

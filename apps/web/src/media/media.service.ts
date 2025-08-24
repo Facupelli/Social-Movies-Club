@@ -6,7 +6,7 @@ export class MediaService {
 		private readonly repo: MediaPgRepository = new MediaPgRepository(),
 	) {}
 
-	async upsertMedia(movie: Omit<Media, "id">): Promise<{ id: bigint }> {
+	async upsertMedia(movie: Omit<Media, "id">): Promise<{ id: string }> {
 		return await this.repo.upsertMedia(movie);
 	}
 
