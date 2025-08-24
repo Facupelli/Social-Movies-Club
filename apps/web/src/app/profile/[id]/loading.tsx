@@ -1,3 +1,9 @@
-export default function ProfileMoviesLoading() {
-  return <p className="pt-10">Cargando...</p>;
+import { Loader2Icon } from "lucide-react";
+
+export default function Loading() {
+	return (
+		<div className="h-svh items-center flex justify-center">
+			<Loader2Icon className="animate-spin" />
+		</div>
+	);
 }

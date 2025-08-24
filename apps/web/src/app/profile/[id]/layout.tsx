@@ -3,7 +3,9 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import ProfileNav from "@/components/profile-nav";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FollowService } from "@/follows/follow.service";
 import { auth } from "@/lib/auth/auth";
 import {
@@ -39,10 +41,12 @@ export default async function ProfileLayout(
 			</div>
 
 			<div className="px-4 md:px-10">
-				<UserInfo
-					profileUserId={profileUserId}
-					sessionUserId={session.user.id}
-				/>
+				<Suspense fallback={<ProfileSkeleton />}>
+					<UserInfo
+						profileUserId={profileUserId}
+						sessionUserId={session.user.id}
+					/>
+				</Suspense>
 
 				<ProfileNav userId={profileUserId} />
 
@@ -127,6 +131,37 @@ async function UserInfo({
 					{profileFollowsInfo.followerCount}{" "}
 					<span className="font-normal text-neutral-500">Seguidores</span>
 				</p>
+			</div>
+		</div>
+	);
+}
+
+export function ProfileSkeleton() {
+	return (
+		<div className="grid gap-2 py-4">
+			<div className="flex items-center justify-between">
+				<div className="shrink-0">
+					<Skeleton className="size-[100px] rounded-full" />
+				</div>
+				<div>
+					<Skeleton className="h-9 w-20" />
+				</div>
+			</div>
+
+			<div className="space-y-2">
+				<Skeleton className="h-5 w-32" />
+				<Skeleton className="h-4 w-24" />
+			</div>
+
+			<div className="flex items-center gap-2">
+				<div className="flex items-center gap-1">
+					<Skeleton className="h-4 w-6" />
+					<Skeleton className="h-4 w-16" />
+				</div>
+				<div className="flex items-center gap-1">
+					<Skeleton className="h-4 w-6" />
+					<Skeleton className="h-4 w-20" />
+				</div>
 			</div>
 		</div>
 	);
