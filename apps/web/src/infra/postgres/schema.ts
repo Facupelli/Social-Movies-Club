@@ -34,7 +34,12 @@ export const users = pgTable("users", {
 
 	/* Your domain-specific columns */
 	username: text("username").unique(),
-});
+}, (table) => [
+	// Performance optimization indexes
+	index("users_username_idx").on(table.username)
+		.where(sql`username IS NOT NULL`),
+	index("users_email_idx").on(table.email),
+]);
 
 export type User = typeof users.$inferSelect;
 
@@ -100,7 +105,12 @@ export const media = pgTable(
 		backdropPath: text("backdrop_path").notNull(),
 		overview: text("overview").default("Defecto para no borrar datos"),
 	},
-	(table) => [unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type)],
+	(table) => [
+		unique("media_tmdb_id_type_unique").on(table.tmdbId, table.type),
+		// Performance optimization indexes
+		index("media_tmdb_idx").on(table.tmdbId, table.type),
+		index("media_type_title_idx").on(table.type, table.title),
+	],
 );
 
 export type Media = typeof media.$inferSelect;
@@ -128,6 +138,14 @@ export const ratings = pgTable(
 	(table) => [
 		unique("ratings_user_media_unique").on(table.userId, table.mediaId),
 		index("ratings_profile_idx").on(table.userId, table.createdAt),
+		// Performance optimization indexes
+		index("ratings_user_media_idx").on(table.userId, table.mediaId),
+		index("ratings_media_created_idx").on(table.mediaId, table.createdAt),
+		index("ratings_feed_idx").on(table.userId, table.createdAt, table.mediaId),
+		index("ratings_media_user_created_idx").on(table.mediaId, table.userId, table.createdAt),
+		// Partial index for recent ratings (most common queries)
+		index("ratings_recent_idx").on(table.userId, table.createdAt)
+			.where(sql`created_at > NOW() - INTERVAL '1 year'`),
 	],
 );
 
@@ -150,6 +168,8 @@ export const follows = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.followerId, table.followeeId] }),
 		index("follows_reverse_idx").on(table.followeeId),
+		// Performance optimization for feed generation
+		index("follows_follower_idx").on(table.followerId, table.followeeId),
 	],
 );
 
@@ -182,6 +202,8 @@ export const feedItems = pgTable(
 	(table) => [
 		index("feed_items_user_time_idx").on(table.userId, table.createdAt),
 		index("feed_items_unseen_idx").on(table.userId, table.seenAt),
+		// Performance optimization indexes
+		index("feed_items_user_unseen_idx").on(table.userId, sql`seen_at NULLS FIRST`, table.createdAt),
 	],
 );
 
@@ -262,6 +284,8 @@ export const watchlist = pgTable(
 	(table) => [
 		unique("watchlist_user_media_unique").on(table.userId, table.mediaId),
 		index("watchlist_profile_idx").on(table.userId, table.createdAt),
+		// Performance optimization
+		index("watchlist_user_idx").on(table.userId, table.createdAt),
 	],
 );
 
@@ -324,6 +348,14 @@ export const notifications = pgTable(
 		index("recipient_created_at_idx").on(table.recipientId, table.createdAt),
 		index("type_created_at_idx").on(table.typeId, table.createdAt),
 		index("actor_created_at_idx").on(table.actorId, table.createdAt),
+		// Performance optimization indexes
+		index("notifications_unread_count_idx").on(table.recipientId, table.readAt)
+			.where(sql`is_deleted = false`),
+		index("notifications_list_idx").on(table.recipientId, table.createdAt)
+			.where(sql`is_deleted = false`),
+		// Partial index for unseen notifications (most common case)
+		index("notifications_unseen_partial_idx").on(table.recipientId, table.createdAt)
+			.where(sql`read_at IS NULL AND is_deleted = false`),
 	],
 );
 

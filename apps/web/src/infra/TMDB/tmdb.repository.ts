@@ -241,11 +241,41 @@ export class TmdbRepository implements ITmdbRepository {
 		};
 	}
 
+	async clearCache(endpoint?: string): Promise<void> {
+		if (endpoint) {
+			// Clear specific endpoint cache
+			const pattern = `tmdb_cache:${endpoint}:*`;
+			const keys = await kv.keys(pattern);
+			if (keys.length > 0) {
+				await kv.del(...keys);
+			}
+		} else {
+			// Clear all TMDB cache
+			const pattern = "tmdb_cache:*";
+			const keys = await kv.keys(pattern);
+			if (keys.length > 0) {
+				await kv.del(...keys);
+			}
+		}
+	}
+
 	private async request<T>(
 		endpoint: string,
 		qs?: Record<string, string>,
 	): Promise<T> {
 		const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(qs)}`;
+		const cacheKey = `tmdb_cache:${endpoint}:${new URLSearchParams(qs).toString()}`;
+
+		// Check cache first
+		const cached = await kv.get<string>(cacheKey);
+		if (cached) {
+			try {
+				return JSON.parse(cached) as T;
+			} catch (error) {
+				console.warn('Failed to parse cached data, fetching fresh:', error);
+				// Continue to fetch fresh data
+			}
+		}
 
 		const isLocked = await kv.get("tmdb_rate_limit_lock");
 		if (isLocked) {
@@ -281,6 +311,29 @@ export class TmdbRepository implements ITmdbRepository {
 			throw new Error(`TMDB error (${res.status})`);
 		}
 
-		return (await res.json()) as T;
+		const data = await res.json();
+		
+		// Cache the response with different TTL based on endpoint type
+		let cacheTTL = 300; // Default 5 minutes
+		
+		if (endpoint.includes('/search/')) {
+			cacheTTL = 1800; // 30 minutes for search results
+		} else if (endpoint.includes('/movie/') || endpoint.includes('/tv/')) {
+			if (endpoint.includes('/watch/providers')) {
+				cacheTTL = 86400; // 24 hours for watch providers
+			} else {
+				cacheTTL = 3600; // 1 hour for movie/tv details
+			}
+		}
+		
+		// Store in cache
+		try {
+			await kv.set(cacheKey, JSON.stringify(data), { ex: cacheTTL });
+		} catch (error) {
+			console.warn('Failed to cache data:', error);
+			// Continue without caching
+		}
+		
+		return data as T;
 	}
 }

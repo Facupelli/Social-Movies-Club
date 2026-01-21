@@ -58,30 +58,46 @@ export class UserPgRepository {
 	) {
 		return await withDatabase(async (db) => {
 			const query = sql`
-				WITH latest AS (
-					SELECT
+				-- Optimized query with proper index usage
+				WITH follower_ratings AS (
+					-- First, get all ratings from followed users using the follows_follower_idx
+					SELECT 
 						r.media_id,
-						jsonb_agg(
-							jsonb_build_object(
-								'userId', r.user_id,
-								'score', r.score,
-								'createdAt', r.created_at,
-								'user', jsonb_build_object(
-									'name',  u.name,
-									'image', u.image
-								)
-							) ORDER BY r.created_at DESC
-						) AS ratings,
-						MAX(r.created_at) AS updated_at
+						r.user_id,
+						r.score,
+						r.created_at,
+						u.name as user_name,
+						u.image as user_image
 					FROM ${ratings} r
 					JOIN ${users} u ON u.id = r.user_id
-					WHERE r.user_id IN (
-						SELECT followee_id
-						FROM ${follows}
-						WHERE follower_id = ${userId}
+					WHERE EXISTS (
+						SELECT 1 
+						FROM ${follows} f 
+						WHERE f.follower_id = ${userId} 
+						AND f.followee_id = r.user_id
 					)
 					${cursor ? sql`AND r.created_at < ${cursor}::timestamptz` : sql``}
-					GROUP BY r.media_id
+					-- Use the ratings_media_user_created_idx
+					ORDER BY r.media_id, r.user_id, r.created_at DESC
+				),
+				latest AS (
+					-- Then aggregate by media_id using the grouped data
+					SELECT
+						fr.media_id,
+						jsonb_agg(
+							jsonb_build_object(
+								'userId', fr.user_id,
+								'score', fr.score,
+								'createdAt', fr.created_at,
+								'user', jsonb_build_object(
+									'name',  fr.user_name,
+									'image', fr.user_image
+								)
+							) ORDER BY fr.created_at DESC
+						) AS ratings,
+						MAX(fr.created_at) AS updated_at
+					FROM follower_ratings fr
+					GROUP BY fr.media_id
 				)
 			SELECT
 				m.id as "mediaId",
@@ -91,6 +107,7 @@ export class UserPgRepository {
 				l.ratings,
 				l.updated_at as "udpatedAt"
 			FROM latest l
+			-- Use media primary key index
 			JOIN ${media} m ON m.id = l.media_id
 			ORDER BY l.updated_at DESC, m.id DESC
 			LIMIT ${limit}
@@ -181,6 +198,7 @@ export class UserPgRepository {
 	}> {
 		return await withDatabase(async (db) => {
 			const feedResult = await db.execute<FeedItemRaw>(sql`
+        -- Optimized feed query using feed_items_user_time_idx
         SELECT 
           fi.id as feed_item_id,
           fi.actor_id,
@@ -200,6 +218,7 @@ export class UserPgRepository {
           r.score,
           r.created_at as rated_at
         FROM feed_items as fi
+        -- Use the feed_items_user_time_idx efficiently
         INNER JOIN users actor ON fi.actor_id = actor.id
         INNER JOIN ratings r ON fi.rating_id = r.id
         INNER JOIN media m ON r.media_id = m.id

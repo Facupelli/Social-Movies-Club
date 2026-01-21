@@ -227,7 +227,6 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 					<div className="sticky top-0">
 						<div className="relative">
 							<Image
-								unoptimized
 								src={
 									(isMobile
 										? `https://image.tmdb.org/t/p/w500${item.media.backdropPath}`

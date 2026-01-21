@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import ProfileNav from "@/components/profile-nav";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileSkeleton } from "@/components/profile-skeleton";
 import { FollowService } from "@/follows/follow.service";
 import { auth } from "@/lib/auth/auth";
 import {
@@ -136,33 +137,4 @@ async function UserInfo({
 	);
 }
 
-export function ProfileSkeleton() {
-	return (
-		<div className="grid gap-2 py-4">
-			<div className="flex items-center justify-between">
-				<div className="shrink-0">
-					<Skeleton className="size-[100px] rounded-full" />
-				</div>
-				<div>
-					<Skeleton className="h-9 w-20" />
-				</div>
-			</div>
 
-			<div className="space-y-2">
-				<Skeleton className="h-5 w-32" />
-				<Skeleton className="h-4 w-24" />
-			</div>
-
-			<div className="flex items-center gap-2">
-				<div className="flex items-center gap-1">
-					<Skeleton className="h-4 w-6" />
-					<Skeleton className="h-4 w-16" />
-				</div>
-				<div className="flex items-center gap-1">
-					<Skeleton className="h-4 w-6" />
-					<Skeleton className="h-4 w-20" />
-				</div>
-			</div>
-		</div>
-	);
-}
