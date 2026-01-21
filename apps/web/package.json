@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "npx drizzle-kit generate --config=src/infra/postgres/drizzle.config.ts",
+    "db:migrate": "npx drizzle-kit migrate --config=src/infra/postgres/drizzle.config.ts",
+    "db:push": "npx drizzle-kit push --config=src/infra/postgres/drizzle.config.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
