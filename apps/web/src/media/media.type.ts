@@ -15,6 +15,7 @@ export interface TMDbMediaMultiSearch {
 	title: string;
 	overview: string;
 	type: MediaType;
+	runtime?: number;
 }
 
 export const MediaTypeEnum = {

@@ -45,6 +45,8 @@ export default async function WatchlistPage(
 
 	const watchlist = watchlistResult.data;
 
+	console.log({ watchlist });
+
 	return (
 		<section className="py-10">
 			<MovieGrid>

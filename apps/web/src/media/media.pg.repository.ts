@@ -7,8 +7,8 @@ export class MediaPgRepository {
 		return await withDatabase(async (db) => {
 			const query = sql`
       WITH ins AS (
-        INSERT INTO ${media} (title, year, overview, poster_path, backdrop_path, tmdb_id, type)
-        VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.backdropPath}, ${movie.tmdbId}, ${movie.type})
+        INSERT INTO ${media} (title, year, overview, poster_path, backdrop_path, tmdb_id, type, runtime)
+        VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.backdropPath}, ${movie.tmdbId}, ${movie.type}, ${movie.runtime})
         ON CONFLICT (tmdb_id) DO NOTHING
         RETURNING id
       )

@@ -187,6 +187,7 @@ export class TmdbRepository implements ITmdbRepository {
 			year: json.release_date.split("-")[0],
 			overview: json.overview,
 			type: "movie",
+			runtime: json.runtime,
 		};
 
 		return {
@@ -272,7 +273,7 @@ export class TmdbRepository implements ITmdbRepository {
 			try {
 				return JSON.parse(cached) as T;
 			} catch (error) {
-				console.warn('Failed to parse cached data, fetching fresh:', error);
+				console.warn("Failed to parse cached data, fetching fresh:", error);
 				// Continue to fetch fresh data
 			}
 		}
@@ -312,28 +313,28 @@ export class TmdbRepository implements ITmdbRepository {
 		}
 
 		const data = await res.json();
-		
+
 		// Cache the response with different TTL based on endpoint type
 		let cacheTTL = 300; // Default 5 minutes
-		
-		if (endpoint.includes('/search/')) {
+
+		if (endpoint.includes("/search/")) {
 			cacheTTL = 1800; // 30 minutes for search results
-		} else if (endpoint.includes('/movie/') || endpoint.includes('/tv/')) {
-			if (endpoint.includes('/watch/providers')) {
+		} else if (endpoint.includes("/movie/") || endpoint.includes("/tv/")) {
+			if (endpoint.includes("/watch/providers")) {
 				cacheTTL = 86400; // 24 hours for watch providers
 			} else {
 				cacheTTL = 3600; // 1 hour for movie/tv details
 			}
 		}
-		
+
 		// Store in cache
 		try {
 			await kv.set(cacheKey, JSON.stringify(data), { ex: cacheTTL });
 		} catch (error) {
-			console.warn('Failed to cache data:', error);
+			console.warn("Failed to cache data:", error);
 			// Continue without caching
 		}
-		
+
 		return data as T;
 	}
 }

@@ -27,6 +27,7 @@ export interface MovieView {
 	score?: number;
 	overview: string;
 	type: MediaType;
+	runtime?: number;
 }
 
 type MovieCardContextType = {
@@ -283,6 +284,20 @@ function Type() {
 	);
 }
 
+function Runtime() {
+	const { movie } = useMovieCardContext();
+
+	if (!movie.runtime || movie.type !== MediaTypeEnum.movie) {
+		return null;
+	}
+
+	return (
+		<span className="text-muted-foreground text-xs font-medium">
+			{movie.runtime}'
+		</span>
+	);
+}
+
 MovieCard.Poster = Poster;
 MovieCard.Title = Title;
 MovieCard.ReleaseDate = ReleaseDate;
@@ -292,3 +307,4 @@ MovieCard.Score = Score;
 MovieCard.WatchProviders = WatchProviders;
 MovieCard.Overview = Overview;
 MovieCard.MediaType = Type;
+MovieCard.Runtime = Runtime;
