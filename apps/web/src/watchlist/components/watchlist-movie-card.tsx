@@ -13,7 +13,7 @@ export function GridMovieCard({ movie }: { movie: MovieView }) {
 			<CardContent className="flex flex-col gap-1 px-4 py-2">
 				<MovieCard.Title />
 				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
+					<div className="flex items-center w-full justify-between gap-2">
 						<MovieCard.ReleaseDate />
 						<MovieCard.Runtime />
 					</div>

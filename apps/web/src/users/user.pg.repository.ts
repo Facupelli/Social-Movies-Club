@@ -305,7 +305,8 @@ export class UserPgRepository {
           m.backdrop_path  AS "backdropPath",
           m.overview,
           m.tmdb_id        AS "tmdbId",
-          m.type           
+          m.type,
+          m.runtime
         FROM ${ratings} r
         JOIN ${media}  m ON m.id = r.media_id
         WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}

@@ -13,6 +13,7 @@ export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {
 		backdropPath: m.backdropPath,
 		overview: m.overview,
 		type: m.type,
+		runtime: m.runtime,
 	};
 }
 
@@ -27,6 +28,7 @@ export function dbMovieToView(r: UserRatings): MovieView {
 		score: r.score,
 		overview: r.overview,
 		type: r.type,
+		runtime: r.runtime,
 	};
 }
 
@@ -40,5 +42,6 @@ export function dbWatchlistMovieToView(w: UserWatchlist): MovieView {
 		backdropPath: w.movieBackdropPath,
 		overview: w.movieOverview,
 		type: w.movieType,
+		runtime: w.movieRuntime,
 	};
 }

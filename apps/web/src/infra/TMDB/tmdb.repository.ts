@@ -88,6 +88,7 @@ export class TmdbRepository implements ITmdbRepository {
 				year: r.release_date?.split("-")[0],
 				overview: r.overview,
 				type: r.media_type as MediaType,
+				runtime: r.runtime ?? null,
 			};
 		});
 
@@ -190,6 +191,8 @@ export class TmdbRepository implements ITmdbRepository {
 			runtime: json.runtime,
 		};
 
+		console.log("GET MOVIE DETAIL", { data });
+
 		return {
 			data,
 		};
@@ -268,14 +271,9 @@ export class TmdbRepository implements ITmdbRepository {
 		const cacheKey = `tmdb_cache:${endpoint}:${new URLSearchParams(qs).toString()}`;
 
 		// Check cache first
-		const cached = await kv.get<string>(cacheKey);
+		const cached = await kv.get<T>(cacheKey);
 		if (cached) {
-			try {
-				return JSON.parse(cached) as T;
-			} catch (error) {
-				console.warn("Failed to parse cached data, fetching fresh:", error);
-				// Continue to fetch fresh data
-			}
+			return cached;
 		}
 
 		const isLocked = await kv.get("tmdb_rate_limit_lock");
@@ -329,7 +327,7 @@ export class TmdbRepository implements ITmdbRepository {
 
 		// Store in cache
 		try {
-			await kv.set(cacheKey, JSON.stringify(data), { ex: cacheTTL });
+			await kv.set(cacheKey, data, { ex: cacheTTL });
 		} catch (error) {
 			console.warn("Failed to cache data:", error);
 			// Continue without caching

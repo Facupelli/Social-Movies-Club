@@ -28,8 +28,6 @@ export class UserMediaService {
 	}): Promise<void> {
 		const media = await this.getMediaDetail(tmdbId, type);
 
-		console.log({ media });
-
 		const movieData: Omit<Media, "id"> = {
 			posterPath: media.posterPath,
 			backdropPath: media.backdropPath,

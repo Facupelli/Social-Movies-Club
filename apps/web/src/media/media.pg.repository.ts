@@ -20,6 +20,7 @@ export class MediaPgRepository {
       `;
 
 			const { rows } = await db.execute<{ id: string }>(query);
+
 			return rows[0];
 		});
 	}

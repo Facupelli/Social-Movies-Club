@@ -292,9 +292,7 @@ function Runtime() {
 	}
 
 	return (
-		<span className="text-muted-foreground text-xs font-medium">
-			{movie.runtime}'
-		</span>
+		<span className="text-muted-foreground text-xs">{movie.runtime} min</span>
 	);
 }
 

@@ -18,6 +18,7 @@ export type UserRatings = {
 	overview: string;
 	tmdbId: number;
 	type: MediaType;
+	runtime?: number;
 };
 
 export interface GetUserRatingMovies {

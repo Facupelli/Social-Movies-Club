@@ -13,6 +13,7 @@ export type UserWatchlist = {
 	movieBackdropPath: string;
 	movieYear: string;
 	movieType: MediaType;
+	movieRuntime?: number;
 };
 
 export class WatchlistPgRepository {
@@ -63,7 +64,8 @@ export class WatchlistPgRepository {
           m.poster_path AS "moviePosterPath",
           m.backdrop_path AS "movieBackdropPath",
           m.year AS "movieYear",
-          m.type AS "movieType"
+          m.type AS "movieType",
+          m.runtime AS "movieRuntime"
         FROM ${watchlist} w  
         JOIN ${media} m ON m.id = w.media_id 
         WHERE user_id = ${userId}
