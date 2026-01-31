@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Bell, Bookmark, Home, User2Icon } from "lucide-react";
+import { Bell, Bookmark, Home, Users2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,19 +32,10 @@ export function Nav() {
 						<span className="hidden md:block">Inicio</span>
 					</Link>
 				</li>
+
 				<li>
 					<Link
-						prefetch={false}
-						className="flex items-center gap-2"
-						href={`/profile/${session?.user.id}`}
-					>
-						<User2Icon />
-						<span className="hidden md:block">Perfil</span>
-					</Link>
-				</li>
-				<li>
-					<Link
-						prefetch={false}
+						prefetch={true}
 						className="flex items-center gap-2"
 						href={
 							session?.user.id ? `/profile/${session.user.id}/watchlist` : "#"
@@ -52,6 +43,16 @@ export function Nav() {
 					>
 						<Bookmark />
 						<span className="hidden md:block">Lista</span>
+					</Link>
+				</li>
+				<li>
+					<Link
+						prefetch={false}
+						className="flex items-center gap-2"
+						href="/users"
+					>
+						<Users2Icon />
+						<span className="hidden md:block">Usuarios</span>
 					</Link>
 				</li>
 				<li>
