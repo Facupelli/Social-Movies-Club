@@ -5,7 +5,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import ProfileNav from "@/components/profile-nav";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileSkeleton } from "@/components/profile-skeleton";
 import { FollowService } from "@/follows/follow.service";
 import { auth } from "@/lib/auth/auth";
@@ -90,6 +89,8 @@ async function UserInfo({
 		sessionUserId,
 	);
 
+	console.log({ isFollowing });
+
 	if (!profileUser) {
 		redirect("/");
 	}
@@ -136,5 +137,3 @@ async function UserInfo({
 		</div>
 	);
 }
-
-

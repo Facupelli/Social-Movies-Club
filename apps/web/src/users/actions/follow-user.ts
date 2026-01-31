@@ -2,6 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { FollowService } from "@/follows/follow.service";
+import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 import { withAuth } from "@/lib/auth/auth-server-action.middleware";
 import { type ApiResponse, execute } from "@/lib/safe-execute";
 import { validateFollowUser } from "../user-validation.service";
@@ -20,7 +21,15 @@ export async function followUser(
 		});
 
 		if (result.success) {
-			revalidateTag(`is-following-user:${followedUserId}`);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUser(session.user.id, followedUserId),
+			);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId),
+			);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUserBySession(session.user.id),
+			);
 		}
 
 		return result;
@@ -41,7 +50,15 @@ export async function unfollowUser(
 		});
 
 		if (result.success) {
-			revalidateTag(`is-following-user:${followedUserId}`);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUser(session.user.id, followedUserId),
+			);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId),
+			);
+			revalidateTag(
+				NEXT_CACHE_TAGS.getIsFollowingUserBySession(session.user.id),
+			);
 		}
 
 		return result;

@@ -11,11 +11,13 @@ export function getIsFollowingUser(
 
 	return unstable_cache(
 		() => followService.isFollowingUser(sessionUserId, profileUserId),
-		["is-following-user", profileUserId],
+		["is-following-user", sessionUserId, profileUserId],
 		{
 			tags: [
 				"is-following-user",
-				NEXT_CACHE_TAGS.getIsFollowingUser(profileUserId),
+				NEXT_CACHE_TAGS.getIsFollowingUser(sessionUserId, profileUserId),
+				NEXT_CACHE_TAGS.getIsFollowingUserByProfile(profileUserId),
+				NEXT_CACHE_TAGS.getIsFollowingUserBySession(sessionUserId),
 			],
 		},
 	)();
