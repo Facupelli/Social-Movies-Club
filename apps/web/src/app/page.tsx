@@ -33,7 +33,6 @@ import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { formatFeedItemTime } from "@/lib/utils";
 import useDebounce from "@/media/hooks/use-debounce";
 import { useSearchMedia } from "@/media/hooks/use-search-media";
-import { useSearchUsers } from "@/media/hooks/use-search-users";
 import { TYPE_DICT } from "@/media/media.constants";
 import type { AggregatedFeedItem } from "@/users/feed.types";
 import { getUserAggregatedFeedQueryOptions } from "@/users/hooks/use-user-aggregated-feed";
@@ -48,7 +47,7 @@ export default function HomePage() {
 	const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
 	const handleSearch = (value: string) => {
-		if (value.length !== 0 && value.length < 4) {
+		if (value.length !== 0 && value.length < 3) {
 			return;
 		}
 
