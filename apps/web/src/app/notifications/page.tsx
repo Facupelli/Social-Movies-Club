@@ -25,6 +25,8 @@ export default async function NotificationsPage() {
 		{ includeRead: true },
 	);
 
+	console.log({ notifications });
+
 	return (
 		<div className="py-6 min-h-svh">
 			<InvalidateNotificationsQuery />
@@ -32,8 +34,10 @@ export default async function NotificationsPage() {
 			<h1 className="font-bold md:text-xl px-2 md:px-10">Notificaciones</h1>
 
 			<section className="pt-8 flex flex-col divide-y divide-border ">
-				{notifications.data.map((notification) => (
-					<div
+				{notifications.data.map((notification, index) => (
+					<Link
+						prefetch={index === 0}
+						href={notification.actionUrl ?? "#"}
 						key={notification.id}
 						className={clsx(
 							"flex gap-2 md:gap-4 items-start py-4 px-2 md:px-10 first:border-t border-boder last:border-b",
@@ -68,17 +72,13 @@ export default async function NotificationsPage() {
 								</div>
 							</div>
 							<div>
-								<Link
-									prefetch={false}
-									href={`/profile/${notification.actorId}`}
-									className="text-primary hover:underline font-bold"
-								>
+								<span className="text-primary hover:underline font-bold">
 									{notification.actorUsername}
-								</Link>{" "}
+								</span>{" "}
 								<span>{notification.title}</span>
 							</div>
 						</div>
-					</div>
+					</Link>
 				))}
 			</section>
 		</div>
