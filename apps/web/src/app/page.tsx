@@ -634,7 +634,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 					{[...Array(10)].map((_, i) => (
 						// biome-ignore lint: reason
 						<div key={i}>
-							<Skeleton className="h-[240px] w-[150px] rounded-xs md:h-[300px] md:w-[200px]" />
+							<Skeleton className="aspect-[2/3] w-full rounded-xs bg-muted" />
 							<div className="grid gap-1 pt-2">
 								<Skeleton className="h-5 w-[120px]" />
 								<Skeleton className="h-5 w-[70px]" />

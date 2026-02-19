@@ -89,8 +89,6 @@ async function UserInfo({
 		sessionUserId,
 	);
 
-	console.log({ isFollowing });
-
 	if (!profileUser) {
 		redirect("/");
 	}

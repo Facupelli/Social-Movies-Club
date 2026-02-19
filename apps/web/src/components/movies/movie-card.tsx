@@ -73,24 +73,32 @@ export function MovieCard({
 function Poster({ size = "default" }: { size?: "small" | "default" }) {
 	const { movie } = useMovieCardContext();
 
-	const dimensions =
+	const sizeClasses =
 		size === "small"
-			? { width: 120, height: 180 }
-			: { width: 250, height: 300 };
+			? "w-[120px]" // Fixed width for small variant
+			: "w-full"; // Fluid width for default grid usage
 
-	return movie.posterPath ? (
-		<div className="shrink-0">
-			<Image
-				alt={movie.title}
-				className={clsx("rounded-xs")}
-				height={dimensions.height}
-				src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
-				unoptimized
-				width={dimensions.width}
-			/>
+	return (
+		<div
+			className={`relative shrink-0 overflow-hidden rounded-xs bg-muted ${sizeClasses} aspect-[2/3]`}
+		>
+			{movie.posterPath ? (
+				<Image
+					alt={movie.title}
+					// 'fill' makes the image adapt to the parent container size
+					fill
+					// 'object-cover' ensures the image fills the area without stretching
+					className="object-cover"
+					src={`https://image.tmdb.org/t/p/original${movie.posterPath}`}
+					// Good practice: inform Next.js the source size matches the display size
+					sizes="(max-width: 768px) 150px, 200px"
+					unoptimized
+				/>
+			) : (
+				// Fallback matches the container size automatically
+				<div className="absolute inset-0 bg-gray-600" />
+			)}
 		</div>
-	) : (
-		<div className="h-[350px] w-[250px] bg-gray-600" />
 	);
 }
 
