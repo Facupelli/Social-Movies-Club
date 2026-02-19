@@ -42,7 +42,6 @@ import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-bu
 
 export default function HomePage() {
 	const [query, setQuery] = useState("");
-	const [_, startTransition] = useTransition();
 	const deferredQuery = useDeferredValue(query);
 	const debouncedSearchTerm = useDebounce(deferredQuery, 500);
 
@@ -51,9 +50,7 @@ export default function HomePage() {
 			return;
 		}
 
-		startTransition(() => {
-			setQuery(value);
-		});
+		setQuery(value);
 	};
 
 	return (
@@ -90,7 +87,7 @@ function RenderProperSection({
 function SearchInput({ onChange }: { onChange: (values: string) => void }) {
 	return (
 		<div className="relative">
-			<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+			<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-primary" />
 			<Input
 				className="w-full bg-white px-10"
 				onChange={(e) => onChange(e.target.value)}

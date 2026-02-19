@@ -25,8 +25,6 @@ export default async function NotificationsPage() {
 		{ includeRead: true },
 	);
 
-	console.log({ notifications });
-
 	return (
 		<div className="py-6 min-h-svh">
 			<InvalidateNotificationsQuery />
