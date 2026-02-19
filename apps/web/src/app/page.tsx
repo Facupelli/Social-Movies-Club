@@ -1,7 +1,15 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Calendar, ChevronDown, Search, Star, Users } from "lucide-react";
+import {
+	Calendar,
+	ChevronDown,
+	Clapperboard,
+	Search,
+	Star,
+	UserPlus,
+	Users,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useState, useTransition } from "react";
@@ -54,8 +62,8 @@ export default function HomePage() {
 	};
 
 	return (
-		<div className="min-h-svh flex-1 py-6 md:min-h-auto">
-			<div className="px-2 pb-2 md:px-10 md:pb-6">
+		<div className="relative min-h-svh flex-1 py-6 md:min-h-auto">
+			<div className="relative z-20 px-2 pb-2 md:px-10 md:pb-6">
 				<SearchInput onChange={handleSearch} />
 			</div>
 
@@ -421,16 +429,43 @@ function Feed() {
 
 	const flatItems = data?.pages.flatMap((page) => page.items);
 
+	if (!flatItems || flatItems.length <= 0) {
+		return (
+			<div>
+				<div className="absolute inset-0 bg-radial from-primary to-background z-0 opacity-10"></div>
+
+				<div className="relative z-20 flex flex-col items-center gap-y-2 py-10">
+					<div>
+						<Clapperboard className="text-primary size-12" />
+					</div>
+					<p className="text-xl font-bold text-center">
+						Tu feed está un poco vacío
+					</p>
+					<p className="text-muted-foreground text-sm text-center">
+						Sigue a tus amigos para ver sus críticas o empieza a puntuar
+						películas para recibir recomendaciones
+					</p>
+					<div className="pt-4">
+						<Button className="font-semibold" asChild>
+							<Link href="/users">
+								<UserPlus className="size-5" />
+								Encuentra a tus amigos
+							</Link>
+						</Button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div>
 			<div className="divide-y divide-accent-foreground">
-				{flatItems &&
-					flatItems.length > 0 &&
-					flatItems.map((item) => (
-						<div className="px-2 md:px-10" key={item.feedItemId}>
-							<FeedItemCard item={item} />
-						</div>
-					))}
+				{flatItems.map((item) => (
+					<div className="px-2 md:px-10" key={item.feedItemId}>
+						<FeedItemCard item={item} />
+					</div>
+				))}
 			</div>
 
 			{hasNextPage && (
