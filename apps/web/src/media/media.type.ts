@@ -23,4 +23,9 @@ export const MediaTypeEnum = {
 	tv: "tv",
 } as const;
 
+export const MediaTypeDict = {
+	[MediaTypeEnum.movie]: "Película",
+	[MediaTypeEnum.tv]: "Serie",
+};
+
 export type MediaType = (typeof MediaTypeEnum)[keyof typeof MediaTypeEnum];

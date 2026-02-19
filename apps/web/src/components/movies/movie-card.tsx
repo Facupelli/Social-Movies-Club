@@ -5,7 +5,11 @@ import Image from "next/image";
 import { createContext, useContext } from "react";
 import { cn } from "@/lib/utils";
 import { useMediaWatchProviders } from "@/media/hooks/use-media-watch-providers";
-import { type MediaType, MediaTypeEnum } from "@/media/media.type";
+import {
+	type MediaType,
+	MediaTypeDict,
+	MediaTypeEnum,
+} from "@/media/media.type";
 import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-button";
 import {
 	Accordion,
@@ -38,7 +42,7 @@ const MovieCardContext = createContext<MovieCardContextType | undefined>(
 	undefined,
 );
 
-function useMovieCardContext() {
+export function useMovieCardContext() {
 	const context = useContext(MovieCardContext);
 	if (!context) {
 		throw new Error(
@@ -262,16 +266,7 @@ function WatchlistButton() {
 }
 
 function Rate() {
-	const { movie } = useMovieCardContext();
-
-	return (
-		<RateDialog
-			movieTMDBId={movie.tmdbId}
-			title={movie.title}
-			type={movie.type}
-			year={movie.year}
-		/>
-	);
+	return <RateDialog />;
 }
 
 function Type() {
@@ -279,7 +274,7 @@ function Type() {
 
 	return (
 		<div className="rounded-md border border-accent bg-secondary px-2 py-1 text-muted-foreground text-xs">
-			<span>{movie.type === MediaTypeEnum.movie ? "Película" : "Serie"}</span>
+			<span>{MediaTypeDict[movie.type]}</span>
 		</div>
 	);
 }
