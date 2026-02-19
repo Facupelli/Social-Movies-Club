@@ -67,16 +67,12 @@ export default function HomePage() {
 				<SearchInput onChange={handleSearch} />
 			</div>
 
-			<RenderProperSection debouncedSearchTerm={debouncedSearchTerm} />
+			<HomeContent debouncedSearchTerm={debouncedSearchTerm} />
 		</div>
 	);
 }
 
-function RenderProperSection({
-	debouncedSearchTerm,
-}: {
-	debouncedSearchTerm: string;
-}) {
+function HomeContent({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 	const hasQuery = !!debouncedSearchTerm;
 
 	if (hasQuery) {
@@ -405,18 +401,13 @@ function ScoreDisplay({ score }: { score: number }) {
 }
 
 function Feed() {
-	const { data: session } = authClient.useSession();
+	const { data: session, isPending: isSessionLoading } =
+		authClient.useSession();
 
-	const {
-		data,
-		isPending,
-		isFetchingNextPage,
-		fetchNextPage,
-		hasNextPage,
-		isEnabled,
-	} = useInfiniteQuery({ ...getUserFeedQueryOptions, enabled: !!session });
+	const { data, isPending, isFetchingNextPage, fetchNextPage, hasNextPage } =
+		useInfiniteQuery({ ...getUserFeedQueryOptions, enabled: !!session });
 
-	if (isPending && isEnabled) {
+	if (isSessionLoading || (isPending && !!session)) {
 		return (
 			<div className="grid gap-4 px-2 pt-4 md:px-10">
 				{[...Array(5)].map((_, idx) => (
