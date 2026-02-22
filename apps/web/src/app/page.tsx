@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useState, useTransition } from "react";
+import { useDeferredValue, useState } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import SignInButton from "@/components/sign-in-button";
@@ -406,6 +406,10 @@ function Feed() {
 
 	const { data, isPending, isFetchingNextPage, fetchNextPage, hasNextPage } =
 		useInfiniteQuery({ ...getUserFeedQueryOptions, enabled: !!session });
+
+	if (!session && !isSessionLoading) {
+		return null;
+	}
 
 	if (isSessionLoading || (isPending && !!session)) {
 		return (
