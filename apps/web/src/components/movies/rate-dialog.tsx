@@ -13,8 +13,11 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { QUERY_KEYS } from "@/lib/app.constants";
 import { authClient } from "@/lib/auth/auth-client";
+import {
+	invalidateAfterRating,
+	optimisticallyRateMedia,
+} from "@/lib/react-query/mutation-cache";
 import type { ApiResponse } from "@/lib/safe-execute";
 import { addRatingToMovie } from "@/media/actions/add-rating";
 import { type MediaType, MediaTypeDict } from "@/media/media.type";
@@ -49,18 +52,31 @@ export function RateDialog({
 		_state: ApiResponse<void>,
 		formData: FormData,
 	) => {
-		const result = await addRatingToMovie(formData);
-		if (!result.success) {
+		const userId = session?.user.id;
+		const rollback = userId
+			? await optimisticallyRateMedia(queryClient, {
+					userId,
+					tmdbId,
+					score: rating,
+				})
+			: undefined;
+
+		try {
+			const result = await addRatingToMovie(formData);
+			if (!result.success) {
+				rollback?.();
+				return result;
+			}
+
+			if (userId) {
+				await invalidateAfterRating(queryClient, userId);
+			}
+
 			return result;
+		} catch (error) {
+			rollback?.();
+			throw error;
 		}
-
-		if (session?.user.id) {
-			queryClient.invalidateQueries({
-				queryKey: QUERY_KEYS.getUserRatings(session.user.id),
-			});
-		}
-
-		return result;
 	};
 
 	const [state, action, isPending] = useActionState(

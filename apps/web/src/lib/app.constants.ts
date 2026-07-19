@@ -1,5 +1,19 @@
 import type { UserMoviesClientFilters } from "@/users/user.types";
 
+const getUserMoviesScope = (viewerUserId: string | undefined) => [
+	"viewer",
+	viewerUserId,
+	"profile-movies",
+] as const;
+
+const getUserMoviesForProfile = (
+	viewerUserId: string | undefined,
+	profileUserId: string,
+) => [
+	...getUserMoviesScope(viewerUserId),
+	{ userId: profileUserId },
+] as const;
+
 export const LOCAL_STORAGE_KEYS: { [key: string]: string } = {
 	PROFILE_TAB_VIEW: "profile-tab-view",
 };
@@ -36,14 +50,13 @@ export const QUERY_KEYS = {
 		{ mediaId },
 		{ type },
 	],
+	getUserMoviesScope,
+	getUserMoviesForProfile,
 	getUserMovies: (
 		viewerUserId: string | undefined,
 		filters: UserMoviesClientFilters & { userId: string },
 	) => [
-		"viewer",
-		viewerUserId,
-		"profile-movies",
-		{ userId: filters.userId },
+		...getUserMoviesForProfile(viewerUserId, filters.userId),
 		{ sortBy: filters.sortBy },
 		{ sortOrder: filters.sortOrder },
 		{ typeFilter: filters.typeFilter },
