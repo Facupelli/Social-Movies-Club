@@ -19,11 +19,11 @@ export async function GET() {
 
 	const statusMap: UseUserWatchlistMap = {};
 
-	res.forEach((result) => {
+	for (const result of res) {
 		if (!statusMap[result.tmdbId]) {
 			statusMap[result.tmdbId] = true;
 		}
-	});
+	}
 
 	return Response.json(statusMap);
 }

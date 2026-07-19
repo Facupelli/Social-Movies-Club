@@ -1,9 +1,24 @@
 {
   "root": false,
   "extends": ["./../../biome.json", "ultracite"],
+  "files": {
+    "includes": ["**", "!!.next"],
+  },
   "linter": {
     "rules": {
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off",
+      },
+      "nursery": {
+        "noNoninteractiveElementInteractions": "off",
+        "noUnknownAtRule": "off",
+        "useSortedClasses": "off",
+      },
+      "performance": {
+        "noNamespaceImport": "off",
+      },
       "style": {
+        "noExportedImports": "off",
         "noParameterProperties": "off",
         "useConsistentBuiltinInstantiation": "off",
       },

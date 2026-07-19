@@ -5,7 +5,9 @@ const GetUserFeedQuerySchema = z.object({
 		.string()
 		.refine(
 			(val) => {
-				if (val === "") return false;
+				if (val === "") {
+					return false;
+				}
 				return !Number.isNaN(Date.parse(val));
 			},
 			{ message: "cursor must be a valid ISO 8601 timestamp" },

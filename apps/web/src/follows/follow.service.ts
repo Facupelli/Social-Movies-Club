@@ -52,7 +52,7 @@ export class FollowService {
 
 			const user = await userService.getUser(userId);
 
-			if (!user || !user.username) {
+			if (!user?.username) {
 				return;
 			}
 

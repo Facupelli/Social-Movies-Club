@@ -24,7 +24,7 @@ function showFollowButton(
 	const isSessionUserProfile = sessionUserId === profileUserId;
 	const isSameUser = sessionUserId === followeeId;
 
-	return !isSessionUserProfile && !isSameUser;
+	return !(isSessionUserProfile || isSameUser);
 }
 
 export default async function FollowingPage(

@@ -12,7 +12,9 @@ export async function execute<T>(
 		const data = await fn();
 		return { success: true, data };
 	} catch (err) {
-		if (onError) return onError(err);
+		if (onError) {
+			return onError(err);
+		}
 
 		if (err instanceof DatabaseError) {
 			return { success: false, error: "Internal server error" };

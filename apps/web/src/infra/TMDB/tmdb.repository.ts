@@ -319,7 +319,7 @@ export class TmdbRepository implements ITmdbRepository {
 			cacheTTL = 1800; // 30 minutes for search results
 		} else if (endpoint.includes("/movie/") || endpoint.includes("/tv/")) {
 			if (endpoint.includes("/watch/providers")) {
-				cacheTTL = 86400; // 24 hours for watch providers
+				cacheTTL = 86_400; // 24 hours for watch providers
 			} else {
 				cacheTTL = 3600; // 1 hour for movie/tv details
 			}

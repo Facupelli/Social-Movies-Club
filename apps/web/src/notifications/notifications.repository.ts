@@ -77,11 +77,12 @@ export class NotificationRepository {
 				type: row.type,
 			}));
 
+			const lastNotification = data.at(-1);
 			const nextCursor =
-				hasMore && data.length > 0
+				hasMore && lastNotification
 					? {
-							createdAt: data[data.length - 1].createdAt,
-							id: data[data.length - 1].id,
+							createdAt: lastNotification.createdAt,
+							id: lastNotification.id,
 						}
 					: undefined;
 

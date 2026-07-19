@@ -89,21 +89,4 @@ export class NotificationService {
 		}
 	}
 
-	private async cleanupOldNotifications(userId: string): Promise<void> {
-		// const stats = await this.repository.getNotificationStats(userId);
-		// if (stats.totalCount <= this.config.maxNotificationsPerUser) {
-		//   return; // No cleanup needed
-		// }
-		// Get oldest notifications to delete
-		// const oldNotifications = await this.repository.getNotifications({
-		//   recipientId: userId,
-		//   includeRead: true,
-		//   limit: stats.totalCount - this.config.maxNotificationsPerUser,
-		// });
-		// // Delete oldest notifications
-		// const deletePromises = oldNotifications.data.map(notification =>
-		//   this.repository.deleteNotification(notification.id, userId)
-		// );
-		// await Promise.all(deletePromises);
-	}
 }

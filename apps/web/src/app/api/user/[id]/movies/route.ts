@@ -26,7 +26,7 @@ export async function GET(
 	const url = new URL(request.url);
 
 	const clientFilters = userMoviesFiltersUrlParser.parseUrl(url);
-	const page = parseInt(url.searchParams.get("page") || "0", 10);
+	const page = Number.parseInt(url.searchParams.get("page") || "0", 10);
 
 	const serverFilters = userMoviesFiltersTransformer.clientToServer(
 		clientFilters,

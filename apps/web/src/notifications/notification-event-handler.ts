@@ -14,16 +14,19 @@ export interface EventHandler<T> {
 }
 
 export class NotificationEventRegistry {
-	private handlers: Map<string, EventHandler<any>> = new Map();
+	private handlers = new Map<
+		string,
+		(event: unknown) => Promise<boolean>
+	>();
 
 	constructor(notificationService: NotificationService) {
-		this.handlers.set(
+		this.registerHandler(
 			"user_followed",
 			new UserFollowEventHandler(notificationService),
 		);
 	}
 
-	async handleEvent<T>(eventType: string, event: T): Promise<boolean> {
+	async handleEvent(eventType: string, event: unknown): Promise<boolean> {
 		const handler = this.handlers.get(eventType);
 		if (!handler) {
 			console.warn(`No handler found for event type: ${eventType}`);
@@ -31,7 +34,7 @@ export class NotificationEventRegistry {
 		}
 
 		try {
-			return await handler.handle(event);
+			return await handler(event);
 		} catch (error) {
 			console.error(`Error handling event ${eventType}:`, error);
 			return false;
@@ -39,7 +42,7 @@ export class NotificationEventRegistry {
 	}
 
 	registerHandler<T>(eventType: string, handler: EventHandler<T>): void {
-		this.handlers.set(eventType, handler);
+		this.handlers.set(eventType, (event) => handler.handle(event as T));
 	}
 
 	getRegisteredEvents(): string[] {

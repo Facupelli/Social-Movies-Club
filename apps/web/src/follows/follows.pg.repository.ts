@@ -24,8 +24,8 @@ export class FollowsPgRepository {
   }
 
   async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
-    return await withDatabase(async (db) => {
-      const { rows } = await db.execute<{
+    return await withDatabase(async (database) => {
+      const { rows } = await database.execute<{
         follower_count: number;
         following_count: number;
       }>(sql`

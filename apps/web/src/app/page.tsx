@@ -119,7 +119,7 @@ function SessionMessage() {
 	return null;
 }
 
-function AggregatedFeed() {
+function _AggregatedFeed() {
 	const { data: session } = authClient.useSession();
 
 	const {
@@ -407,7 +407,7 @@ function Feed() {
 	const { data, isPending, isFetchingNextPage, fetchNextPage, hasNextPage } =
 		useInfiniteQuery({ ...getUserFeedQueryOptions, enabled: !!session });
 
-	if (!session && !isSessionLoading) {
+	if (!(session || isSessionLoading)) {
 		return null;
 	}
 
@@ -427,7 +427,7 @@ function Feed() {
 	if (!flatItems || flatItems.length <= 0) {
 		return (
 			<div>
-				<div className="absolute inset-0 bg-radial from-primary to-background z-0 opacity-10"></div>
+				<div className="absolute inset-0 bg-radial from-primary to-background z-0 opacity-10" />
 
 				<div className="relative z-20 flex flex-col items-center gap-y-2 py-10">
 					<div>

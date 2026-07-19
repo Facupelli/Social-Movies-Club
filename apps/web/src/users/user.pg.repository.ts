@@ -54,7 +54,7 @@ export class UserPgRepository {
 	async getAggregatedFeedOnTheFly(
 		userId: string,
 		cursor: string | null = null,
-		limit: number = 20,
+		limit = 20,
 	) {
 		return await withDatabase(async (db) => {
 			const query = sql`
@@ -118,7 +118,7 @@ export class UserPgRepository {
 		});
 	}
 
-	async getAggregatedFeed({
+	getAggregatedFeed({
 		userId,
 		limit = 20,
 		cursor = null,
@@ -172,17 +172,18 @@ export class UserPgRepository {
 				LIMIT ${limit}
 			`;
 
-			const { rows: feedItems } = await db.execute<AggregatedFeedItem>(query);
+			const { rows: aggregatedFeedItems } =
+				await db.execute<AggregatedFeedItem>(query);
 
-			const lastElement = feedItems.at(-1);
+			const lastElement = aggregatedFeedItems.at(-1);
 
 			const nextCursor =
-				lastElement && feedItems.length === limit
+				lastElement && aggregatedFeedItems.length === limit
 					? new Date(lastElement.lastRatingAt).toISOString()
 					: null;
 
 			return {
-				items: feedItems,
+				items: aggregatedFeedItems,
 				nextCursor,
 			};
 		});

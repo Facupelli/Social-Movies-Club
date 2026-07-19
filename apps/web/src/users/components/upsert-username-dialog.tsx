@@ -52,7 +52,7 @@ export function UpsertUsernameDialog({
 			<DialogTrigger asChild className="cursor-pointer">
 				<Button
 					size="sm"
-					disabled={!session || !isOwner}
+					disabled={!(session && isOwner)}
 					className="px-0 h-auto"
 					variant="link"
 				>
