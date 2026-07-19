@@ -1,5 +1,5 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import { QUERY_KEYS } from "@/lib/app.constants";
 import type {
 	UserMoviesClientFilters,

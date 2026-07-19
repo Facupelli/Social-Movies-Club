@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import { dbMovieToView } from "@/media/media.adapters";
 import type { FeedItem, UserMoviesServerFilters } from "./user.types";
 import { UserService } from "./user.service";

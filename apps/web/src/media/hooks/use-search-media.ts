@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import { QUERY_KEYS } from "@/lib/app.constants";
 
 async function getMediaByQuery(query: string): Promise<MovieView[]> {

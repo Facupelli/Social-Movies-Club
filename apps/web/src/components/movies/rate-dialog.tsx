@@ -17,21 +17,28 @@ import { QUERY_KEYS } from "@/lib/app.constants";
 import { authClient } from "@/lib/auth/auth-client";
 import type { ApiResponse } from "@/lib/safe-execute";
 import { addRatingToMovie } from "@/media/actions/add-rating";
-import { MediaTypeDict } from "@/media/media.type";
+import { type MediaType, MediaTypeDict } from "@/media/media.type";
 import { getUserRatingsQueryOptions } from "@/users/hooks/use-user-ratings";
 import { SubmitButton } from "../submit-button";
 import { Button } from "../ui/button";
-import { useMovieCardContext } from "./movie-card";
 
 const initialState: ApiResponse<void> = {
 	success: false,
 	error: "",
 };
 
-export function RateDialog() {
+export function RateDialog({
+	tmdbId,
+	title,
+	type,
+	year,
+}: {
+	tmdbId: number;
+	title: string;
+	type: MediaType;
+	year: string;
+}) {
 	const { data: session } = authClient.useSession();
-
-	const { movie } = useMovieCardContext();
 
 	const queryClient = useQueryClient();
 	const { data: userRatings } = useQuery(
@@ -61,7 +68,7 @@ export function RateDialog() {
 		initialState,
 	);
 
-	const userRating = userRatings?.[movie.tmdbId];
+	const userRating = userRatings?.[tmdbId];
 	const isMovieRated = userRating?.isRated;
 
 	const [rating, setRating] = useState(userRating?.score ?? 0);
@@ -81,12 +88,12 @@ export function RateDialog() {
 					<>
 						<DialogHeader>
 							<div className="space-y-1">
-								<DialogTitle className="text-2xl">{movie.title}</DialogTitle>
+								<DialogTitle className="text-2xl">{title}</DialogTitle>
 								<div className="font-normal flex items-center gap-1 justify-center uppercase text-neutral-500 text-xs">
-									<span className="">{MediaTypeDict[movie.type]}</span>
+									<span className="">{MediaTypeDict[type]}</span>
 									<span className="">-</span>
 									<span className="font-normal text-neutral-500 text-sm">
-										{movie.year}
+										{year}
 									</span>
 								</div>
 							</div>
@@ -103,8 +110,8 @@ export function RateDialog() {
 						</DialogHeader>
 
 						<form className="md:pt-2">
-							<input name="movieTMDBId" type="hidden" value={movie.tmdbId} />
-							<input name="type" type="hidden" value={movie.type} />
+							<input name="movieTMDBId" type="hidden" value={tmdbId} />
+							<input name="type" type="hidden" value={type} />
 
 							<p className="sr-only">
 								Use the number keys 1 through 10 to select a rating.

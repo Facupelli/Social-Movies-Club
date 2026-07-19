@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { NEXT_CACHE_TAGS } from "@/lib/app.constants";
 import { auth } from "@/lib/auth/auth";
@@ -36,6 +36,7 @@ export default async function WatchlistPage(
 
 	const params = await props.params;
 	const userId = params.id;
+	const isOwner = session.user.id === userId;
 
 	const watchlistResult = await getWatchlist(userId);
 
@@ -49,7 +50,7 @@ export default async function WatchlistPage(
 		<section className="py-10">
 			<MovieGrid>
 				{watchlist?.map((movie) => (
-					<GridMovieCard movie={movie} key={movie.tmdbId} />
+					<GridMovieCard isOwner={isOwner} movie={movie} key={movie.tmdbId} />
 				))}
 			</MovieGrid>
 		</section>

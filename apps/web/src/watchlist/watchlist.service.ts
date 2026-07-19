@@ -1,4 +1,4 @@
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import { dbWatchlistMovieToView } from "@/media/media.adapters";
 import { WatchlistPgRepository } from "./watchlist.repository";
 

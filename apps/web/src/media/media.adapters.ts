@@ -1,4 +1,4 @@
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import type { UserRatings } from "@/users/user.types";
 import type { UserWatchlist } from "@/watchlist/watchlist.repository";
 import type { TMDbMediaMultiSearch } from "./media.type";

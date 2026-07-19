@@ -13,7 +13,14 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MovieCard } from "@/components/movies/movie-card";
+import {
+	MovieCard,
+	MoviePoster,
+	MovieReleaseDate,
+	MovieScore,
+	MovieTitle,
+} from "@/components/movies/movie-card";
+import { MovieWatchProviders } from "@/components/movies/movie-watch-providers";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import { MovieList } from "@/components/movies/movie-list";
 import { Button } from "@/components/ui/button";
@@ -84,13 +91,13 @@ export function ProfileRatingsClient({
 					{isPending && <p>Cargando...</p>}
 
 					{profileMovies?.map((movie) => (
-						<MovieCard key={movie.tmdbId} movie={movie}>
-							<MovieCard.Poster />
+						<MovieCard key={movie.tmdbId}>
+							<MoviePoster posterPath={movie.posterPath} title={movie.title} />
 							<CardContent className="flex flex-col gap-1 px-4 py-2">
-								<MovieCard.Title />
+								<MovieTitle title={movie.title} />
 								<div className="flex items-center justify-between">
-									<MovieCard.ReleaseDate />
-									<MovieCard.Score />
+									<MovieReleaseDate year={movie.year} />
+									<MovieScore score={movie.score} />
 								</div>
 							</CardContent>
 						</MovieCard>
@@ -110,25 +117,29 @@ export function ProfileRatingsClient({
 					{isPending && <p>Cargando...</p>}
 
 					{profileMovies?.map((movie, idx) => (
-						<MovieCard key={movie.tmdbId} movie={movie}>
+						<MovieCard key={movie.tmdbId}>
 							<div className="flex gap-6">
 								<p className="hidden pl-2 font-bold md:block">{idx + 1}</p>
 
 								<div className="flex flex-1 gap-4">
-									<MovieCard.Poster size="small" />
+									<MoviePoster
+										posterPath={movie.posterPath}
+										size="small"
+										title={movie.title}
+									/>
 
 									<div className="flex flex-col gap-2 md:flex-1 md:flex-row md:gap-4">
 										<div className="pt-2 md:flex-1">
-											<MovieCard.Title className="font-bold text-lg" />
-											<MovieCard.ReleaseDate />
+											<MovieTitle className="font-bold text-lg" title={movie.title} />
+											<MovieReleaseDate year={movie.year} />
 										</div>
 										<div className="flex items-center gap-4 md:pr-4">
-											<MovieCard.WatchProviders />
+											<MovieWatchProviders tmdbId={movie.tmdbId} type={movie.type} />
 										</div>
 									</div>
 
 									<div className="ml-auto self-center px-2 md:px-4">
-										<MovieCard.Score />
+										<MovieScore score={movie.score} />
 									</div>
 								</div>
 							</div>

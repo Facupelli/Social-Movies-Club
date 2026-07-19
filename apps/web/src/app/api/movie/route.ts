@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import type { MovieView } from "@/components/movies/movie-card";
+import type { MovieView } from "@/media/movie-view";
 import type { MultiSearchResult } from "@/infra/TMDB/tmdb.repository";
 import { TmdbService } from "@/infra/TMDB/tmdb.service";
 import { apiMovieToView } from "@/media/media.adapters";

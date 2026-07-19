@@ -14,8 +14,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useState } from "react";
-import { MovieCard, type MovieView } from "@/components/movies/movie-card";
+import {
+	MovieCard,
+	MovieMediaType,
+	MoviePoster,
+	MovieReleaseDate,
+	MovieScore,
+	MovieTitle,
+} from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
+import { MovieWatchProviders } from "@/components/movies/movie-watch-providers";
+import { RateDialog } from "@/components/movies/rate-dialog";
 import SignInButton from "@/components/sign-in-button";
 import {
 	Accordion,
@@ -215,22 +224,8 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 	const otherRatings = item.ratings?.slice(1);
 	const hasMoreRatings = otherRatings && otherRatings.length > 0;
 
-	const movieView: MovieView = {
-		tmdbId: item.media.tmdbId,
-		posterPath: item.media.posterPath,
-		backdropPath: item.media.backdropPath,
-		score: lastRating.score,
-		title: item.media.title,
-		year: item.media.year,
-		overview: item.media.overview,
-		type: item.media.type,
-	};
-
 	return (
-		<MovieCard
-			movie={movieView}
-			className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent"
-		>
+		<MovieCard className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent">
 			<div className="flex flex-col md:flex-row gap-2 md:gap-6">
 				<div className="md:block hidden">
 					<Link
@@ -284,7 +279,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 					<div className="grid ">
 						<div className="flex items-baseline">
 							<div className="flex-1">
-								<MovieCard.Title className="md:text-xl" />
+								<MovieTitle className="md:text-xl" title={item.media.title} />
 							</div>
 							<div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
 								<span>hace</span>
@@ -301,7 +296,10 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 									<AccordionContent>{item.media.overview}</AccordionContent>
 								</AccordionItem>
 							</Accordion>
-							<MovieCard.WatchProviders />
+							<MovieWatchProviders
+								tmdbId={item.media.tmdbId}
+								type={item.media.type}
+							/>
 						</div>
 					</div>
 
@@ -387,7 +385,7 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 								</DropdownMenu>
 							)}
 
-							<MovieCard.Score />
+							<MovieScore score={lastRating.score} />
 						</div>
 
 						{/* Stats */}
@@ -509,22 +507,8 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
 function FeedItemCard({ item }: { item: FeedItem }) {
 	const isMobile = useIsMobile();
 
-	const movieView: MovieView = {
-		tmdbId: item.movieTmdbId,
-		posterPath: item.moviePoster,
-		backdropPath: item.movieBackdrop,
-		score: item.score,
-		title: item.movieTitle,
-		year: item.movieYear,
-		overview: item.movieOverview,
-		type: item.movieType,
-	};
-
 	return (
-		<MovieCard
-			movie={movieView}
-			className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent"
-		>
+		<MovieCard className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent">
 			<div className="flex flex-col md:flex-row gap-2 md:gap-6">
 				<div className="md:block hidden">
 					<Link
@@ -590,7 +574,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 					<div className="grid ">
 						<div className="flex items-baseline">
 							<div className="flex-1">
-								<MovieCard.Title className="md:text-xl" />
+								<MovieTitle className="md:text-xl" title={item.movieTitle} />
 							</div>
 							<div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
 								<span>hace</span>
@@ -607,7 +591,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 									<AccordionContent>{item.movieOverview}</AccordionContent>
 								</AccordionItem>
 							</Accordion>
-							<MovieCard.WatchProviders />
+							<MovieWatchProviders tmdbId={item.movieTmdbId} type={item.movieType} />
 						</div>
 					</div>
 
@@ -641,7 +625,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 								</div>
 							</div>
 
-							<MovieCard.Score />
+							<MovieScore score={item.score} />
 						</div>
 					</div>
 				</div>
@@ -684,21 +668,26 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 		<div className="px-2 pt-2 md:px-10">
 			<MovieGrid>
 				{movies?.map((movie) => (
-					<MovieCard key={movie.tmdbId} movie={movie}>
-						<MovieCard.Poster />
+					<MovieCard key={movie.tmdbId}>
+						<MoviePoster posterPath={movie.posterPath} title={movie.title} />
 						<CardContent className="flex flex-col gap-1 px-4 pt-2">
-							<MovieCard.Title />
+							<MovieTitle title={movie.title} />
 							<div className="flex items-center justify-between">
-								<MovieCard.ReleaseDate />
-								<MovieCard.MediaType />
+								<MovieReleaseDate year={movie.year} />
+								<MovieMediaType type={movie.type} />
 							</div>
 						</CardContent>
 						<CardFooter className="flex justify-end gap-2 px-4 pb-4">
 							<div className="flex-1 md:flex-initial">
-								<MovieCard.WatchlistButton />
+								<AddToWatchlistButton tmdbId={movie.tmdbId} type={movie.type} />
 							</div>
 							<div className="flex-1 md:flex-initial">
-								<MovieCard.Rate />
+								<RateDialog
+									tmdbId={movie.tmdbId}
+									title={movie.title}
+									type={movie.type}
+									year={movie.year}
+								/>
 							</div>
 						</CardFooter>
 					</MovieCard>
