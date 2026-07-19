@@ -130,8 +130,7 @@ function _AggregatedFeed() {
 		hasNextPage,
 		isEnabled,
 	} = useInfiniteQuery({
-		...getUserAggregatedFeedQueryOptions,
-		enabled: !!session,
+		...getUserAggregatedFeedQueryOptions(session?.user.id),
 	});
 
 	if (isPending && isEnabled) {
@@ -405,7 +404,7 @@ function Feed() {
 		authClient.useSession();
 
 	const { data, isPending, isFetchingNextPage, fetchNextPage, hasNextPage } =
-		useInfiniteQuery({ ...getUserFeedQueryOptions, enabled: !!session });
+		useInfiniteQuery(getUserFeedQueryOptions(session?.user.id));
 
 	if (!(session || isSessionLoading)) {
 		return null;

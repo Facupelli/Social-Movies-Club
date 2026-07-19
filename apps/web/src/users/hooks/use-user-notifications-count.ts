@@ -1,18 +1,23 @@
 import { queryOptions } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/app.constants";
 
-async function getUserNotificationsCount(): Promise<number> {
-	const response = await fetch("/api/user/notifications/count");
+async function getUserNotificationsCount(signal?: AbortSignal): Promise<number> {
+	const response = await fetch("/api/user/notifications/count", {
+		cache: "no-store",
+		signal,
+	});
 	if (!response.ok) {
 		throw new Error("Network response was not ok");
 	}
 	return response.json();
 }
 
-const getUserNotificationsCountQueryOptions = queryOptions({
-	queryKey: QUERY_KEYS.USER_NOTIFICATIONS_COUNT,
-	queryFn: () => getUserNotificationsCount(),
-	refetchOnWindowFocus: false,
-});
+const getUserNotificationsCountQueryOptions = (userId: string | undefined) =>
+	queryOptions({
+		queryKey: QUERY_KEYS.getUserNotificationsCount(userId),
+		queryFn: ({ signal }) => getUserNotificationsCount(signal),
+		enabled: Boolean(userId),
+		refetchOnWindowFocus: false,
+	});
 
 export { getUserNotificationsCountQueryOptions };

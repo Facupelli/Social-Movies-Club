@@ -32,7 +32,9 @@ export function AddToWatchlistButton({
 }) {
 	const queryClient = useQueryClient();
 	const { data: session } = authClient.useSession();
-	const { data: userWatchlist } = useQuery(getUserWatchlistQueryOptions);
+	const { data: userWatchlist } = useQuery(
+		getUserWatchlistQueryOptions(session?.user.id),
+	);
 
 	const { isProfilePage } = useIsOwner();
 
@@ -41,9 +43,23 @@ export function AddToWatchlistButton({
 		formData: FormData,
 	) => {
 		const result = await addMovieToWatchlist(formData);
-		if (result.success) {
+		if (result.success && session?.user.id) {
 			queryClient.invalidateQueries({
-				queryKey: QUERY_KEYS.USER_WATCHLIST,
+				queryKey: QUERY_KEYS.getUserWatchlist(session.user.id),
+			});
+		}
+
+		return result;
+	};
+
+	const handleRemoveMovieFromWatchlist = async (
+		_state: ApiResponse<void>,
+		formData: FormData,
+	) => {
+		const result = await removeMovieFromWatchlist(_state, formData);
+		if (result.success && session?.user.id) {
+			queryClient.invalidateQueries({
+				queryKey: QUERY_KEYS.getUserWatchlist(session.user.id),
 			});
 		}
 
@@ -55,10 +71,13 @@ export function AddToWatchlistButton({
 		error: "",
 	});
 
-	const [__, removeAction] = useActionState(removeMovieFromWatchlist, {
-		success: false,
-		error: "",
-	});
+	const [__, removeAction] = useActionState(
+		handleRemoveMovieFromWatchlist,
+		{
+			success: false,
+			error: "",
+		},
+	);
 
 	const userMovie = userWatchlist?.[tmdbId];
 	const isMovieInWatchlist = !!userMovie;

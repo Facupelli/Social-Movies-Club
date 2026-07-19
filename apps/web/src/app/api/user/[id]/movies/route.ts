@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
 import { UserService } from "@/users/user.service";
 import type { GetUserRatingMovies } from "@/users/user.types";
 import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
@@ -19,7 +20,7 @@ export async function GET(
 	});
 
 	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
+		return unauthorizedJson();
 	}
 
 	const routeParams = await params;
@@ -43,5 +44,5 @@ export async function GET(
 		session.user.id,
 	);
 
-	return Response.json(res);
+	return authenticatedJson(res);
 }

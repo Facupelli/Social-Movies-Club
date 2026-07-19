@@ -1,25 +1,28 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Bookmark, Home, Users2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
+import { clearPersonalizedQueries } from "@/lib/react-query/personalized-cache";
 import { getUserNotificationsCountQueryOptions } from "@/users/hooks/use-user-notifications-count";
 import SignInButton from "./sign-in-button";
 import { Button } from "./ui/button";
 
 export function Nav() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { data: session } = authClient.useSession();
 
 	const { data: notificationsCount } = useQuery(
-		getUserNotificationsCountQueryOptions,
+		getUserNotificationsCountQueryOptions(session?.user.id),
 	);
 
 	const handleLogOut = async () => {
 		await authClient.signOut();
+		await clearPersonalizedQueries(queryClient);
 		router.push("/");
 	};
 

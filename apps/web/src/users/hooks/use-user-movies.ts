@@ -13,6 +13,7 @@ import { userMoviesFiltersTransformer } from "../utils/filter-user-movies-transf
 async function getUserMovies(
 	userId: string,
 	filters: UserMoviesServerFilters,
+	signal?: AbortSignal,
 ): Promise<{ nextCursor: number | null; data: MovieView[] }> {
 	const allParams = userMoviesFiltersUrlParser.toSearchParams(filters);
 	allParams.set(
@@ -23,7 +24,7 @@ async function getUserMovies(
 	const url = new URL(`/api/user/${userId}/movies`, window.location.origin);
 	url.search = allParams.toString();
 
-	const response = await fetch(url);
+	const response = await fetch(url, { cache: "no-store", signal });
 	if (!response.ok) {
 		throw new Error("Network response was not ok");
 	}
@@ -37,11 +38,12 @@ async function getUserMovies(
 }
 
 const getUserMoviesQueryOptions = (
+	viewerUserId: string | undefined,
 	filters: UserMoviesClientFilters & { userId: string },
 ) =>
 	infiniteQueryOptions({
-		queryKey: QUERY_KEYS.getUserMovies(filters),
-		queryFn: async ({ pageParam = 0 }) => {
+		queryKey: QUERY_KEYS.getUserMovies(viewerUserId, filters),
+		queryFn: async ({ pageParam = 0, signal }) => {
 			const serverFilters = userMoviesFiltersTransformer.clientToServer(
 				filters,
 				{
@@ -50,9 +52,10 @@ const getUserMoviesQueryOptions = (
 				},
 			);
 
-			return await getUserMovies(filters.userId, serverFilters);
+			return await getUserMovies(filters.userId, serverFilters, signal);
 		},
 		initialPageParam: 0,
+		enabled: Boolean(viewerUserId),
 		getNextPageParam: (lastPage) => lastPage.nextCursor,
 		refetchOnWindowFocus: false,
 		refetchIntervalInBackground: false,

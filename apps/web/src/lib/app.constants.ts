@@ -5,12 +5,30 @@ export const LOCAL_STORAGE_KEYS: { [key: string]: string } = {
 };
 
 export const QUERY_KEYS = {
-	USER: ["user"],
-	USER_FEED: ["user-feed"],
-	USER_AGGREGATED_FEED: ["user-aggregated-feed"],
-	USER_RATINGS: ["user-ratings"],
-	USER_WATCHLIST: ["user-watchlist"],
-	USER_NOTIFICATIONS_COUNT: ["user-notifications-count"],
+	VIEWER: ["viewer"],
+	getViewer: (userId: string | undefined) => ["viewer", userId],
+	getUser: (userId: string | undefined) => ["viewer", userId, "user"],
+	getUserFeed: (userId: string | undefined) => ["viewer", userId, "feed"],
+	getUserAggregatedFeed: (userId: string | undefined) => [
+		"viewer",
+		userId,
+		"aggregated-feed",
+	],
+	getUserRatings: (userId: string | undefined) => [
+		"viewer",
+		userId,
+		"ratings",
+	],
+	getUserWatchlist: (userId: string | undefined) => [
+		"viewer",
+		userId,
+		"watchlist",
+	],
+	getUserNotificationsCount: (userId: string | undefined) => [
+		"viewer",
+		userId,
+		"notifications-count",
+	],
 	getSearchUsers: (query: string) => ["search-users", { query }],
 	getSearchMedia: (query: string) => ["search-media", { query }],
 	getWatchProviders: (mediaId: number, type: string) => [
@@ -18,8 +36,13 @@ export const QUERY_KEYS = {
 		{ mediaId },
 		{ type },
 	],
-	getUserMovies: (filters: UserMoviesClientFilters & { userId: string }) => [
-		"user-movies",
+	getUserMovies: (
+		viewerUserId: string | undefined,
+		filters: UserMoviesClientFilters & { userId: string },
+	) => [
+		"viewer",
+		viewerUserId,
+		"profile-movies",
 		{ userId: filters.userId },
 		{ sortBy: filters.sortBy },
 		{ sortOrder: filters.sortOrder },

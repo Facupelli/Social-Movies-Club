@@ -34,7 +34,9 @@ export function RateDialog() {
 	const { movie } = useMovieCardContext();
 
 	const queryClient = useQueryClient();
-	const { data: userRatings } = useQuery(getUserRatingsQueryOptions);
+	const { data: userRatings } = useQuery(
+		getUserRatingsQueryOptions(session?.user.id),
+	);
 
 	const handleAddRatingToMovie = async (
 		_state: ApiResponse<void>,
@@ -45,9 +47,11 @@ export function RateDialog() {
 			return result;
 		}
 
-		queryClient.invalidateQueries({
-			queryKey: QUERY_KEYS.USER_RATINGS,
-		});
+		if (session?.user.id) {
+			queryClient.invalidateQueries({
+				queryKey: QUERY_KEYS.getUserRatings(session.user.id),
+			});
+		}
 
 		return result;
 	};

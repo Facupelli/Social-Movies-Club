@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
 import { NotificationService } from "@/notifications/notifications.service";
 
 export async function GET() {
@@ -8,7 +9,7 @@ export async function GET() {
 	});
 
 	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
+		return unauthorizedJson();
 	}
 
 	const notificationService = new NotificationService();
@@ -16,5 +17,5 @@ export async function GET() {
 	const res = await notificationService.getUnreadNotificationCount(
 		session.user.id,
 	);
-	return Response.json(res);
+	return authenticatedJson(res);
 }

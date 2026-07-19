@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LOCAL_STORAGE_KEYS } from "@/lib/app.constants";
+import { authClient } from "@/lib/auth/auth-client";
 import { useIsOwner } from "@/lib/hooks/use-is-owner";
 import { cn } from "@/lib/utils";
 import { TYPE_FILTER_DICT } from "@/media/media.constants";
@@ -40,10 +41,11 @@ export default function ProfilePage({
 }) {
 	const pageParams = use(params);
 	const { filters } = useUserMoviesFilters();
+	const { data: session } = authClient.useSession();
 
 	const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
 		useInfiniteQuery(
-			getUserMoviesQueryOptions({
+			getUserMoviesQueryOptions(session?.user.id, {
 				userId: pageParams.id,
 				...filters,
 			}),

@@ -3,9 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@/infra/postgres/schema";
 import { QUERY_KEYS } from "@/lib/app.constants";
+import { authClient } from "@/lib/auth/auth-client";
 
-async function getUsersByQuery(query: string): Promise<User[]> {
-	const response = await fetch(`/api/users/?q=${query}`);
+async function getUsersByQuery(
+	query: string,
+	signal?: AbortSignal,
+): Promise<User[]> {
+	const response = await fetch(`/api/users/?q=${query}`, {
+		cache: "no-store",
+		signal,
+	});
 	if (!response.ok) {
 		throw new Error("Network response was not ok");
 	}
@@ -14,10 +21,12 @@ async function getUsersByQuery(query: string): Promise<User[]> {
 }
 
 const useSearchUsers = (query: string) => {
+	const { data: session } = authClient.useSession();
+
 	return useQuery({
 		queryKey: QUERY_KEYS.getSearchUsers(query),
-		queryFn: () => getUsersByQuery(query),
-		enabled: query !== "",
+		queryFn: ({ signal }) => getUsersByQuery(query, signal),
+		enabled: Boolean(session?.user.id) && query !== "",
 		refetchOnWindowFocus: false,
 	});
 };
