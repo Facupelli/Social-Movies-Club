@@ -23,7 +23,8 @@ export function Nav() {
 	const handleLogOut = async () => {
 		await authClient.signOut();
 		await clearPersonalizedQueries(queryClient);
-		router.push("/");
+		router.replace("/");
+		router.refresh();
 	};
 
 	return (

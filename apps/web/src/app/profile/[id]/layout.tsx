@@ -1,5 +1,4 @@
 import { ArrowLeft } from "lucide-react";
-import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -7,7 +6,7 @@ import { Suspense } from "react";
 import ProfileNav from "@/components/profile-nav";
 import { ProfileSkeleton } from "@/components/profile-skeleton";
 import { FollowService } from "@/follows/follow.service";
-import { auth } from "@/lib/auth/auth";
+import { getServerSession } from "@/lib/auth/get-server-session";
 import {
 	getIsFollowingUser,
 	getUserProfile,
@@ -21,9 +20,7 @@ export default async function ProfileLayout(
 		params: Promise<{ id: string }>;
 	}>,
 ) {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+	const session = await getServerSession();
 
 	if (!session) {
 		redirect("/");

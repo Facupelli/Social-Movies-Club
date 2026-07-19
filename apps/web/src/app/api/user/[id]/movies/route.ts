@@ -1,8 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import { UserService } from "@/users/user.service";
-import type { GetUserRatingMovies } from "@/users/user.types";
+import { loadUserMoviesPage } from "@/users/user-query-loaders.server";
 import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
 import { userMoviesFiltersTransformer } from "@/users/utils/filter-user-movies-transformer";
 
@@ -37,12 +36,11 @@ export async function GET(
 		},
 	);
 
-	const userService = new UserService();
-	const res: GetUserRatingMovies = await userService.getUserRatingMovies(
-		routeParams.id,
-		serverFilters,
-		session.user.id,
-	);
+	const res = await loadUserMoviesPage({
+		profileUserId: routeParams.id,
+		viewerUserId: session.user.id,
+		filters: serverFilters,
+	});
 
 	return authenticatedJson(res);
 }

@@ -1,8 +1,16 @@
-"use client";
-
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/app.constants";
 import type { FeedItem } from "../user.types";
+
+type UserFeedPage = {
+	items: FeedItem[];
+	nextCursor: string | null;
+};
+
+type LoadUserFeedPage = (params: {
+	cursor: string | null;
+	signal?: AbortSignal;
+}) => Promise<UserFeedPage>;
 
 async function getUserFeed({
 	cursor,
@@ -10,24 +18,31 @@ async function getUserFeed({
 }: {
 	cursor: string | null;
 	signal?: AbortSignal;
-}): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
-	const url = new URL("/api/user/feed", window.location.origin);
+}): Promise<UserFeedPage> {
+	const searchParams = new URLSearchParams();
 	if (cursor) {
-		url.searchParams.set("cursor", cursor);
+		searchParams.set("cursor", cursor);
 	}
 
-	const response = await fetch(url, { cache: "no-store", signal });
+	const query = searchParams.size > 0 ? `?${searchParams.toString()}` : "";
+	const response = await fetch(`/api/user/feed${query}`, {
+		cache: "no-store",
+		signal,
+	});
 	if (!response.ok) {
 		throw new Error("Network response was not ok");
 	}
 	return response.json();
 }
 
-const getUserFeedQueryOptions = (userId: string | undefined) =>
+const getUserFeedQueryOptions = (
+	userId: string | undefined,
+	loadPage: LoadUserFeedPage = getUserFeed,
+) =>
 	infiniteQueryOptions({
 		queryKey: QUERY_KEYS.getUserFeed(userId),
-		queryFn: async ({ pageParam = null, signal }) =>
-			await getUserFeed({ cursor: pageParam, signal }),
+		queryFn: ({ pageParam = null, signal }) =>
+			loadPage({ cursor: pageParam, signal }),
 		initialPageParam: null as string | null,
 		getNextPageParam: (lastPage) => lastPage.nextCursor,
 		enabled: Boolean(userId),
