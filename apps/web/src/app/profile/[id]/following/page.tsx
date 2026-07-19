@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FollowService } from "@/follows/follow.service";
 import type { GetFollowingUsers } from "@/follows/follows.type";
@@ -62,12 +63,8 @@ export default async function FollowingPage(
 	return (
 		<section className="flex-1 pt-10 space-y-4">
 			{followingUsers.map((user) => (
-				<a
-					href={`/profile/${user.followeeId}`}
-					className="flex justify-between"
-					key={user.followeeId}
-				>
-					<div className="flex gap-4">
+				<div className="flex justify-between" key={user.followeeId}>
+					<Link className="flex gap-4" href={`/profile/${user.followeeId}`}>
 						<div className="size-[50px] rounded-full bg-secondary-foreground">
 							<Image
 								unoptimized
@@ -82,7 +79,7 @@ export default async function FollowingPage(
 							<div>{user.userName}</div>
 							<div>{user.userUsername}</div>
 						</div>
-					</div>
+					</Link>
 					{showFollowButton(
 						session.user.id,
 						profileUserId,
@@ -93,7 +90,7 @@ export default async function FollowingPage(
 							isFollowing={isFollowing}
 						/>
 					)}
-				</a>
+				</div>
 			))}
 		</section>
 	);

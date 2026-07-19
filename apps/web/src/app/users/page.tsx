@@ -128,7 +128,6 @@ function UsersList({
 			{users?.map((user) => (
 				<Link
 					key={user.id}
-					prefetch={false}
 					href={`/profile/${user.id}`}
 					className="flex items-center gap-4 hover:bg-muted rounded-md p-2"
 				>

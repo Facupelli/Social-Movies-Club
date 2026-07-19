@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useDeferredValue, useEffect, useState } from "react";
 import { MovieCard, type MovieView } from "@/components/movies/movie-card";
 import { MovieGrid } from "@/components/movies/movie-grid";
 import SignInButton from "@/components/sign-in-button";
@@ -48,26 +49,43 @@ import type { FeedItem } from "@/users/user.types";
 import { AddToWatchlistButton } from "@/watchlist/components/add-to-watchlist-button";
 
 export function HomePageClient({
+	initialQuery = "",
 	viewerUserId,
 }: {
+	initialQuery?: string;
 	viewerUserId?: string;
 }) {
-	const [query, setQuery] = useState("");
-	const deferredQuery = useDeferredValue(query);
-	const debouncedSearchTerm = useDebounce(deferredQuery, 500);
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const [query, setQuery] = useState(initialQuery);
+	const deferredQuery = useDeferredValue(query.trim());
+	const debouncedQuery = useDebounce(deferredQuery, 500);
+	const debouncedSearchTerm =
+		debouncedQuery.length >= 3 ? debouncedQuery : "";
+
+	useEffect(() => {
+		setQuery(searchParams.get("q") ?? "");
+	}, [searchParams]);
 
 	const handleSearch = (value: string) => {
-		if (value.length !== 0 && value.length < 3) {
-			return;
+		setQuery(value);
+
+		const params = new URLSearchParams(searchParams.toString());
+		if (value) {
+			params.set("q", value);
+		} else {
+			params.delete("q");
 		}
 
-		setQuery(value);
+		const queryString = params.toString();
+		const url = queryString ? `${pathname}?${queryString}` : pathname;
+		window.history.replaceState(window.history.state, "", url);
 	};
 
 	return (
 		<div className="relative min-h-svh flex-1 py-6 md:min-h-auto">
 			<div className="relative z-20 px-2 pb-2 md:px-10 md:pb-6">
-				<SearchInput onChange={handleSearch} />
+				<SearchInput onChange={handleSearch} value={query} />
 			</div>
 
 			<HomeContent
@@ -100,7 +118,13 @@ function HomeContent({
 	);
 }
 
-function SearchInput({ onChange }: { onChange: (values: string) => void }) {
+function SearchInput({
+	onChange,
+	value,
+}: {
+	onChange: (values: string) => void;
+	value: string;
+}) {
 	return (
 		<div className="relative">
 			<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-primary" />
@@ -109,6 +133,7 @@ function SearchInput({ onChange }: { onChange: (values: string) => void }) {
 				onChange={(e) => onChange(e.target.value)}
 				placeholder="Buscar película o serie"
 				type="search"
+				value={value}
 			/>
 		</div>
 	);
@@ -210,7 +235,6 @@ function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
 				<div className="md:block hidden">
 					<Link
 						href={`/profile/${lastRating.user.id}`}
-						prefetch={false}
 						className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
 					>
 						<Avatar className="size-7 md:size-10">
@@ -505,7 +529,6 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 				<div className="md:block hidden">
 					<Link
 						href={`/profile/${item.actorId}`}
-						prefetch={false}
 						className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
 					>
 						<Avatar className="size-7 md:size-10">
@@ -592,7 +615,6 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 						<div className="flex items-center gap-2 md:gap-4 p-3 bg-muted/50 rounded-sm">
 							<Link
 								href={`/profile/${item.actorId}`}
-								prefetch={false}
 								className="size-[30px] rounded-full bg-accent-foreground md:size-[50px] md:hidden"
 							>
 								<Avatar className="size-7 md:size-10">

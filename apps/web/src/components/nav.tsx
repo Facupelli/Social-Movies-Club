@@ -31,7 +31,7 @@ export function Nav() {
 		<nav className="fixed z-10 bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar p-4 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:p-8">
 			<ul className="flex gap-16 md:grid md:gap-4">
 				<li>
-					<Link prefetch={false} className="flex items-center gap-2" href="/">
+					<Link className="flex items-center gap-2" href="/">
 						<Home />
 						<span className="hidden md:block">Inicio</span>
 					</Link>
@@ -50,21 +50,13 @@ export function Nav() {
 					</Link>
 				</li>
 				<li>
-					<Link
-						prefetch={false}
-						className="flex items-center gap-2"
-						href="/users"
-					>
+					<Link className="flex items-center gap-2" href="/users">
 						<Users2Icon />
 						<span className="hidden md:block">Usuarios</span>
 					</Link>
 				</li>
 				<li>
-					<Link
-						prefetch={false}
-						className="flex items-center gap-2"
-						href="/notifications"
-					>
+					<Link className="flex items-center gap-2" href="/notifications">
 						<div className="relative">
 							{notificationsCount && notificationsCount > 0 ? (
 								<div className="absolute -right-1 -top-1 bg-primary size-4 rounded-full flex items-center justify-center text-sm">
