@@ -1,15 +1,16 @@
 services:
   api:
     build:
-      dockerfile: Dockerfile
-      context: .
-      # Only will build development stage from our dockerfile
+      dockerfile: apps/queue-system/Dockerfile
+      context: ../..
+      # Only build the development stage for local use.
       target: development
     volumes:
-      - .:/usr/src/app
+      - .:/workspace/apps/queue-system
+      - /workspace/apps/queue-system/node_modules
     env_file:
       - .env
-    command: npm run start:dev
+    command: pnpm dev
     ports:
       - 3000:3000
     depends_on:

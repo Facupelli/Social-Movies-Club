@@ -1,6 +1,6 @@
 {
   "root": false,
-  "extends": ["//", "ultracite"],
+  "extends": ["./../../biome.json", "ultracite"],
   "linter": {
     "rules": {
       "style": {

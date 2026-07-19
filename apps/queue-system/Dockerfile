@@ -1,53 +1,38 @@
+FROM node:20-alpine AS base
+
+RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
+
+WORKDIR /workspace
+
 ###################
-# BUILD FOR LOCAL DEVELOPMENT
+# LOCAL DEVELOPMENT
 ###################
 
-FROM node:20-alpine AS development
+FROM base AS development
 
-# Create app directory
-WORKDIR /usr/src/app
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY --chown=node:node apps/queue-system/package.json ./apps/queue-system/package.json
+COPY --chown=node:node apps/web/package.json ./apps/web/package.json
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-# Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node package*.json ./
+RUN pnpm install --filter queue-system... --frozen-lockfile
 
-RUN npm ci
+COPY --chown=node:node apps/queue-system ./apps/queue-system
 
-# Bundle app source
-COPY --chown=node:node . .
-
-# Use the node user from the image (instead of the root user)
+WORKDIR /workspace/apps/queue-system
 USER node
 
 ###################
-# BUILD FOR PRODUCTION
+# PRODUCTION BUILD
 ###################
 
-FROM node:20-alpine AS build
+FROM development AS build
 
-WORKDIR /usr/src/app
+USER root
+WORKDIR /workspace
 
-COPY --chown=node:node package*.json ./
-
-# In order to run `npm run build` we need access to the Nest CLI.
-# The Nest CLI is a dev dependency,
-# In the previous development stage we ran `npm ci` which installed all dependencies.
-# So we can copy over the node_modules directory from the development image into this build image.
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-
-COPY --chown=node:node . .
-
-RUN npm run build
-
-ENV NODE_ENV=production
-
-# Running `npm ci` removes the existing node_modules directory.
-# Passing in --only=production ensures that only the production dependencies are installed.
-# This ensures that the node_modules directory is as optimized as possible.
-RUN npm ci --only=production && npm cache clean --force
-
-USER node
+RUN pnpm --filter queue-system build
+RUN pnpm --filter queue-system deploy --legacy --prod /prod/queue-system
+RUN cp -R apps/queue-system/dist /prod/queue-system/dist
 
 ###################
 # PRODUCTION
@@ -55,9 +40,11 @@ USER node
 
 FROM node:20-alpine AS production
 
-# Copy the bundled code from the build stage to the production image
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
 
-# Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+COPY --chown=node:node --from=build /prod/queue-system ./
+
+USER node
+
+CMD ["node", "dist/main.js"]

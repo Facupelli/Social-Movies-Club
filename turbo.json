@@ -39,6 +39,9 @@
     "format": {
       "dependsOn": ["^topo"]
     },
+    "test": {
+      "dependsOn": ["^test"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
