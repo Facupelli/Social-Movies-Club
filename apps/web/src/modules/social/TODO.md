@@ -6,7 +6,7 @@
 - [x] Reject self-following
   Enforce it in the use case and database.
 
-- [ ] Stop swallowing follow failures
+- [x] Stop swallowing follow failures
   Persistence failures must not report success.
 
 - [ ] Split follow queries by use case

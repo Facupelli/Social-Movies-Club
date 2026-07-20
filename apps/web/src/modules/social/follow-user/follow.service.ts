@@ -60,9 +60,9 @@ export class FollowService {
       throw new Error('User is already being followed');
     }
 
-    try {
-      await this.followPgRepository.followUser(userId, followedUserId);
+    await this.followPgRepository.followUser(userId, followedUserId);
 
+    try {
       const user = await profileService.getUser(userId);
 
       if (!user?.username) {
@@ -80,7 +80,7 @@ export class FollowService {
       await eventRegistry.handleEvent('user_followed', event);
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: preserve follow notification failure diagnostics
-      console.log({ error });
+      console.error('Failed to send follow notification:', error);
     }
   }
 
