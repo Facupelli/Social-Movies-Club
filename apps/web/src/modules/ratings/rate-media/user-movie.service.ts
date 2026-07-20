@@ -1,5 +1,5 @@
 import { revalidateTag } from 'next/cache';
-import { MediaService } from '@/modules/media-catalog/get-media-details/media.service';
+import { upsertMedia } from '@/modules/media-catalog/get-media-details/media.pg';
 import type {
   MediaType,
   TMDbMediaMultiSearch,
@@ -14,7 +14,6 @@ import { RatingPgRepository } from './rating.pg.repository';
 
 export class UserMediaService {
   constructor(
-    private readonly mediaService = new MediaService(),
     private readonly ratingRepository = new RatingPgRepository(),
     private readonly tmdbService = new TmdbService()
   ) {}
@@ -45,7 +44,7 @@ export class UserMediaService {
       runtime: media.runtime ?? null,
     };
 
-    const { id: mediaId } = await this.mediaService.upsertMedia(movieData);
+    const { id: mediaId } = await upsertMedia(movieData);
 
     await this.ratingRepository.rateMovie(userId, mediaId, rating, watchedDate);
 
@@ -70,7 +69,7 @@ export class UserMediaService {
       runtime: media.runtime ?? null,
     };
 
-    const { id: movieId } = await this.mediaService.upsertMedia(movieData);
+    const { id: movieId } = await upsertMedia(movieData);
 
     return addToWatchlist(userId, movieId);
   }

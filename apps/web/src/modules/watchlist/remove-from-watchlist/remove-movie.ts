@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidateTag } from 'next/cache';
-import { MediaService } from '@/modules/media-catalog/get-media-details/media.service';
+import { getMediaByTmdbIdentity } from '@/modules/media-catalog/get-media-details/media.pg';
 import { removeFromWatchlist } from '@/modules/watchlist/remove-from-watchlist/remove-from-watchlist.pg';
 import { validateRemoveMovieFromWatchlist } from '@/modules/watchlist/watchlist-validation';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
@@ -23,13 +23,8 @@ export async function removeMovieFromWatchlist(
       };
     }
 
-    const mediaService = new MediaService();
-
     const result = await execute<void>(async () => {
-      const movie = await mediaService.getMediaByTmdbIdentity(
-        movieTMDBId,
-        type
-      );
+      const movie = await getMediaByTmdbIdentity(movieTMDBId, type);
       if (!movie) {
         throw new Error('Media not found');
       }
