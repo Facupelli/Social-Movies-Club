@@ -1,66 +1,71 @@
-'use server';
+import { FollowNotificationService } from '@/modules/notifications/notify-user-followed/follow-notification.service';
+import {
+  NotificationEventRegistry,
+  type UserFollowedEvent,
+} from '@/modules/notifications/notify-user-followed/notification-event-handler';
+import { ProfileService } from '@/modules/profiles/profile.service';
+import { createFollow, removeFollow } from './follow-user.pg';
 
-import { revalidateTag } from 'next/cache';
-import { validateFollowUser } from '@/modules/account/user-validation';
-import { FollowService } from '@/modules/social/follow-user/follow.service';
-import { withAuth } from '@/platform/auth/auth-server-action.middleware';
-import { type ApiResponse, execute } from '@/shared/http/safe-execute';
-import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
+const notificationService = new FollowNotificationService();
+const eventRegistry = new NotificationEventRegistry(notificationService);
+const profileService = new ProfileService();
+
+type FollowUserDependencies = {
+  createFollow: typeof createFollow;
+  getUser: ProfileService['getUser'];
+  notifyUserFollowed: (event: UserFollowedEvent) => Promise<boolean>;
+};
+
+const followUserDependencies: FollowUserDependencies = {
+  createFollow,
+  getUser: (userId) => profileService.getUser(userId),
+  notifyUserFollowed: (event) =>
+    eventRegistry.handleEvent('user_followed', event),
+};
 
 export async function followUser(
-  _: ApiResponse<void>,
-  formData: FormData
-): Promise<ApiResponse<void>> {
-  return await withAuth(async (session) => {
-    const { followedUserId } = validateFollowUser(formData);
+  userId: string,
+  followedUserId: string,
+  dependencies: FollowUserDependencies = followUserDependencies
+): Promise<void> {
+  if (userId === followedUserId) {
+    throw new Error('Users cannot follow themselves');
+  }
 
-    const followService = new FollowService();
+  const created = await dependencies.createFollow(userId, followedUserId);
 
-    const result = await execute<void>(async () => {
-      await followService.followUser(session.user.id, followedUserId);
-    });
+  if (!created) {
+    throw new Error('User is already being followed');
+  }
 
-    if (result.success) {
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUser(session.user.id, followedUserId)
-      );
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId)
-      );
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUserBySession(session.user.id)
-      );
+  try {
+    const user = await dependencies.getUser(userId);
+
+    if (!user?.username) {
+      return;
     }
 
-    return result;
-  });
+    await dependencies.notifyUserFollowed({
+      followerId: userId,
+      followedUserId,
+      followerUsername: user.username,
+      followerImage: user.image,
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: preserve follow notification failure diagnostics
+    console.error('Failed to send follow notification:', error);
+  }
 }
 
 export async function unfollowUser(
-  _: ApiResponse<void>,
-  formData: FormData
-): Promise<ApiResponse<void>> {
-  return await withAuth(async (session) => {
-    const { followedUserId } = validateFollowUser(formData);
+  userId: string,
+  followedUserId: string,
+  remove: typeof removeFollow = removeFollow
+): Promise<void> {
+  const removed = await remove(userId, followedUserId);
 
-    const followService = new FollowService();
-
-    const result = await execute<void>(async () => {
-      await followService.unfollowUser(session.user.id, followedUserId);
-    });
-
-    if (result.success) {
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUser(session.user.id, followedUserId)
-      );
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId)
-      );
-      revalidateTag(
-        NEXT_CACHE_TAGS.getIsFollowingUserBySession(session.user.id)
-      );
-    }
-
-    return result;
-  });
+  if (!removed) {
+    throw new Error('User is not followed');
+  }
 }

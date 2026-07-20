@@ -11,7 +11,7 @@ import {
 import ProfileNav from '@/modules/profiles/view-profile/profile-nav';
 import { ProfileSkeleton } from '@/modules/profiles/view-profile/profile-skeleton';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
-import { FollowSummaryService } from '@/modules/social/get-follow-summary/follow-summary.service';
+import { getFollowSummary } from '@/modules/social/get-follow-summary/follow-summary.pg';
 import { getServerSession } from '@/platform/auth/get-server-session';
 
 export default async function ProfileLayout(
@@ -54,11 +54,9 @@ export default async function ProfileLayout(
 }
 
 async function getUserInfo(profileUserId: string, sessionUserId: string) {
-  const followSummaryService = new FollowSummaryService();
-
   const profileUserPromise = getUserProfile(profileUserId);
 
-  const profileFollowsInfoPromise = followSummaryService.get(profileUserId);
+  const profileFollowsInfoPromise = getFollowSummary(profileUserId);
   const isFollowingUserPromise = getIsFollowingUser(
     sessionUserId,
     profileUserId

@@ -2,7 +2,10 @@
 
 import { useActionState } from 'react';
 import { SubmitButton } from '@/shared/components/submit-button';
-import { followUser, unfollowUser } from './follow-user';
+import {
+  followUserAction,
+  unfollowUserAction,
+} from './follow-user.actions';
 
 export function FollowUserButton({
   followedUserId,
@@ -11,12 +14,12 @@ export function FollowUserButton({
   isFollowing: boolean;
   followedUserId: string;
 }) {
-  const [_, followAction, followIsPending] = useActionState(followUser, {
+  const [_, followAction, followIsPending] = useActionState(followUserAction, {
     success: false,
     error: '',
   });
 
-  const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUser, {
+  const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUserAction, {
     success: false,
     error: '',
   });

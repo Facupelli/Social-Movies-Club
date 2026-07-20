@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
-import { FollowingService } from '@/modules/social/list-following/following.service';
+import { listFollowingUsers } from '@/modules/social/list-following/following.pg';
 import type { FollowingUser } from '@/modules/social/list-following/following.types';
 import { auth } from '@/platform/auth/auth';
 import { execute } from '@/shared/http/safe-execute';
@@ -12,10 +12,8 @@ const fetchFollowingUsers = async (
   profileUserId: string,
   viewerUserId: string
 ) => {
-  const followingService = new FollowingService();
-
   return await execute<FollowingUser[]>(async () => {
-    return await followingService.list(profileUserId, viewerUserId);
+    return await listFollowingUsers(profileUserId, viewerUserId);
   });
 };
 
