@@ -1,7 +1,7 @@
 import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 import type { UserRatings } from '@/modules/ratings/list-profile-ratings/profile-ratings.types';
-import type { UserWatchlist } from '@/modules/watchlist/view-watchlist/watchlist.repository';
+import type { UserWatchlist } from '@/modules/watchlist/view-watchlist/watchlist.pg.repository';
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {

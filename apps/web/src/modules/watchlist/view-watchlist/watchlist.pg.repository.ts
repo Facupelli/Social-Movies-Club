@@ -4,7 +4,6 @@ import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, watchlist } from '@/platform/database/postgres/schema';
 
 export type UserWatchlist = {
-  watchlistId: string;
   movieId: string;
   movieTmdbId: number;
   movieTitle: string;
@@ -17,42 +16,6 @@ export type UserWatchlist = {
 };
 
 export class WatchlistPgRepository {
-  async addMedia(userId: string, mediaId: string): Promise<void> {
-    return await withDatabase(async (db) => {
-      const query = sql`
-        INSERT INTO ${watchlist} (user_id, media_id)
-        VALUES (${userId}, ${mediaId})
-      `;
-      await db.execute(query);
-    });
-  }
-
-  async removeMedia(userId: string, mediaId: string): Promise<void> {
-    return await withDatabase(async (db) => {
-      const query = sql`
-        DELETE FROM ${watchlist}
-        WHERE user_id = ${userId} AND media_id = ${mediaId}
-      `;
-
-      await db.execute(query);
-    });
-  }
-
-  async getExists(userId: string, movieId: string): Promise<boolean> {
-    return await withDatabase(async (db) => {
-      const query = sql`
-				SELECT EXISTS(
-					SELECT 1
-					FROM ${watchlist}
-					WHERE user_id = ${userId} AND media_id = ${movieId}
-				)
-			`;
-
-      const { rows } = await db.execute<{ exists: boolean }>(query);
-      return rows[0]?.exists;
-    });
-  }
-
   async getWatchlist(userId: string): Promise<UserWatchlist[]> {
     return await withDatabase(async (db) => {
       const query = sql`

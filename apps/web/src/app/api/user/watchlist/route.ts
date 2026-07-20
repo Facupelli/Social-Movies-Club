@@ -1,16 +1,12 @@
 import { headers } from 'next/headers';
-import {
-  getMediaIdentityKey,
-  type MediaIdentityKey,
-} from '@/modules/media-catalog/media-identity';
-import { WatchlistService } from '@/modules/watchlist/view-watchlist/watchlist.service';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
+import { WatchlistStatusService } from '@/modules/watchlist/get-watchlist-status/watchlist-status.service';
+import type { WatchlistStatusMap } from '@/modules/watchlist/get-watchlist-status/watchlist-status.types';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,
   unauthorizedJson,
 } from '@/shared/http/authenticated-response';
-
-export type UseUserWatchlistMap = Record<MediaIdentityKey, boolean>;
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -21,14 +17,19 @@ export async function GET() {
     return unauthorizedJson();
   }
 
-  const watchlistService = new WatchlistService();
+  const watchlistStatusService = new WatchlistStatusService();
 
-  const res = await watchlistService.getWatchlist(session.user.id);
+  const mediaIdentities = await watchlistStatusService.listMediaIdentities(
+    session.user.id
+  );
 
-  const statusMap: UseUserWatchlistMap = {};
+  const statusMap: WatchlistStatusMap = {};
 
-  for (const result of res) {
-    const identityKey = getMediaIdentityKey(result.tmdbId, result.type);
+  for (const mediaIdentity of mediaIdentities) {
+    const identityKey = getMediaIdentityKey(
+      mediaIdentity.tmdbId,
+      mediaIdentity.type
+    );
     if (!statusMap[identityKey]) {
       statusMap[identityKey] = true;
     }

@@ -4,7 +4,9 @@ import type {
   MediaType,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
-import { WatchlistService } from '@/modules/watchlist/view-watchlist/watchlist.service';
+import { AddToWatchlistService } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist.service';
+import { WatchlistStatusService } from '@/modules/watchlist/get-watchlist-status/watchlist-status.service';
+import { RemoveFromWatchlistService } from '@/modules/watchlist/remove-from-watchlist/remove-from-watchlist.service';
 import type { Media } from '@/platform/database/postgres/schema';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
@@ -12,7 +14,9 @@ import { RatingPgRepository } from './rating.pg.repository';
 
 export class UserMediaService {
   constructor(
-    private readonly watchlistService = new WatchlistService(),
+    private readonly watchlistStatusService = new WatchlistStatusService(),
+    private readonly addToWatchlistService = new AddToWatchlistService(),
+    private readonly removeFromWatchlistService = new RemoveFromWatchlistService(),
     private readonly mediaService = new MediaService(),
     private readonly ratingRepository = new RatingPgRepository(),
     private readonly tmdbService = new TmdbService()
@@ -48,9 +52,12 @@ export class UserMediaService {
 
     await this.ratingRepository.rateMovie(userId, mediaId, rating, watchedDate);
 
-    const isInWatchList = await this.watchlistService.hasMedia(userId, mediaId);
+    const isInWatchList = await this.watchlistStatusService.hasMedia(
+      userId,
+      mediaId
+    );
     if (isInWatchList) {
-      await this.watchlistService.removeMedia(userId, mediaId);
+      await this.removeFromWatchlistService.remove(userId, mediaId);
       revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
     }
   }
@@ -71,7 +78,7 @@ export class UserMediaService {
 
     const { id: movieId } = await this.mediaService.upsertMedia(movieData);
 
-    return this.watchlistService.addMedia(userId, movieId);
+    return this.addToWatchlistService.add(userId, movieId);
   }
 
   private async getMediaDetail(

@@ -1,10 +1,10 @@
 import { queryOptions } from '@tanstack/react-query';
-import type { UseUserWatchlistMap } from '@/app/api/user/watchlist/route';
+import type { WatchlistStatusMap } from './watchlist-status.types';
 import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 
 async function getUserWatchlist(
   signal?: AbortSignal
-): Promise<UseUserWatchlistMap> {
+): Promise<WatchlistStatusMap> {
   const response = await fetch('/api/user/watchlist', {
     cache: 'no-store',
     signal,

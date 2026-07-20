@@ -2,7 +2,7 @@
 
 import { revalidateTag } from 'next/cache';
 import { MediaService } from '@/modules/media-catalog/get-media-details/media.service';
-import { WatchlistService } from '@/modules/watchlist/view-watchlist/watchlist.service';
+import { RemoveFromWatchlistService } from '@/modules/watchlist/remove-from-watchlist/remove-from-watchlist.service';
 import { validateRemoveMovieFromWatchlist } from '@/modules/watchlist/watchlist-validation';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
@@ -24,7 +24,7 @@ export async function removeMovieFromWatchlist(
     }
 
     const mediaService = new MediaService();
-    const watchlistService = new WatchlistService();
+    const removeFromWatchlistService = new RemoveFromWatchlistService();
 
     const result = await execute<void>(async () => {
       const movie = await mediaService.getMediaByTmdbIdentity(
@@ -34,7 +34,7 @@ export async function removeMovieFromWatchlist(
       if (!movie) {
         throw new Error('Media not found');
       }
-      await watchlistService.removeMedia(userId, movie.id);
+      await removeFromWatchlistService.remove(userId, movie.id);
     });
 
     if (result.success) {
