@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { UsernameField } from '@/modules/account/username-field';
 import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsOwner } from '@/shared/hooks/use-is-owner';
@@ -16,8 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog';
-import { Input } from '@/shared/ui/input';
-import { Label } from '@/shared/ui/label';
 import { updateUsername } from './update-username';
 
 export function UpsertUsernameDialog({
@@ -42,7 +41,7 @@ export function UpsertUsernameDialog({
     return result;
   };
 
-  const [_, action] = useActionState(handleUpdateUsername, {
+  const [state, action] = useActionState(handleUpdateUsername, {
     success: false,
     error: '',
   });
@@ -70,10 +69,12 @@ export function UpsertUsernameDialog({
           </DialogDescription>
 
           <form className="pt-4">
-            <Label htmlFor="username">Nombre de usuario</Label>
-            <Input id="username" name="username" type="text" />
+            <UsernameField
+              currentUsername={username}
+              error={state.success ? undefined : state.error}
+            />
 
-            <DialogFooter className="pt-4 gap-2 md:gap-6">
+            <DialogFooter className="gap-2 pt-4 md:gap-6">
               <DialogClose asChild>
                 <Button type="button" variant="secondary">
                   Cancelar

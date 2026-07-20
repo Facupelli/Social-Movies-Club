@@ -5,11 +5,9 @@ import { users } from '@/platform/database/postgres/schema';
 export class UsernamePgRepository {
   async update(userId: string, username: string): Promise<void> {
     return await withDatabase(async (db) => {
-      const newUsername = `@${username}`;
-
       await db.execute(sql`
         UPDATE ${users}
-        SET username = ${newUsername}
+        SET username = ${username}
         WHERE id = ${userId}
       `);
     });
