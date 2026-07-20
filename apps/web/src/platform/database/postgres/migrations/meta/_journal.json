@@ -36,6 +36,13 @@
       "when": 1784507980308,
       "tag": "0005_hard_ezekiel_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784508718727,
+      "tag": "0006_past_excalibur",
+      "breakpoints": true
     }
   ]
 }

@@ -684,6 +684,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 							</div>
 							<div className="flex-1 md:flex-initial">
 								<RateDialog
+									posterPath={movie.posterPath}
 									tmdbId={movie.tmdbId}
 									title={movie.title}
 									type={movie.type}

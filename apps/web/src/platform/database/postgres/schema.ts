@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import {
 	boolean,
+	check,
+	date,
 	index,
 	integer,
 	pgEnum,
@@ -137,12 +139,23 @@ export const ratings = pgTable(
 			.notNull()
 			.references(() => media.id, { onDelete: "cascade" }),
 		score: smallint("score").notNull(),
+		watchedDate: date("watched_date")
+			.default(sql`CURRENT_DATE`)
+			.notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.defaultNow()
 			.notNull(),
 	},
 	(table) => [
 		unique("ratings_user_media_unique").on(table.userId, table.mediaId),
+		check(
+			"ratings_score_range_check",
+			sql`${table.score} BETWEEN 1 AND 10`,
+		),
+		check(
+			"ratings_watched_date_not_future_check",
+			sql`${table.watchedDate} <= CURRENT_DATE`,
+		),
 		index("ratings_profile_idx").on(table.userId, table.createdAt),
 		// Performance optimization indexes
 		index("ratings_user_media_idx").on(table.userId, table.mediaId),

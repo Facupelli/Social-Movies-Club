@@ -10,7 +10,7 @@ import {
 
 export type UseUserMoviesMap = Record<
 	MediaIdentityKey,
-	{ isRated: boolean; score: number }
+	{ isRated: boolean; score: number; watchedDate: string }
 >;
 
 export async function GET() {
@@ -39,6 +39,7 @@ export async function GET() {
 		statusMap[identityKey] = {
 			isRated: true,
 			score: result.score,
+			watchedDate: result.watchedDate,
 		};
 	}
 

@@ -20,11 +20,13 @@ export class UserMediaService {
 		tmdbId,
 		rating,
 		type,
+		watchedDate,
 	}: {
 		userId: string;
 		tmdbId: number;
 		rating: number;
 		type: MediaType;
+		watchedDate: string;
 	}): Promise<void> {
 		const media = await this.getMediaDetail(tmdbId, type);
 
@@ -41,7 +43,7 @@ export class UserMediaService {
 
 		const { id: mediaId } = await this.mediaService.upsertMedia(movieData);
 
-		await this.userService.rateMovie(userId, mediaId, rating);
+		await this.userService.rateMovie(userId, mediaId, rating, watchedDate);
 
 		const isInWatchList = await this.watchlistService.hasMedia(userId, mediaId);
 		if (isInWatchList) {

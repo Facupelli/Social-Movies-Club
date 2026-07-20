@@ -57,8 +57,18 @@ export class UserService {
 		);
 	}
 
-	async rateMovie(userId: string, movieId: string, score: number) {
-		return await this.userPgRepository.rateMovie(userId, movieId, score);
+	async rateMovie(
+		userId: string,
+		movieId: string,
+		score: number,
+		watchedDate: string,
+	) {
+		return await this.userPgRepository.rateMovie(
+			userId,
+			movieId,
+			score,
+			watchedDate,
+		);
 	}
 
 	async updateUsername(userId: string, username: string) {

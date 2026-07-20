@@ -1,262 +1,531 @@
-"use client";
+'use client';
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleCheck, Star, StarIcon } from "lucide-react";
-import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/shared/ui/dialog";
-import { authClient } from "@/platform/auth/auth-client";
+  CalendarDays,
+  ChevronDown,
+  CircleCheck,
+  Film,
+  Star,
+  X,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import {
-	invalidateAfterRating,
-	optimisticallyRateMedia,
-} from "@/platform/react-query/mutation-cache";
-import type { ApiResponse } from "@/shared/http/safe-execute";
-import { addRatingToMovie } from "@/modules/ratings/rate-media/add-rating";
-import { type MediaType, MediaTypeDict } from "@/modules/media-catalog/media.type";
-import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
-import { getUserRatingsQueryOptions } from "@/modules/ratings/get-rating-status/use-user-ratings";
-import { SubmitButton } from "@/shared/components/submit-button";
-import { Button } from "@/shared/ui/button";
+  type MediaType,
+  MediaTypeDict,
+} from '@/modules/media-catalog/media.type';
+import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
+import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
+import { authClient } from '@/platform/auth/auth-client';
+import {
+  invalidateAfterRating,
+  optimisticallyRateMedia,
+} from '@/platform/react-query/mutation-cache';
+import { SubmitButton } from '@/shared/components/submit-button';
+import type { ApiResponse } from '@/shared/http/safe-execute';
+import { useIsMobile } from '@/shared/hooks/use-mobile';
+import { Button } from '@/shared/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/shared/ui/drawer';
+import { cn } from '@/shared/utilities/utils';
 
 const initialState: ApiResponse<void> = {
-	success: false,
-	error: "",
+  success: false,
+  error: '',
+};
+
+function getLocalTodayDate(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatWatchedDate(date: string): string {
+  if (!date) {
+    return 'Elegí una fecha';
+  }
+
+  return new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+    .format(new Date(`${date}T00:00:00`))
+    .replaceAll('.', '');
+}
+
+type UserRating = {
+  isRated: boolean;
+  score: number;
+  watchedDate: string;
+};
+
+type RateDialogProps = {
+  tmdbId: number;
+  title: string;
+  type: MediaType;
+  year: string;
+  posterPath: string;
 };
 
 export function RateDialog({
-	tmdbId,
-	title,
-	type,
-	year,
-}: {
-	tmdbId: number;
-	title: string;
-	type: MediaType;
-	year: string;
-}) {
-	const { data: session } = authClient.useSession();
+  tmdbId,
+  title,
+  type,
+  year,
+  posterPath,
+}: RateDialogProps) {
+  const isMobile = useIsMobile();
+  const { data: session } = authClient.useSession();
+  const { data: userRatings } = useQuery(
+    getUserRatingsQueryOptions(session?.user.id)
+  );
+  const [open, setOpen] = useState(false);
 
-	const queryClient = useQueryClient();
-	const { data: userRatings } = useQuery(
-		getUserRatingsQueryOptions(session?.user.id),
-	);
+  const userRating = userRatings?.[getMediaIdentityKey(tmdbId, type)];
 
-	const handleAddRatingToMovie = async (
-		_state: ApiResponse<void>,
-		formData: FormData,
-	) => {
-		const userId = session?.user.id;
-		const rollback = userId
-			? await optimisticallyRateMedia(queryClient, {
-					userId,
-					tmdbId,
-					type,
-					score: rating,
-				})
-			: undefined;
+  const trigger = (
+    <Button className="w-full bg-transparent" size="sm" variant="outline">
+      <Star className={cn(userRating?.isRated && 'fill-yellow-400')} />
+      <span className="sr-only">
+        {userRating?.isRated ? 'Editar puntuación' : 'Puntuar'} {title}
+      </span>
+    </Button>
+  );
 
-		try {
-			const result = await addRatingToMovie(formData);
-			if (!result.success) {
-				rollback?.();
-				return result;
-			}
+  const content = open ? (
+    <RateDialogBody
+      isMobile={isMobile}
+      onClose={() => setOpen(false)}
+      posterPath={posterPath}
+      title={title}
+      tmdbId={tmdbId}
+      type={type}
+      userId={session?.user.id}
+      userRating={userRating}
+      year={year}
+    />
+  ) : null;
 
-			if (userId) {
-				await invalidateAfterRating(queryClient, userId);
-			}
+  if (isMobile) {
+    return (
+      <Drawer onOpenChange={setOpen} open={open}>
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
 
-			return result;
-		} catch (error) {
-			rollback?.();
-			throw error;
-		}
-	};
+        <DrawerContent
+          aria-describedby={undefined}
+          className="max-h-[94dvh] overflow-hidden rounded-t-[28px] border-white/15 bg-[linear-gradient(145deg,rgba(28,33,39,0.99),rgba(19,24,29,0.99))] text-white shadow-[0_-24px_80px_rgba(0,0,0,0.65)] [&>div:first-child]:mt-3 [&>div:first-child]:h-1.5 [&>div:first-child]:w-16 [&>div:first-child]:bg-white/20"
+        >
+          <DrawerTitle className="sr-only">Puntuar {title}</DrawerTitle>
 
-	const [state, action, isPending] = useActionState(
-		handleAddRatingToMovie,
-		initialState,
-	);
+          <div className="overflow-y-auto px-5 pt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+            {content}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
-	const userRating = userRatings?.[getMediaIdentityKey(tmdbId, type)];
-	const isMovieRated = userRating?.isRated;
+  return (
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
 
-	const [rating, setRating] = useState(userRating?.score ?? 0);
-	const [hoverRating, setHoverRating] = useState(0);
-
-	return (
-		<Dialog>
-			<DialogTrigger asChild className="cursor-pointer">
-				<Button className="w-full bg-transparent" size="sm" variant="outline">
-					{isMovieRated ? <Star className="fill-yellow-400" /> : <Star />}
-				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				{state.success ? (
-					<RatingSuccessView rating={rating} userId={session?.user.id} />
-				) : (
-					<>
-						<DialogHeader>
-							<div className="space-y-1">
-								<DialogTitle className="text-2xl">{title}</DialogTitle>
-								<div className="font-normal flex items-center gap-1 justify-center uppercase text-neutral-500 text-xs">
-									<span className="">{MediaTypeDict[type]}</span>
-									<span className="">-</span>
-									<span className="font-normal text-neutral-500 text-sm">
-										{year}
-									</span>
-								</div>
-							</div>
-
-							<div>
-								<p className="font-medium flex items-center gap-1 justify-center">
-									<span className="font-bold text-2xl text-primary">
-										{rating}
-									</span>
-									<span className="text-xl text-muted-foreground">/</span>
-									<span className="text-muted-foreground">10</span>
-								</p>
-							</div>
-						</DialogHeader>
-
-						<form className="md:pt-2">
-							<input name="movieTMDBId" type="hidden" value={tmdbId} />
-							<input name="type" type="hidden" value={type} />
-
-							<p className="sr-only">
-								Use the number keys 1 through 10 to select a rating.
-							</p>
-
-							<fieldset className="">
-								<legend className="sr-only">Rating</legend>
-								<div
-									className="flex items-center justify-center space-x-1 sm:space-x-2"
-									onMouseLeave={() => setHoverRating(0)}
-									role="radiogroup"
-								>
-									{[...Array(10)].map((_, index) => {
-										const ratingValue = index + 1;
-										return (
-											<label
-												className="cursor-pointer"
-												key={ratingValue}
-												onMouseEnter={() => setHoverRating(ratingValue)}
-											>
-												<input
-													aria-label={`${ratingValue} out of 10`}
-													checked={rating === ratingValue}
-													className="sr-only"
-													name="rating"
-													onChange={() => setRating(ratingValue)}
-													type="radio"
-													value={ratingValue}
-												/>
-												<StarIcon
-													className={`size-6 transition-colors duration-200 sm:h-8 sm:w-8 md:size-7 ${
-														ratingValue <= (hoverRating || rating)
-															? "fill-yellow-400 text-yellow-400"
-															: "text-gray-300 dark:text-gray-600"
-													} rounded-full focus-within:outline-none focus-within:ring-2 focus-within:ring-yellow-500 focus-within:ring-offset-2 focus-within:ring-offset-white hover:text-yellow-300 dark:hover:text-yellow-500 dark:focus-within:ring-offset-gray-800`}
-												/>
-											</label>
-										);
-									})}
-								</div>
-							</fieldset>
-
-							<div className="text-muted-foreground text-sm text-center pt-6 pb-4">
-								Después de calificar esta película, se agregará a tu lista
-								personal.
-							</div>
-
-							<DialogFooter className="gap-2 md:gap-6">
-								<DialogClose asChild>
-									<Button type="button" variant="secondary">
-										Cancelar
-									</Button>
-								</DialogClose>
-
-								<SubmitButton
-									disabled={rating === 0 || isPending}
-									formAction={action}
-									loadingText="Calificando"
-								>
-									Calificar
-								</SubmitButton>
-							</DialogFooter>
-
-							{!state.success && state.error && (
-								<div className="flex justify-center pt-2 md:justify-end">
-									<p className="text-red-500">
-										{state.error === "Unauthorized"
-											? "Debes inciar sesión para calificar"
-											: state.error}
-									</p>
-								</div>
-							)}
-
-							{state.success && (
-								<div className="flex justify-center pt-2 md:justify-end">
-									<p className="text-green-500">Calificaste esta película!</p>
-								</div>
-							)}
-						</form>
-					</>
-				)}
-			</DialogContent>
-		</Dialog>
-	);
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-h-[95dvh] w-[95vw] max-w-[620px] gap-0 overflow-x-hidden overflow-y-auto rounded-[22px] border-white/15 bg-[linear-gradient(145deg,rgba(28,33,39,0.99),rgba(19,24,29,0.99))] p-7 text-white shadow-[0_32px_100px_rgba(0,0,0,0.7)] sm:max-w-[620px]"
+        overlayClassName="bg-black/80 backdrop-blur-[3px]"
+      >
+        <DialogTitle className="sr-only">Puntuar {title}</DialogTitle>
+        {content}
+      </DialogContent>
+    </Dialog>
+  );
 }
 
+type RateDialogBodyProps = {
+  tmdbId: number;
+  title: string;
+  type: MediaType;
+  year: string;
+  posterPath: string;
+  isMobile: boolean;
+  onClose: () => void;
+  userId?: string;
+  userRating?: UserRating;
+};
+
+function RateDialogBody({
+  tmdbId,
+  title,
+  type,
+  year,
+  posterPath,
+  isMobile,
+  onClose,
+  userId,
+  userRating,
+}: RateDialogBodyProps) {
+  const queryClient = useQueryClient();
+  const hasInteracted = useRef(false);
+
+  const [rating, setRating] = useState(userRating?.score ?? 0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [watchedDate, setWatchedDate] = useState(
+    userRating?.watchedDate ?? getLocalTodayDate()
+  );
+
+  useEffect(() => {
+    if (userRating && !hasInteracted.current) {
+      setRating(userRating.score);
+      setWatchedDate(userRating.watchedDate);
+    }
+  }, [userRating]);
+
+  const handleAddRatingToMovie = async (
+    _state: ApiResponse<void>,
+    formData: FormData
+  ) => {
+    const rollback = userId
+      ? await optimisticallyRateMedia(queryClient, {
+          userId,
+          tmdbId,
+          type,
+          score: rating,
+          watchedDate,
+        })
+      : undefined;
+
+    try {
+      const result = await addRatingToMovie(formData);
+
+      if (!result.success) {
+        rollback?.();
+        return result;
+      }
+
+      if (userId) {
+        await invalidateAfterRating(queryClient, userId);
+      }
+
+      return result;
+    } catch (error) {
+      rollback?.();
+      throw error;
+    }
+  };
+
+  const [state, action, isPending] = useActionState(
+    handleAddRatingToMovie,
+    initialState
+  );
+
+  if (state.success) {
+    return (
+      <RatingSuccessView
+        onClose={onClose}
+        rating={rating}
+        userId={userId}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div
+        className={cn(
+          'grid grid-cols-[82px_minmax(0,1fr)] gap-4',
+          isMobile
+            ? 'grid-cols-[96px_minmax(0,1fr)] gap-5 pr-9'
+            : 'grid-cols-[112px_minmax(0,1fr)] gap-6'
+        )}
+      >
+        <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xs border border-white/15 bg-white/5">
+          {posterPath ? (
+            <Image
+              alt={`Póster de ${title}`}
+              className="object-cover"
+              fill
+              sizes={isMobile ? '96px' : '112px'}
+              src={`https://image.tmdb.org/t/p/w342${posterPath}`}
+              unoptimized
+            />
+          ) : (
+            <div className="grid size-full place-items-center text-white/30">
+              <Film className="size-8" />
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 pt-0.5">
+          <div className="space-y-1 text-left">
+            <h2 className="line-clamp-2 text-xl leading-tight tracking-[-0.025em] sm:text-2xl">
+              {title}
+            </h2>
+
+            <p className="text-sm text-white/50">
+              {MediaTypeDict[type]} · {year}
+            </p>
+          </div>
+
+          <div className="mt-7">
+            <p className="text-sm text-white/55">Tu puntuación</p>
+
+            <div
+              aria-live="polite"
+              className="mt-1 flex items-baseline tracking-[-0.04em]"
+            >
+              <span className="font-semibold text-[38px] leading-none text-violet-500 sm:text-[42px]">
+                {rating}
+              </span>
+
+              <span className="text-[25px] leading-none text-violet-400">
+                /10
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form action={action} className={cn(isMobile ? 'mt-7' : 'mt-6')}>
+        <input name="movieTMDBId" type="hidden" value={tmdbId} />
+        <input name="type" type="hidden" value={type} />
+
+        <fieldset>
+          <legend className="sr-only">Puntuación</legend>
+
+          <div
+            className={cn(
+              'grid grid-cols-10',
+              isMobile ? 'gap-1.5' : 'gap-2'
+            )}
+            onMouseLeave={() => setHoverRating(0)}
+            role="radiogroup"
+          >
+            {Array.from({ length: 10 }, (_, index) => index + 1).map(
+              (ratingValue) => {
+                const activeRating = hoverRating || rating;
+                const isSelected = rating === ratingValue;
+                const isFilled = ratingValue <= activeRating;
+
+                return (
+                  <label
+                    className="group relative grid min-w-0 cursor-pointer place-items-center"
+                    key={ratingValue}
+                    onMouseEnter={() => setHoverRating(ratingValue)}
+                  >
+                    <input
+                      aria-label={`${ratingValue} de 10`}
+                      checked={isSelected}
+                      className="peer sr-only"
+                      name="rating"
+                      onChange={() => {
+                        hasInteracted.current = true;
+                        setRating(ratingValue);
+                      }}
+                      type="radio"
+                      value={ratingValue}
+                    />
+
+                    <span
+                      className={cn(
+                        'grid aspect-square w-full place-items-center border font-medium transition-[background-color,border-color,box-shadow,transform] duration-150 group-hover:scale-105 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#171c21]',
+                        isMobile
+                          ? 'max-w-10 rounded-xl text-sm'
+                          : 'max-w-10 rounded-full text-sm',
+                        isFilled
+                          ? 'border-violet-500/70 bg-violet-500/20 text-white'
+                          : 'border-white/20 bg-white/[0.015] text-white/80',
+                        isSelected &&
+                          'border-violet-500 bg-violet-500/30 shadow-[0_0_0_2px_rgba(139,92,246,0.3),0_0_18px_rgba(124,58,237,0.22)]'
+                      )}
+                    >
+                      {ratingValue}
+                    </span>
+                  </label>
+                );
+              }
+            )}
+          </div>
+        </fieldset>
+
+        <div
+          className={cn(
+            'border-white/10 border-t',
+            isMobile ? 'mt-7 pt-6' : 'mt-6 pt-5'
+          )}
+        >
+          <div
+            className={cn(
+              'flex gap-2',
+              isMobile ? 'flex-col' : 'flex-row items-center gap-5'
+            )}
+          >
+            <label
+              className={cn(
+                'text-white/65',
+                isMobile
+                  ? 'text-base'
+                  : 'flex shrink-0 items-center gap-3 text-sm'
+              )}
+              htmlFor={`watched-date-${tmdbId}-${type}`}
+            >
+                La viste el
+            </label>
+
+            <div
+              className={cn(
+                'relative flex items-center justify-between border border-white/15 bg-white/[0.025] px-4 text-white transition-colors hover:border-white/25 h-10 w-[190px] rounded-full text-sm',
+                isMobile && "w-full"
+              )}
+            >
+              <span className="flex min-w-0 items-center gap-3 truncate">
+                {isMobile && (
+                  <CalendarDays className="size-5 shrink-0 text-violet-400" />
+                )}
+                <span className="truncate">
+                  {formatWatchedDate(watchedDate)}
+                </span>
+              </span>
+
+              {isMobile ? (
+                <ChevronDown className="ml-3 size-4 shrink-0 text-white/45" />
+              ) : (
+                <CalendarDays className="ml-3 size-4 shrink-0 text-violet-400" />
+              )}
+
+              <input
+                aria-label="Fecha en que la viste"
+                className={cn(
+                  'absolute inset-0 size-full cursor-pointer opacity-0',
+                  userRating?.isRated && 'cursor-default'
+                )}
+                id={`watched-date-${tmdbId}-${type}`}
+                max={getLocalTodayDate()}
+                name="watchedDate"
+                onChange={(event) => {
+                  hasInteracted.current = true;
+                  setWatchedDate(event.target.value);
+                }}
+                readOnly={userRating?.isRated}
+                required
+                type="date"
+                value={watchedDate}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            'mt-6 gap-3',
+            isMobile
+              ? 'grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]'
+              : 'flex justify-end'
+          )}
+        >
+          <Button
+            className={cn(
+              'rounded-full border-white/20 bg-transparent px-5 text-sm text-white hover:bg-white/[0.07] hover:text-white',
+              isMobile ? 'h-12 w-full' : 'h-10 w-auto'
+            )}
+            onClick={onClose}
+            type="button"
+            variant="outline"
+          >
+            Cancelar
+          </Button>
+
+          <SubmitButton
+            className={cn(
+              'rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-6 text-sm shadow-[0_8px_24px_rgba(124,58,237,0.28)] hover:from-violet-500 hover:to-violet-400',
+              isMobile ? 'h-12 w-full' : 'h-10 w-auto min-w-[180px]'
+            )}
+            disabled={rating === 0 || isPending}
+            loadingText="Guardando"
+          >
+            Guardar puntuación
+          </SubmitButton>
+        </div>
+
+        {state.error && (
+          <p className="mt-4 text-center text-sm text-red-400 sm:text-right">
+            {state.error === 'Unauthorized'
+              ? 'Debes iniciar sesión para puntuar'
+              : state.error}
+          </p>
+        )}
+      </form>
+    </>
+  );
+}
+
+type RatingSuccessViewProps = {
+  rating: number;
+  onClose: () => void;
+  userId?: string;
+};
+
 function RatingSuccessView({
-	rating,
-	userId,
-}: {
-	rating: number;
-	userId?: string;
-}) {
-	return (
-		<>
-			<DialogHeader>
-				<div className="grid place-items-center gap-y-2">
-					<CircleCheck className="size-12 text-primary" />
-					<div>
-						<DialogTitle className="text-lg font-bold text-center">
-							Calificación Subida!
-						</DialogTitle>
-						<p className="text-muted-foreground text-sm text-center">
-							Gracias! Tu calificación{" "}
-							<span className="text-primary font-semibold text-base">
-								{rating}/10
-							</span>{" "}
-							fue guardada
-						</p>
-					</div>
-				</div>
-			</DialogHeader>
-			<div className="grid gap-y-3">
-				<DialogClose asChild>
-					<Button type="button" variant="secondary">
-						Listo
-					</Button>
-				</DialogClose>
-				{userId && (
-					<Link
-						href={`/profile/${userId}`}
-						className="text-sm text-muted-foreground text-center hover:underline"
-					>
-						Ver tus calificaciones
-					</Link>
-				)}
-			</div>
-		</>
-	);
+  rating,
+  onClose,
+  userId,
+}: RatingSuccessViewProps) {
+  return (
+    <div className="grid gap-y-6 py-7 sm:py-9">
+      <div className="grid place-items-center gap-y-3">
+        <CircleCheck className="size-11 text-violet-400" />
+
+        <div>
+          <h2 className="text-center text-xl font-bold">
+            ¡Calificación subida!
+          </h2>
+
+          <p className="mt-2 text-center text-sm text-white/55">
+            ¡Gracias! Tu puntuación{' '}
+            <span className="font-semibold text-base text-violet-400">
+              {rating}/10
+            </span>{' '}
+            fue guardada.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto grid w-full max-w-xs gap-y-3">
+        <Button
+          className="rounded-full"
+          onClick={onClose}
+          type="button"
+          variant="secondary"
+        >
+          Listo
+        </Button>
+
+        {userId && (
+          <Link
+            className="text-center text-sm text-white/50 hover:text-white hover:underline"
+            href={`/profile/${userId}`}
+          >
+            Ver tus calificaciones
+          </Link>
+        )}
+      </div>
+    </div>
+  );
 }

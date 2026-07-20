@@ -1,5 +1,9 @@
 import z from "zod";
 
+function getTodayDate(): string {
+	return new Date().toISOString().slice(0, 10);
+}
+
 const MovieRatingSchema = z.object({
 	movieTMDBId: z
 		.string()
@@ -13,6 +17,11 @@ const MovieRatingSchema = z.object({
 			message: "Rating must be between 1 and 10",
 		}),
 	type: z.enum(["movie", "tv"]),
+	watchedDate: z
+		.iso.date("Watched date must be a valid date")
+		.refine((value) => value <= getTodayDate(), {
+			message: "Watched date cannot be in the future",
+		}),
 });
 
 export type MovieRatingInput = z.infer<typeof MovieRatingSchema>;

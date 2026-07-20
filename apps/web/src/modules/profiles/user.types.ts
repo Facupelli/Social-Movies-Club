@@ -10,6 +10,7 @@ export interface GetUserFeedParams {
 export type UserRatings = {
 	movieId: string;
 	score: number;
+	watchedDate: string;
 	createdAt: Date;
 	title: string;
 	year: string;

@@ -299,6 +299,7 @@ export class UserPgRepository {
         SELECT
           r.media_id       AS "movieId",
           r.score,
+          r.watched_date   AS "watchedDate",
           r.created_at     AS "createdAt",
           m.title,
           m.year,
@@ -348,13 +349,14 @@ export class UserPgRepository {
 		userId: string,
 		movieId: bigint,
 		score: number,
+		watchedDate: string,
 	): Promise<void> {
 		return await withDatabase(async (db) => {
 			const createRatingQuery = sql`
           INSERT INTO ${ratings}
-            (user_id, media_id, score, created_at)
+            (user_id, media_id, score, watched_date, created_at)
           VALUES
-            (${userId}, ${movieId}, ${score}, now())
+            (${userId}, ${movieId}, ${score}, ${watchedDate}, now())
           ON CONFLICT (user_id, media_id)
           DO UPDATE SET
             score = EXCLUDED.score,
@@ -396,13 +398,14 @@ export class UserPgRepository {
 		userId: string,
 		movieId: string,
 		score: number,
+		watchedDate: string,
 	): Promise<void> {
 		return await withDatabase(async (db) => {
 			const createRatingQuery = sql`
           INSERT INTO ${ratings}
-            (user_id, media_id, score, created_at)
+            (user_id, media_id, score, watched_date, created_at)
           VALUES
-            (${userId}, ${movieId}, ${score}, now())
+            (${userId}, ${movieId}, ${score}, ${watchedDate}, now())
           ON CONFLICT (user_id, media_id)
           DO UPDATE SET
             score = EXCLUDED.score,

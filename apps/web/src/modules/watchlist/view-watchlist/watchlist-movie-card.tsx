@@ -35,6 +35,7 @@ export function GridMovieCard({
 				{isOwner && (
 					<div>
 						<RateDialog
+							posterPath={movie.posterPath}
 							tmdbId={movie.tmdbId}
 							title={movie.title}
 							type={movie.type}

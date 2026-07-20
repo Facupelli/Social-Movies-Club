@@ -11,6 +11,7 @@ type UserRatingsCache = Record<
 	{
 		isRated: boolean;
 		score: number;
+		watchedDate: string;
 	}
 >;
 
@@ -35,11 +36,13 @@ export async function optimisticallyRateMedia(
 		tmdbId,
 		type,
 		score,
+		watchedDate,
 	}: {
 		userId: string;
 		tmdbId: number;
 		type: MediaType;
 		score: number;
+		watchedDate: string;
 	},
 ): Promise<() => void> {
 	const ratingsKey = QUERY_KEYS.getUserRatings(userId);
@@ -53,7 +56,11 @@ export async function optimisticallyRateMedia(
 	if (ratings) {
 		queryClient.setQueryData<UserRatingsCache>(ratingsKey, {
 			...ratings,
-			[identityKey]: { isRated: true, score },
+			[identityKey]: {
+				isRated: true,
+				score,
+				watchedDate: previousRating?.watchedDate ?? watchedDate,
+			},
 		});
 	}
 

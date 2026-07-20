@@ -9,16 +9,17 @@ export async function addRatingToMovie(
 	formData: FormData,
 ): Promise<ApiResponse<void>> {
 	return await withAuth(async (session) => {
-		const { movieTMDBId, rating, type } = validateMovieRating(formData);
-
-		const userMediaService = new UserMediaService();
-
 		return await execute<void>(async () => {
+			const { movieTMDBId, rating, type, watchedDate } =
+				validateMovieRating(formData);
+			const userMediaService = new UserMediaService();
+
 			return await userMediaService.rateMovie({
 				userId: session.user.id,
 				tmdbId: movieTMDBId,
 				rating,
 				type,
+				watchedDate,
 			});
 		});
 	});
