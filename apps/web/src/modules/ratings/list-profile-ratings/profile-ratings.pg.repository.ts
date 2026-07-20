@@ -62,9 +62,10 @@ export class ProfileRatingsPgRepository {
       `;
 
       const countQuery = sql`
-        SELECT COUNT(*) as count
+        SELECT COUNT(*)::integer AS count
         FROM ${ratings} r
-        WHERE r.user_id = ${userId};
+        JOIN ${media} m ON m.id = r.media_id
+        WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}
       `;
 
       if (limit !== undefined && offset !== undefined) {
