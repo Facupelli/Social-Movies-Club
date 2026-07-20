@@ -12,7 +12,7 @@ import {
   execute,
 } from '@/shared/http/safe-execute';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
-import { UsernamePgRepository } from './username.pg.repository';
+import { persistUsername } from './username.pg';
 
 const USERNAME_TAKEN_ERROR = 'Ese nombre de usuario ya está en uso.';
 const USERNAME_UNKNOWN_ERROR =
@@ -33,15 +33,13 @@ function toUsernameFailure(error: unknown): ApiFailure {
   return { success: false, error: USERNAME_UNKNOWN_ERROR };
 }
 
-async function persistUsername(
+async function validateAndPersistUsername(
   userId: string,
   formData: FormData
 ): Promise<ApiResponse<void>> {
   return await execute<void>(async () => {
     const { username } = validateUpdateUsername(formData);
-    const repository = new UsernamePgRepository();
-
-    await repository.update(userId, username);
+    await persistUsername(userId, username);
   }, toUsernameFailure);
 }
 
@@ -49,7 +47,7 @@ export async function updateUsername(
   formData: FormData
 ): Promise<ApiResponse<void>> {
   return await withAuth(async (session) => {
-    const result = await persistUsername(session.user.id, formData);
+    const result = await validateAndPersistUsername(session.user.id, formData);
 
     if (result.success) {
       revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id));
@@ -64,7 +62,7 @@ export async function createUsername(
   formData: FormData
 ): Promise<ApiResponse<void>> {
   return await withAuth(async (session) => {
-    const result = await persistUsername(session.user.id, formData);
+    const result = await validateAndPersistUsername(session.user.id, formData);
 
     if (!result.success) {
       return result;
