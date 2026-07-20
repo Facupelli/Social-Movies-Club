@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/platform/auth/get-server-session";
 import { makeQueryClient } from "@/platform/react-query/query-client";
 import { getUserMoviesQueryOptions } from "@/modules/ratings/list-profile-ratings/use-user-movies";
-import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
+import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/profile-ratings-query-loader.server";
 import { userMoviesFiltersUrlParser } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser";
 import { ProfileRatingsClient } from "@/modules/ratings/list-profile-ratings/profile-ratings-client";
 

@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/platform/auth/auth";
 import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
-import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
+import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/profile-ratings-query-loader.server";
 import { userMoviesFiltersUrlParser } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser";
 import { userMoviesFiltersTransformer } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-transformer";
 

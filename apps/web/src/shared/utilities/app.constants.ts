@@ -1,4 +1,4 @@
-import type { UserMoviesClientFilters } from "@/modules/profiles/user.types";
+import type { UserMoviesClientFilters } from "@/modules/ratings/list-profile-ratings/profile-ratings.types";
 
 const getUserMoviesScope = (viewerUserId: string | undefined) => [
 	"viewer",

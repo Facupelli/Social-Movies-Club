@@ -7,26 +7,6 @@ export interface GetUserFeedParams {
 	onlyUnseen?: boolean;
 }
 
-export type UserRatings = {
-	movieId: string;
-	score: number;
-	watchedDate: string;
-	createdAt: Date;
-	title: string;
-	year: string;
-	posterPath: string;
-	backdropPath: string;
-	overview: string;
-	tmdbId: number;
-	type: MediaType;
-	runtime?: number;
-};
-
-export interface GetUserRatingMovies {
-	data: UserRatings[];
-	nextCursor: number | null;
-}
-
 export type FeedItemRaw = {
 	feed_item_id: string;
 	actor_id: string;
@@ -64,30 +44,3 @@ export type FeedItem = {
 	ratedAt: Date;
 	seenAt: Date;
 };
-
-export type UserMoviesBothRatedFilter = "true" | "false";
-export type UserMoviesTypeFilter = "all" | "movie" | "tv";
-export type UserMoviesSortBy = "score" | "createdAt";
-export type UserMoviesSortOrder = "asc" | "desc";
-
-// Client-side filter interface
-export interface UserMoviesClientFilters {
-	sortBy?: UserMoviesSortBy;
-	sortOrder?: UserMoviesSortOrder;
-	typeFilter?: UserMoviesTypeFilter;
-	bothRated?: boolean;
-}
-
-// Server-side filter interface
-export interface UserMoviesServerFilters extends UserMoviesClientFilters {
-	limit?: number;
-	offset?: number;
-}
-
-// URL search params interface
-export interface UserMoviesUrlParams {
-	sortBy?: string;
-	sortOrder?: string;
-	type?: string;
-	bothRatedFilter?: string;
-}

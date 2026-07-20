@@ -1,7 +1,7 @@
 import type {
 	UserMoviesClientFilters,
 	UserMoviesServerFilters,
-} from "@/modules/profiles/user.types";
+} from "../profile-ratings.types";
 
 /**
  * Transform client filters to server filters

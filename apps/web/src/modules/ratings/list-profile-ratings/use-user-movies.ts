@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "@/shared/utilities/app.constants";
 import type {
 	UserMoviesClientFilters,
 	UserMoviesServerFilters,
-} from "@/modules/profiles/user.types";
+} from "./profile-ratings.types";
 import { userMoviesFiltersUrlParser } from "./filters/filter-user-movies-parser";
 import { userMoviesFiltersTransformer } from "./filters/filter-user-movies-transformer";
 

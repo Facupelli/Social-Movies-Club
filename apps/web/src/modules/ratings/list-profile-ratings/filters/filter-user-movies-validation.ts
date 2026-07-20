@@ -3,7 +3,7 @@ import type {
 	UserMoviesSortBy,
 	UserMoviesSortOrder,
 	UserMoviesTypeFilter,
-} from "@/modules/profiles/user.types";
+} from "../profile-ratings.types";
 
 const VALID_SORT_BY: UserMoviesSortBy[] = ["score", "createdAt"];
 const VALID_SORT_ORDER: UserMoviesSortOrder[] = ["asc", "desc"];

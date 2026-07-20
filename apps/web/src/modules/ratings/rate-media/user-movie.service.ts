@@ -5,13 +5,13 @@ import { NEXT_CACHE_TAGS } from "@/shared/utilities/app.constants";
 import { MediaService } from "@/modules/media-catalog/get-media-details/media.service";
 import type { MediaType, TMDbMediaMultiSearch } from "@/modules/media-catalog/media.type";
 import { WatchlistService } from "@/modules/watchlist/view-watchlist/watchlist.service";
-import { UserService } from "@/modules/profiles/user.service";
+import { RatingPgRepository } from "./rating.pg.repository";
 
 export class UserMediaService {
 	constructor(
 		private readonly watchlistService = new WatchlistService(),
 		private readonly mediaService = new MediaService(),
-		private readonly userService = new UserService(),
+		private readonly ratingRepository = new RatingPgRepository(),
 		private readonly tmdbService = new TmdbService(),
 	) {}
 
@@ -43,7 +43,12 @@ export class UserMediaService {
 
 		const { id: mediaId } = await this.mediaService.upsertMedia(movieData);
 
-		await this.userService.rateMovie(userId, mediaId, rating, watchedDate);
+		await this.ratingRepository.rateMovie(
+			userId,
+			mediaId,
+			rating,
+			watchedDate,
+		);
 
 		const isInWatchList = await this.watchlistService.hasMedia(userId, mediaId);
 		if (isInWatchList) {

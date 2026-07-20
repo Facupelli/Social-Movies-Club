@@ -12,5 +12,5 @@
 - [x] Add database score constraints
   Enforce the 1 through 10 range.
 
-- [ ] Split the mixed user repository
+- [x] Split the mixed user repository
   Move rating operations into their slices.

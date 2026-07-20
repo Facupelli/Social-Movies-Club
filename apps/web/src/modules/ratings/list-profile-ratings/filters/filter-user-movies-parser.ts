@@ -1,4 +1,4 @@
-import type { UserMoviesClientFilters } from "@/modules/profiles/user.types";
+import type { UserMoviesClientFilters } from "../profile-ratings.types";
 import {
 	FILTER_SERACH_PARAMS_KEYS,
 	userMoviesFiltersValidation,

@@ -1,5 +1,5 @@
 import type { MovieView } from "@/modules/media-catalog/movie-view";
-import type { UserRatings } from "@/modules/profiles/user.types";
+import type { UserRatings } from "@/modules/ratings/list-profile-ratings/profile-ratings.types";
 import type { UserWatchlist } from "@/modules/watchlist/view-watchlist/watchlist.repository";
 import type { TMDbMediaMultiSearch } from "@/modules/media-catalog/media.type";
 

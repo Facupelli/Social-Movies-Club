@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import type { UserMoviesClientFilters } from "@/modules/profiles/user.types";
+import type { UserMoviesClientFilters } from "./profile-ratings.types";
 import { userMoviesFiltersUrlParser } from "./filters/filter-user-movies-parser";
 
 export function useUserMoviesFilters() {

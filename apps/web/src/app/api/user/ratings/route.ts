@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import { auth } from "@/platform/auth/auth";
 import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
-import { UserService } from "@/modules/profiles/user.service";
-import type { GetUserRatingMovies } from "@/modules/profiles/user.types";
+import { ProfileRatingsService } from "@/modules/ratings/list-profile-ratings/profile-ratings.service";
+import type { GetUserRatingMovies } from "@/modules/ratings/list-profile-ratings/profile-ratings.types";
 import {
 	getMediaIdentityKey,
 	type MediaIdentityKey,
@@ -22,9 +22,9 @@ export async function GET() {
 		return unauthorizedJson();
 	}
 
-	const userService = new UserService();
+	const ratingsService = new ProfileRatingsService();
 
-	const res: GetUserRatingMovies = await userService.getUserRatingMovies(
+	const res: GetUserRatingMovies = await ratingsService.getUserRatingMovies(
 		session.user.id,
 	);
 

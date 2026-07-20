@@ -1,12 +1,7 @@
 import type { User } from "@/platform/database/postgres/schema";
 import type { AggregatedFeedItem } from "@/modules/timeline/view-timeline/feed.types";
 import { UserPgRepository } from "./user.pg.repository";
-import type {
-	FeedItem,
-	GetUserFeedParams,
-	GetUserRatingMovies,
-	UserMoviesServerFilters,
-} from "./user.types";
+import type { FeedItem, GetUserFeedParams } from "./user.types";
 
 export class UserService {
 	private userPgRepository: UserPgRepository;
@@ -44,32 +39,6 @@ export class UserService {
 	// ): Promise<{ data: UserViewModel[]; totalCount: number }> {
 	//   return await this.userRepository.find(filter, page, limit);
 	// }
-
-	async getUserRatingMovies(
-		userId: string,
-		filters?: UserMoviesServerFilters,
-		sessionUserId?: string,
-	): Promise<GetUserRatingMovies> {
-		return await this.userPgRepository.getRatingMovies(
-			userId,
-			filters,
-			sessionUserId,
-		);
-	}
-
-	async rateMovie(
-		userId: string,
-		movieId: string,
-		score: number,
-		watchedDate: string,
-	) {
-		return await this.userPgRepository.rateMovie(
-			userId,
-			movieId,
-			score,
-			watchedDate,
-		);
-	}
 
 	async updateUsername(userId: string, username: string) {
 		return await this.userPgRepository.updatetUsername(userId, username);
