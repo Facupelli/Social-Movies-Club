@@ -1,7 +1,7 @@
 import 'server-only';
 
-import { TimelineService } from './timeline.service';
 import type { FeedItem } from './feed.types';
+import { getUserFeed } from './timeline.pg';
 
 export type UserFeedPage = {
   items: FeedItem[];
@@ -15,6 +15,5 @@ export async function loadUserFeedPage({
   userId: string;
   cursor?: string | null;
 }): Promise<UserFeedPage> {
-  const service = new TimelineService();
-  return await service.getFeed({ userId, cursor });
+  return await getUserFeed({ userId, cursor });
 }

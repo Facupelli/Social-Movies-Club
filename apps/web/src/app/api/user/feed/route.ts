@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
-import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
+import { getUserFeed } from '@/modules/timeline/view-timeline/timeline.pg';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const { cursor } = validateGetUserFeedQuery(searchParams);
 
-  const res = await loadUserFeedPage({
+  const res = await getUserFeed({
     userId: session.user.id,
     cursor,
   });
