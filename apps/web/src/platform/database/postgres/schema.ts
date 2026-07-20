@@ -184,6 +184,10 @@ export const follows = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.followerId, table.followeeId] }),
+    check(
+      'follows_no_self_follow_check',
+      sql`${table.followerId} <> ${table.followeeId}`
+    ),
     index('follows_reverse_idx').on(table.followeeId),
     // Performance optimization for feed generation
     index('follows_follower_idx').on(table.followerId, table.followeeId),

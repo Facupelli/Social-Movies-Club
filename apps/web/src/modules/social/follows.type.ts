@@ -9,4 +9,5 @@ export type GetFollowingUsers = {
   userName: string;
   userUsername?: string;
   userImage: string;
+  isFollowing: boolean;
 };

@@ -8,11 +8,17 @@ import type { GetFollowingUsers } from '@/modules/social/follows.type';
 import { auth } from '@/platform/auth/auth';
 import { execute } from '@/shared/http/safe-execute';
 
-const fetchFollowingUsers = async (userId: string) => {
+const fetchFollowingUsers = async (
+  profileUserId: string,
+  viewerUserId: string
+) => {
   const followService = new FollowService();
 
   return await execute<GetFollowingUsers[]>(async () => {
-    const followingUsers = await followService.getFollowingUsers(userId);
+    const followingUsers = await followService.getFollowingUsers(
+      profileUserId,
+      viewerUserId
+    );
     return followingUsers;
   });
 };
@@ -44,7 +50,10 @@ export default async function FollowingPage(
   const params = await props.params;
   const profileUserId = params.id;
 
-  const followingUsersResult = await fetchFollowingUsers(profileUserId);
+  const followingUsersResult = await fetchFollowingUsers(
+    profileUserId,
+    session.user.id
+  );
 
   if (!followingUsersResult.success) {
     return <div>{followingUsersResult.error}</div>;
@@ -57,8 +66,6 @@ export default async function FollowingPage(
       <div className="flex-1 pt-10 text-neutral-500">No sigue a nadie</div>
     );
   }
-
-  const isFollowing = false;
 
   return (
     <section className="flex-1 pt-10 space-y-4">
@@ -87,7 +94,7 @@ export default async function FollowingPage(
           ) && (
             <FollowUserButton
               followedUserId={user.followeeId}
-              isFollowing={isFollowing}
+              isFollowing={user.isFollowing}
             />
           )}
         </div>

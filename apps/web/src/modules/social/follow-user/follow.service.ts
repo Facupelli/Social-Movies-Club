@@ -22,8 +22,14 @@ export class FollowService {
     this.followPgRepository = new FollowsPgRepository();
   }
 
-  async getFollowingUsers(userId: string): Promise<GetFollowingUsers[]> {
-    return await this.followPgRepository.getFollowingUsers(userId);
+  async getFollowingUsers(
+    userId: string,
+    viewerUserId: string
+  ): Promise<GetFollowingUsers[]> {
+    return await this.followPgRepository.getFollowingUsers(
+      userId,
+      viewerUserId
+    );
   }
 
   async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
@@ -41,6 +47,10 @@ export class FollowService {
   }
 
   async followUser(userId: string, followedUserId: string): Promise<void> {
+    if (userId === followedUserId) {
+      throw new Error('Users cannot follow themselves');
+    }
+
     const isFollowingUser = await this.followPgRepository.isFollowingUser(
       userId,
       followedUserId

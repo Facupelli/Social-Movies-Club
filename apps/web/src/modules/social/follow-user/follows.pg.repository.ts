@@ -8,7 +8,10 @@ import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { follows, users } from '@/platform/database/postgres/schema';
 
 export class FollowsPgRepository {
-  async getFollowingUsers(userId: string): Promise<GetFollowingUsers[]> {
+  async getFollowingUsers(
+    userId: string,
+    viewerUserId: string
+  ): Promise<GetFollowingUsers[]> {
     const { rows } = await db.execute<GetFollowingUsers>(
       sql`
         SELECT
@@ -16,7 +19,13 @@ export class FollowsPgRepository {
           u.id AS "userId",
           u.name AS "userName",
           u.username AS "userUsername",
-          u.image AS "userImage"
+          u.image AS "userImage",
+          EXISTS (
+            SELECT 1
+            FROM ${follows} AS viewer_follow
+            WHERE viewer_follow.follower_id = ${viewerUserId}
+              AND viewer_follow.followee_id = f.followee_id
+          ) AS "isFollowing"
         FROM ${follows} f
         JOIN ${users} u ON f.followee_id = u.id
         WHERE follower_id = ${userId};

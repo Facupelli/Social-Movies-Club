@@ -1,9 +1,9 @@
 # Social TODO
 
-- [ ] Correct following-list button state
+- [x] Correct following-list button state
   Show whether the viewer follows each user.
 
-- [ ] Reject self-following
+- [x] Reject self-following
   Enforce it in the use case and database.
 
 - [ ] Stop swallowing follow failures

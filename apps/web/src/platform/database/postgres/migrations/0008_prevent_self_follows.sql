@@ -1,0 +1,1 @@
+ALTER TABLE "follows" ADD CONSTRAINT "follows_no_self_follow_check" CHECK ("follows"."follower_id" <> "follows"."followee_id");
