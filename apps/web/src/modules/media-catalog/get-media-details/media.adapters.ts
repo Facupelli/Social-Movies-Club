@@ -1,47 +1,47 @@
-import type { MovieView } from "@/modules/media-catalog/movie-view";
-import type { UserRatings } from "@/modules/ratings/list-profile-ratings/profile-ratings.types";
-import type { UserWatchlist } from "@/modules/watchlist/view-watchlist/watchlist.repository";
-import type { TMDbMediaMultiSearch } from "@/modules/media-catalog/media.type";
+import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
+import type { MovieView } from '@/modules/media-catalog/movie-view';
+import type { UserRatings } from '@/modules/ratings/list-profile-ratings/profile-ratings.types';
+import type { UserWatchlist } from '@/modules/watchlist/view-watchlist/watchlist.repository';
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {
-	return {
-		tmdbId: m.id,
-		title: m.title,
-		year: m.year,
-		posterPath: m.posterPath,
-		backdropPath: m.backdropPath,
-		overview: m.overview,
-		type: m.type,
-		runtime: m.runtime,
-	};
+  return {
+    tmdbId: m.id,
+    title: m.title,
+    year: m.year,
+    posterPath: m.posterPath,
+    backdropPath: m.backdropPath,
+    overview: m.overview,
+    type: m.type,
+    runtime: m.runtime,
+  };
 }
 
 // From Ratings local DB table
 export function dbMovieToView(r: UserRatings): MovieView {
-	return {
-		tmdbId: r.tmdbId,
-		title: r.title,
-		year: r.year,
-		posterPath: r.posterPath,
-		backdropPath: r.backdropPath,
-		score: r.score,
-		overview: r.overview,
-		type: r.type,
-		runtime: r.runtime,
-	};
+  return {
+    tmdbId: r.tmdbId,
+    title: r.title,
+    year: r.year,
+    posterPath: r.posterPath,
+    backdropPath: r.backdropPath,
+    score: r.score,
+    overview: r.overview,
+    type: r.type,
+    runtime: r.runtime,
+  };
 }
 
 // From Watchlist local DB table
 export function dbWatchlistMovieToView(w: UserWatchlist): MovieView {
-	return {
-		tmdbId: w.movieTmdbId,
-		title: w.movieTitle,
-		year: w.movieYear,
-		posterPath: w.moviePosterPath,
-		backdropPath: w.movieBackdropPath,
-		overview: w.movieOverview,
-		type: w.movieType,
-		runtime: w.movieRuntime,
-	};
+  return {
+    tmdbId: w.movieTmdbId,
+    title: w.movieTitle,
+    year: w.movieYear,
+    posterPath: w.moviePosterPath,
+    backdropPath: w.movieBackdropPath,
+    overview: w.movieOverview,
+    type: w.movieType,
+    runtime: w.movieRuntime,
+  };
 }

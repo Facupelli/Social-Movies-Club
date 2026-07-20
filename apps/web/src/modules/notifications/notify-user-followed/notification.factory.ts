@@ -1,34 +1,34 @@
-import type { NewNotification } from "@/platform/database/postgres/schema";
+import type { NewNotification } from '@/platform/database/postgres/schema';
 
 export interface NotificationData {
-	recipientId: string;
-	actorId?: string | null;
-	metadata?: Record<string, unknown>;
+  recipientId: string;
+  actorId?: string | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface FollowNotificationData extends NotificationData {
-	actorId: string;
-	actorUsername: string;
-	actorImage: string | null;
+  actorId: string;
+  actorUsername: string;
+  actorImage: string | null;
 }
 
 export function createFollowNotification(
-	data: FollowNotificationData,
+  data: FollowNotificationData
 ): NewNotification {
-	const { recipientId, actorId, actorUsername, actorImage } = data;
+  const { recipientId, actorId, actorUsername, actorImage } = data;
 
-	return {
-		recipientId,
-		typeId: "user_follow",
-		actorId,
-		actorUsername,
-		actorImage,
-		title: "ahora te sigue",
-		message: "ahora te sigue",
-		metadata: JSON.stringify({
-			actionType: "follow",
-			timestamp: new Date().toISOString(),
-		}),
-		actionUrl: `/profile/${actorId}`,
-	};
+  return {
+    recipientId,
+    typeId: 'user_follow',
+    actorId,
+    actorUsername,
+    actorImage,
+    title: 'ahora te sigue',
+    message: 'ahora te sigue',
+    metadata: JSON.stringify({
+      actionType: 'follow',
+      timestamp: new Date().toISOString(),
+    }),
+    actionUrl: `/profile/${actorId}`,
+  };
 }

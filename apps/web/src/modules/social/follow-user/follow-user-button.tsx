@@ -1,52 +1,52 @@
-"use client";
+'use client';
 
-import { useActionState } from "react";
-import { SubmitButton } from "@/shared/components/submit-button";
-import { followUser, unfollowUser } from "./follow-user";
+import { useActionState } from 'react';
+import { SubmitButton } from '@/shared/components/submit-button';
+import { followUser, unfollowUser } from './follow-user';
 
 export function FollowUserButton({
-	followedUserId,
-	isFollowing,
+  followedUserId,
+  isFollowing,
 }: {
-	isFollowing: boolean;
-	followedUserId: string;
+  isFollowing: boolean;
+  followedUserId: string;
 }) {
-	const [_, followAction, followIsPending] = useActionState(followUser, {
-		success: false,
-		error: "",
-	});
+  const [_, followAction, followIsPending] = useActionState(followUser, {
+    success: false,
+    error: '',
+  });
 
-	const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUser, {
-		success: false,
-		error: "",
-	});
+  const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUser, {
+    success: false,
+    error: '',
+  });
 
-	return (
-		<form>
-			<input type="hidden" name="followedUserId" value={followedUserId} />
+  return (
+    <form>
+      <input name="followedUserId" type="hidden" value={followedUserId} />
 
-			{isFollowing ? (
-				<SubmitButton
-					disabled={unfollowIsPending}
-					formAction={(formData) => {
-						unfollowAction(formData);
-					}}
-					loadingText="Cargando"
-					variant="secondary"
-				>
-					Dejar de seguir
-				</SubmitButton>
-			) : (
-				<SubmitButton
-					disabled={followIsPending}
-					formAction={(formData) => {
-						followAction(formData);
-					}}
-					loadingText="Siguiendo"
-				>
-					Seguir
-				</SubmitButton>
-			)}
-		</form>
-	);
+      {isFollowing ? (
+        <SubmitButton
+          disabled={unfollowIsPending}
+          formAction={(formData) => {
+            unfollowAction(formData);
+          }}
+          loadingText="Cargando"
+          variant="secondary"
+        >
+          Dejar de seguir
+        </SubmitButton>
+      ) : (
+        <SubmitButton
+          disabled={followIsPending}
+          formAction={(formData) => {
+            followAction(formData);
+          }}
+          loadingText="Siguiendo"
+        >
+          Seguir
+        </SubmitButton>
+      )}
+    </form>
+  );
 }

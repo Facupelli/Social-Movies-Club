@@ -1,34 +1,34 @@
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
-import { NEXT_CACHE_TAGS } from "@/shared/utilities/app.constants";
-import { withAuth } from "@/platform/auth/auth-server-action.middleware";
-import { type ApiResponse, execute } from "@/shared/http/safe-execute";
-import { UserMediaService } from "@/modules/ratings/rate-media/user-movie.service";
-import { validateAddMovieToWatchlist } from "@/modules/watchlist/watchlist-validation";
+import { revalidateTag } from 'next/cache';
+import { UserMediaService } from '@/modules/ratings/rate-media/user-movie.service';
+import { validateAddMovieToWatchlist } from '@/modules/watchlist/watchlist-validation';
+import { withAuth } from '@/platform/auth/auth-server-action.middleware';
+import { type ApiResponse, execute } from '@/shared/http/safe-execute';
+import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 
 export async function addMovieToWatchlist(
-	formData: FormData,
+  formData: FormData
 ): Promise<ApiResponse<void>> {
-	return await withAuth(async (session) => {
-		const { movieTMDBId, userId, type } = validateAddMovieToWatchlist(formData);
+  return await withAuth(async (session) => {
+    const { movieTMDBId, userId, type } = validateAddMovieToWatchlist(formData);
 
-		if (userId !== session.user.id) {
-			return {
-				success: false,
-				error: "Unauthorized",
-			};
-		}
+    if (userId !== session.user.id) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
 
-		const result = await execute<void>(async () => {
-			const userMediaService = new UserMediaService();
-			await userMediaService.addMediaToWatchlist(userId, movieTMDBId, type);
-		});
+    const result = await execute<void>(async () => {
+      const userMediaService = new UserMediaService();
+      await userMediaService.addMediaToWatchlist(userId, movieTMDBId, type);
+    });
 
-		if (result.success) {
-			revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
-		}
+    if (result.success) {
+      revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+    }
 
-		return result;
-	});
+    return result;
+  });
 }

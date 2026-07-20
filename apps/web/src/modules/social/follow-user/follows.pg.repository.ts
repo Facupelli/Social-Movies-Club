@@ -1,8 +1,11 @@
-import { sql } from "drizzle-orm";
-import { db } from "@/platform/database/postgres/db";
-import { withDatabase } from "@/platform/database/postgres/db-utils";
-import { follows, users } from "@/platform/database/postgres/schema";
-import type { GetFollowingUsers, GetUserFollowsInfoMap } from "@/modules/social/follows.type";
+import { sql } from 'drizzle-orm';
+import type {
+  GetFollowingUsers,
+  GetUserFollowsInfoMap,
+} from '@/modules/social/follows.type';
+import { db } from '@/platform/database/postgres/db';
+import { withDatabase } from '@/platform/database/postgres/db-utils';
+import { follows, users } from '@/platform/database/postgres/schema';
 
 export class FollowsPgRepository {
   async getFollowingUsers(userId: string): Promise<GetFollowingUsers[]> {

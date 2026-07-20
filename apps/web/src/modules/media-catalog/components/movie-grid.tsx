@@ -1,4 +1,4 @@
-import { Children } from "react";
+import { Children } from 'react';
 
 export function MovieGrid({ children }: { children: React.ReactNode }) {
   return (

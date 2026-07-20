@@ -1,84 +1,84 @@
-import clsx from "clsx";
-import { User } from "lucide-react";
-import { headers } from "next/headers";
-import Image from "next/image";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth } from "@/platform/auth/auth";
-import { formatFeedItemTime } from "@/shared/utilities/utils";
-import { InvalidateNotificationsQuery } from "@/modules/notifications/mark-as-read/invalidate-query";
-import { NotificationService } from "@/modules/notifications/list-notifications/notifications.service";
+import clsx from 'clsx';
+import { User } from 'lucide-react';
+import { headers } from 'next/headers';
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { NotificationService } from '@/modules/notifications/list-notifications/notifications.service';
+import { InvalidateNotificationsQuery } from '@/modules/notifications/mark-as-read/invalidate-query';
+import { auth } from '@/platform/auth/auth';
+import { formatFeedItemTime } from '@/shared/utilities/utils';
 
 const notificationService = new NotificationService();
 
 export default async function NotificationsPage() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-	if (!session) {
-		redirect("/");
-	}
+  if (!session) {
+    redirect('/');
+  }
 
-	const notifications = await notificationService.getUserNotifications(
-		session.user.id,
-		{ includeRead: true },
-	);
+  const notifications = await notificationService.getUserNotifications(
+    session.user.id,
+    { includeRead: true }
+  );
 
-	return (
-		<div className="py-6 min-h-svh">
-			<InvalidateNotificationsQuery />
+  return (
+    <div className="py-6 min-h-svh">
+      <InvalidateNotificationsQuery />
 
-			<h1 className="font-bold md:text-xl px-2 md:px-10">Notificaciones</h1>
+      <h1 className="font-bold md:text-xl px-2 md:px-10">Notificaciones</h1>
 
-			<section className="pt-8 flex flex-col divide-y divide-border ">
-				{notifications.data.map((notification, index) => (
-					<Link
-						prefetch={index === 0}
-						href={notification.actionUrl ?? "#"}
-						key={notification.id}
-						className={clsx(
-							"flex gap-2 md:gap-4 items-start py-4 px-2 md:px-10 first:border-t border-boder last:border-b",
-						)}
-					>
-						<div>
-							<User className="size-7" />
-						</div>
-						<div className="space-y-1 flex-1">
-							<div className="flex justify-between ">
-								<div className="size-8 rounded-full bg-secondary-foreground">
-									{notification.actorImage ? (
-										<Image
-											unoptimized
-											src={notification.actorImage}
-											alt="profile image"
-											width={32}
-											className="rounded-full size-8 object-cover"
-											height={32}
-										/>
-									) : (
-										<div className="size-8 rounded-full bg-secondary-foreground">
-											<User />
-										</div>
-									)}
-								</div>
+      <section className="pt-8 flex flex-col divide-y divide-border ">
+        {notifications.data.map((notification, index) => (
+          <Link
+            className={clsx(
+              'flex gap-2 md:gap-4 items-start py-4 px-2 md:px-10 first:border-t border-boder last:border-b'
+            )}
+            href={notification.actionUrl ?? '#'}
+            key={notification.id}
+            prefetch={index === 0}
+          >
+            <div>
+              <User className="size-7" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <div className="flex justify-between ">
+                <div className="size-8 rounded-full bg-secondary-foreground">
+                  {notification.actorImage ? (
+                    <Image
+                      alt="profile image"
+                      className="rounded-full size-8 object-cover"
+                      height={32}
+                      src={notification.actorImage}
+                      unoptimized
+                      width={32}
+                    />
+                  ) : (
+                    <div className="size-8 rounded-full bg-secondary-foreground">
+                      <User />
+                    </div>
+                  )}
+                </div>
 
-								<div>
-									<span className="text-muted-foreground text-sm">
-										{formatFeedItemTime(notification.createdAt)}
-									</span>
-								</div>
-							</div>
-							<div>
-								<span className="text-primary hover:underline font-bold">
-									{notification.actorUsername}
-								</span>{" "}
-								<span>{notification.title}</span>
-							</div>
-						</div>
-					</Link>
-				))}
-			</section>
-		</div>
-	);
+                <div>
+                  <span className="text-muted-foreground text-sm">
+                    {formatFeedItemTime(notification.createdAt)}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <span className="text-primary hover:underline font-bold">
+                  {notification.actorUsername}
+                </span>{' '}
+                <span>{notification.title}</span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </section>
+    </div>
+  );
 }

@@ -7,16 +7,15 @@ import {
   CircleCheck,
   Film,
   Star,
-  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useActionState, useEffect, useRef, useState } from 'react';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import {
   type MediaType,
   MediaTypeDict,
 } from '@/modules/media-catalog/media.type';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
 import { authClient } from '@/platform/auth/auth-client';
@@ -25,8 +24,8 @@ import {
   optimisticallyRateMedia,
 } from '@/platform/react-query/mutation-cache';
 import { SubmitButton } from '@/shared/components/submit-button';
-import type { ApiResponse } from '@/shared/http/safe-execute';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
+import type { ApiResponse } from '@/shared/http/safe-execute';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
@@ -36,7 +35,6 @@ import {
 } from '@/shared/ui/dialog';
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerTitle,
   DrawerTrigger,
@@ -238,11 +236,7 @@ function RateDialogBody({
 
   if (state.success) {
     return (
-      <RatingSuccessView
-        onClose={onClose}
-        rating={rating}
-        userId={userId}
-      />
+      <RatingSuccessView onClose={onClose} rating={rating} userId={userId} />
     );
   }
 
@@ -311,10 +305,7 @@ function RateDialogBody({
           <legend className="sr-only">Puntuación</legend>
 
           <div
-            className={cn(
-              'grid grid-cols-10',
-              isMobile ? 'gap-1.5' : 'gap-2'
-            )}
+            className={cn('grid grid-cols-10', isMobile ? 'gap-1.5' : 'gap-2')}
             onMouseLeave={() => setHoverRating(0)}
             role="radiogroup"
           >
@@ -386,13 +377,13 @@ function RateDialogBody({
               )}
               htmlFor={`watched-date-${tmdbId}-${type}`}
             >
-                La viste el
+              La viste el
             </label>
 
             <div
               className={cn(
                 'relative flex items-center justify-between border border-white/15 bg-white/[0.025] px-4 text-white transition-colors hover:border-white/25 h-10 w-[190px] rounded-full text-sm',
-                isMobile && "w-full"
+                isMobile && 'w-full'
               )}
             >
               <span className="flex min-w-0 items-center gap-3 truncate">

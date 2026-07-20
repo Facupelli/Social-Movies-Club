@@ -1,11 +1,11 @@
-import "server-only";
+import 'server-only';
 
-import { cache } from "react";
-import { headers } from "next/headers";
-import { auth } from "./auth";
+import { headers } from 'next/headers';
+import { cache } from 'react';
+import { auth } from './auth';
 
 export const getServerSession = cache(async () =>
-	auth.api.getSession({
-		headers: await headers(),
-	}),
+  auth.api.getSession({
+    headers: await headers(),
+  })
 );

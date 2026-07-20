@@ -1,52 +1,52 @@
-import { sql } from "drizzle-orm";
-import { withDatabase } from "@/platform/database/postgres/db-utils";
+import { sql } from 'drizzle-orm';
+import type { AggregatedFeedItem } from '@/modules/timeline/view-timeline/feed.types';
+import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
-	feedItemRatings,
-	feedMediaBucket,
-	follows,
-	media,
-	ratings,
-	type User,
-	users,
-} from "@/platform/database/postgres/schema";
-import type { AggregatedFeedItem } from "@/modules/timeline/view-timeline/feed.types";
-import type { FeedItem, FeedItemRaw, GetUserFeedParams } from "./user.types";
+  feedItemRatings,
+  feedMediaBucket,
+  follows,
+  media,
+  ratings,
+  type User,
+  users,
+} from '@/platform/database/postgres/schema';
+import type { FeedItem, FeedItemRaw, GetUserFeedParams } from './user.types';
 
 export class UserPgRepository {
-	async getUsers(query: string): Promise<User[]> {
-		return await withDatabase(async (db) => {
-			const usernameQuery = `%${query}%`;
+  async getUsers(query: string): Promise<User[]> {
+    return await withDatabase(async (db) => {
+      const usernameQuery = `%${query}%`;
 
-			const { rows } = await db.execute<User>(sql<User>`
+      const { rows } = await db.execute<User>(sql<User>`
         SELECT id, name, image, username FROM users WHERE ${users.username} ILIKE ${usernameQuery}
       `);
 
-			return rows;
-		});
-	}
+      return rows;
+    });
+  }
 
-	async getById(userId: string): Promise<User> {
-		return await withDatabase(async (db) => {
-			const query = sql<User>`
+  async getById(userId: string): Promise<User> {
+    return await withDatabase(async (db) => {
+      const query = sql<User>`
         SELECT * FROM users WHERE ${users.id} = ${userId}
       `;
 
-			const { rows } = await db.execute<User>(query);
-			return rows[0];
-		});
-	}
+      const { rows } = await db.execute<User>(query);
+      return rows[0];
+    });
+  }
 
-	// this query repeats every time this
-	// - scan all ratings of every follower
-	// - group/aggregate them per media
-	// - joinn users and media
-	async getAggregatedFeedOnTheFly(
-		userId: string,
-		cursor: string | null = null,
-		limit = 20,
-	) {
-		return await withDatabase(async (db) => {
-			const query = sql`
+  // this query repeats every time this
+  // - scan all ratings of every follower
+  // - group/aggregate them per media
+  // - joinn users and media
+  async getAggregatedFeedOnTheFly(
+    userId: string,
+    cursor: string | null = null,
+    limit = 20
+  ) {
+    return await withDatabase(async (db) => {
+      const query = sql`
 				-- Optimized query with proper index usage
 				WITH follower_ratings AS (
 					-- First, get all ratings from followed users using the follows_follower_idx
@@ -102,21 +102,21 @@ export class UserPgRepository {
 			LIMIT ${limit}
 			`;
 
-			const { rows } = await db.execute(query);
-			return rows;
-		});
-	}
+      const { rows } = await db.execute(query);
+      return rows;
+    });
+  }
 
-	getAggregatedFeed({
-		userId,
-		limit = 20,
-		cursor = null,
-	}: GetUserFeedParams): Promise<{
-		items: AggregatedFeedItem[];
-		nextCursor: string | null;
-	}> {
-		return withDatabase(async (db) => {
-			const query = sql`
+  getAggregatedFeed({
+    userId,
+    limit = 20,
+    cursor = null,
+  }: GetUserFeedParams): Promise<{
+    items: AggregatedFeedItem[];
+    nextCursor: string | null;
+  }> {
+    return withDatabase(async (db) => {
+      const query = sql`
 				SELECT
 					fmb.id as "bucketId",
 					fmb.media_id as "mediaId",
@@ -161,33 +161,33 @@ export class UserPgRepository {
 				LIMIT ${limit}
 			`;
 
-			const { rows: aggregatedFeedItems } =
-				await db.execute<AggregatedFeedItem>(query);
+      const { rows: aggregatedFeedItems } =
+        await db.execute<AggregatedFeedItem>(query);
 
-			const lastElement = aggregatedFeedItems.at(-1);
+      const lastElement = aggregatedFeedItems.at(-1);
 
-			const nextCursor =
-				lastElement && aggregatedFeedItems.length === limit
-					? new Date(lastElement.lastRatingAt).toISOString()
-					: null;
+      const nextCursor =
+        lastElement && aggregatedFeedItems.length === limit
+          ? new Date(lastElement.lastRatingAt).toISOString()
+          : null;
 
-			return {
-				items: aggregatedFeedItems,
-				nextCursor,
-			};
-		});
-	}
+      return {
+        items: aggregatedFeedItems,
+        nextCursor,
+      };
+    });
+  }
 
-	async getFeed({
-		userId,
-		limit = 20,
-		cursor = null,
-	}: GetUserFeedParams): Promise<{
-		items: FeedItem[];
-		nextCursor: string | null;
-	}> {
-		return await withDatabase(async (db) => {
-			const feedResult = await db.execute<FeedItemRaw>(sql`
+  async getFeed({
+    userId,
+    limit = 20,
+    cursor = null,
+  }: GetUserFeedParams): Promise<{
+    items: FeedItem[];
+    nextCursor: string | null;
+  }> {
+    return await withDatabase(async (db) => {
+      const feedResult = await db.execute<FeedItemRaw>(sql`
         -- Optimized feed query using feed_items_user_time_idx
         SELECT 
           fi.id as feed_item_id,
@@ -218,48 +218,48 @@ export class UserPgRepository {
         LIMIT ${limit}
       `);
 
-			const newFeedItems: FeedItem[] = feedResult.rows.map((row) => ({
-				feedItemId: row.feed_item_id,
-				actorId: row.actor_id,
-				actorName: row.actor_name,
-				actorImage: row.actor_image,
-				actorUsername: row.actor_username,
-				movieId: row.media_id,
-				movieOverview: row.movie_overview,
-				movieTmdbId: row.movie_tmdb_id,
-				movieTitle: row.movie_title,
-				movieYear: row.movie_year,
-				moviePoster: row.movie_poster,
-				movieBackdrop: row.movie_backdrop,
-				movieType: row.movie_type,
-				score: row.score,
-				ratedAt: row.rated_at,
-				seenAt: row.seen_at,
-			}));
+      const newFeedItems: FeedItem[] = feedResult.rows.map((row) => ({
+        feedItemId: row.feed_item_id,
+        actorId: row.actor_id,
+        actorName: row.actor_name,
+        actorImage: row.actor_image,
+        actorUsername: row.actor_username,
+        movieId: row.media_id,
+        movieOverview: row.movie_overview,
+        movieTmdbId: row.movie_tmdb_id,
+        movieTitle: row.movie_title,
+        movieYear: row.movie_year,
+        moviePoster: row.movie_poster,
+        movieBackdrop: row.movie_backdrop,
+        movieType: row.movie_type,
+        score: row.score,
+        ratedAt: row.rated_at,
+        seenAt: row.seen_at,
+      }));
 
-			const lastElement = newFeedItems.at(-1);
+      const lastElement = newFeedItems.at(-1);
 
-			const nextCursor =
-				lastElement && newFeedItems.length === limit
-					? new Date(lastElement.ratedAt).toISOString()
-					: null;
+      const nextCursor =
+        lastElement && newFeedItems.length === limit
+          ? new Date(lastElement.ratedAt).toISOString()
+          : null;
 
-			return {
-				items: newFeedItems,
-				nextCursor,
-			};
-		});
-	}
+      return {
+        items: newFeedItems,
+        nextCursor,
+      };
+    });
+  }
 
-	async updatetUsername(userId: string, username: string): Promise<void> {
-		return await withDatabase(async (db) => {
-			const newUsername = `@${username}`;
+  async updatetUsername(userId: string, username: string): Promise<void> {
+    return await withDatabase(async (db) => {
+      const newUsername = `@${username}`;
 
-			await db.execute(sql`
+      await db.execute(sql`
 			  UPDATE ${users}
 				SET username = ${newUsername}
 			  WHERE id = ${userId}
 			`);
-		});
-	}
+    });
+  }
 }

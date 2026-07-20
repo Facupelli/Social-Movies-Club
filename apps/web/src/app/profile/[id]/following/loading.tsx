@@ -1,11 +1,11 @@
-import { Skeleton } from "@/shared/ui/skeleton";
+import { Skeleton } from '@/shared/ui/skeleton';
 
 export default function FollowingPageLoading() {
   return (
     <div className="space-y-4 pt-4">
       {[...Array(5)].map((_, idx) => (
         // biome-ignore lint:reason
-        <div key={idx} className="flex justify-between">
+        <div className="flex justify-between" key={idx}>
           <div className="flex gap-4">
             <Skeleton className="size-[50px] rounded-full " />
             <div className="space-y-2">
