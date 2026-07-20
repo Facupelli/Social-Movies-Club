@@ -1,8 +1,10 @@
 import { headers } from 'next/headers';
 import type { NextRequest } from 'next/server';
-import { ProfileSearchService } from '@/modules/profiles/search-profiles/profile-search.service';
+import {
+  type ProfileSearchResult,
+  searchProfiles,
+} from '@/modules/profiles/search-profiles/profile-search.pg';
 import { auth } from '@/platform/auth/auth';
-import type { User } from '@/platform/database/postgres/schema';
 import {
   authenticatedJson,
   unauthorizedJson,
@@ -24,8 +26,6 @@ export async function GET(request: NextRequest) {
     return authenticatedJson({});
   }
 
-  const profileSearchService = new ProfileSearchService();
-
-  const res: User[] = await profileSearchService.search(query);
+  const res: ProfileSearchResult[] = await searchProfiles(query);
   return authenticatedJson(res);
 }

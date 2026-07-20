@@ -3,22 +3,21 @@ import {
   NotificationEventRegistry,
   type UserFollowedEvent,
 } from '@/modules/notifications/notify-user-followed/notification-event-handler';
-import { ProfileService } from '@/modules/profiles/profile.service';
+import { getProfileById } from '@/modules/profiles/profile.pg';
 import { createFollow, removeFollow } from './follow-user.pg';
 
 const notificationService = new FollowNotificationService();
 const eventRegistry = new NotificationEventRegistry(notificationService);
-const profileService = new ProfileService();
 
 type FollowUserDependencies = {
   createFollow: typeof createFollow;
-  getUser: ProfileService['getUser'];
+  getUser: typeof getProfileById;
   notifyUserFollowed: (event: UserFollowedEvent) => Promise<boolean>;
 };
 
 const followUserDependencies: FollowUserDependencies = {
   createFollow,
-  getUser: (userId) => profileService.getUser(userId),
+  getUser: getProfileById,
   notifyUserFollowed: (event) =>
     eventRegistry.handleEvent('user_followed', event),
 };

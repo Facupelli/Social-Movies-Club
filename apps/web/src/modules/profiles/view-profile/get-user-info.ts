@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { getFollowStatus } from '@/modules/social/get-follow-status/follow-status.pg';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
-import { ProfileService } from '../profile.service';
+import { getProfileById } from '../profile.pg';
 
 export function getIsFollowingUser(
   sessionUserId: string,
@@ -22,10 +22,8 @@ export function getIsFollowingUser(
 }
 
 export function getUserProfile(profileUserId: string) {
-  const profileService = new ProfileService();
-
   return unstable_cache(
-    () => profileService.getUser(profileUserId),
+    () => getProfileById(profileUserId),
     ['user-profile', profileUserId],
     {
       tags: ['user-profile', NEXT_CACHE_TAGS.getUserProfile(profileUserId)],

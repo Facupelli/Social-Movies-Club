@@ -2,13 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { authClient } from '@/platform/auth/auth-client';
-import type { User } from '@/platform/database/postgres/schema';
+import type { ProfileSearchResult } from '@/modules/profiles/search-profiles/profile-search.pg';
 import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 
 async function getUsersByQuery(
   query: string,
   signal?: AbortSignal
-): Promise<User[]> {
+): Promise<ProfileSearchResult[]> {
   const response = await fetch(`/api/users/?q=${query}`, {
     cache: 'no-store',
     signal,
