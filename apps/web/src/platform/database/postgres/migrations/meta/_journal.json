@@ -57,6 +57,13 @@
       "when": 1784582851001,
       "tag": "0008_prevent_self_follows",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784584181218,
+      "tag": "0009_wise_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

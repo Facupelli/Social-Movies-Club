@@ -378,7 +378,7 @@ export const notifications = pgTable(
       .on(table.recipientId, table.readAt)
       .where(sql`is_deleted = false`),
     index('notifications_list_idx')
-      .on(table.recipientId, table.createdAt)
+      .on(table.recipientId, table.createdAt, table.id)
       .where(sql`is_deleted = false`),
     // Partial index for unseen notifications (most common case)
     index('notifications_unseen_partial_idx')

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   type NewNotification,
@@ -54,7 +54,13 @@ export class NotificationRepository {
       }
 
       if (cursor) {
-        conditions.push(lt(notifications.createdAt, cursor.createdAt));
+        conditions.push(sql`
+          ${notifications.createdAt} < ${cursor.createdAt}
+          OR (
+            ${notifications.createdAt} = ${cursor.createdAt}
+            AND ${notifications.id} < ${cursor.id}
+          )
+        `);
       }
 
       const results = await db
@@ -68,7 +74,7 @@ export class NotificationRepository {
           eq(notifications.typeId, notificationTypes.id)
         )
         .where(and(...conditions))
-        .orderBy(desc(notifications.createdAt))
+        .orderBy(desc(notifications.createdAt), desc(notifications.id))
         .limit(limit + 1);
 
       const hasMore = results.length > limit;
