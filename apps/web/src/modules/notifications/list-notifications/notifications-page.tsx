@@ -4,12 +4,10 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ListNotificationsService } from '@/modules/notifications/list-notifications/notifications.service';
+import { listNotifications } from '@/modules/notifications/list-notifications/list-notifications';
 import { InvalidateNotificationsQuery } from '@/modules/notifications/mark-as-read/invalidate-query';
 import { auth } from '@/platform/auth/auth';
 import { formatFeedItemTime } from '@/shared/utilities/utils';
-
-const notificationService = new ListNotificationsService();
 
 export default async function NotificationsPage() {
   const session = await auth.api.getSession({
@@ -20,10 +18,9 @@ export default async function NotificationsPage() {
     redirect('/');
   }
 
-  const notifications = await notificationService.getUserNotifications(
-    session.user.id,
-    { includeRead: true }
-  );
+  const notifications = await listNotifications(session.user.id, {
+    includeRead: true,
+  });
 
   return (
     <div className="py-6 min-h-svh">

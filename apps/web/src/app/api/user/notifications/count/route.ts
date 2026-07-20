@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { UnreadNotificationsService } from '@/modules/notifications/count-unread/unread-notifications.service';
+import { countUnreadNotifications } from '@/modules/notifications/count-unread/count-unread-notifications';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,
@@ -15,8 +15,6 @@ export async function GET() {
     return unauthorizedJson();
   }
 
-  const notificationService = new UnreadNotificationsService();
-
-  const res = await notificationService.count(session.user.id);
+  const res = await countUnreadNotifications(session.user.id);
   return authenticatedJson(res);
 }
