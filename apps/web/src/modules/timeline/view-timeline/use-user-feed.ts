@@ -1,5 +1,5 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
-import type { FeedItem } from '@/modules/profiles/user.types';
+import type { FeedItem } from './feed.types';
 import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 
 type UserFeedPage = {

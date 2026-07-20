@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
-import { UserService } from '@/modules/profiles/user.service';
 import type { AggregatedFeedItem } from '@/modules/timeline/view-timeline/feed.types';
+import { TimelineService } from '@/modules/timeline/view-timeline/timeline.service';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,
@@ -20,10 +20,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const { cursor } = validateGetUserFeedQuery(searchParams);
 
-  const userService = new UserService();
+  const timelineService = new TimelineService();
 
   const res: { items: AggregatedFeedItem[]; nextCursor: string | null } =
-    await userService.getAggregatedFeed({
+    await timelineService.getAggregatedFeed({
       userId: session.user.id,
       cursor,
     });

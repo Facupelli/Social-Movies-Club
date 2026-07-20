@@ -1,7 +1,7 @@
 import 'server-only';
 
-import { UserService } from '@/modules/profiles/user.service';
-import type { FeedItem } from '@/modules/profiles/user.types';
+import { TimelineService } from './timeline.service';
+import type { FeedItem } from './feed.types';
 
 export type UserFeedPage = {
   items: FeedItem[];
@@ -15,6 +15,6 @@ export async function loadUserFeedPage({
   userId: string;
   cursor?: string | null;
 }): Promise<UserFeedPage> {
-  const userService = new UserService();
-  return await userService.getFeed({ userId, cursor });
+  const service = new TimelineService();
+  return await service.getFeed({ userId, cursor });
 }

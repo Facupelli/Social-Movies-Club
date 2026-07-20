@@ -28,9 +28,11 @@ import { TYPE_DICT } from '@/modules/media-catalog/media.constants';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
 import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
-import type { FeedItem } from '@/modules/profiles/user.types';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
-import type { AggregatedFeedItem } from '@/modules/timeline/view-timeline/feed.types';
+import type {
+  AggregatedFeedItem,
+  FeedItem,
+} from '@/modules/timeline/view-timeline/feed.types';
 import { getUserAggregatedFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-aggregated-feed';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';

@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { UserService } from '@/modules/profiles/user.service';
+import { ProfileService } from '@/modules/profiles/profile.service';
 import { auth } from '@/platform/auth/auth';
 import type { User } from '@/platform/database/postgres/schema';
 import {
@@ -16,8 +16,8 @@ export async function GET() {
     return unauthorizedJson();
   }
 
-  const userService = new UserService();
+  const profileService = new ProfileService();
 
-  const res: User | null = await userService.getUser(session.user.id);
+  const res: User | null = await profileService.getUser(session.user.id);
   return authenticatedJson(res);
 }

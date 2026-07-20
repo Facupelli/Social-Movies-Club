@@ -3,7 +3,7 @@
 import { revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { validateUpdateUsername } from '@/modules/account/user-validation';
-import { UserService } from '@/modules/profiles/user.service';
+import { UsernamePgRepository } from './username.pg.repository';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
@@ -14,10 +14,10 @@ export async function updateUsername(
   return await withAuth(async (session) => {
     const { username } = validateUpdateUsername(formData);
 
-    const userService = new UserService();
+    const repository = new UsernamePgRepository();
 
     const result = await execute<void>(async () => {
-      await userService.updateUsername(session.user.id, username);
+      await repository.update(session.user.id, username);
     });
 
     if (result.success) {
@@ -34,10 +34,10 @@ export async function createUsername(
   return await withAuth(async (session) => {
     const { username } = validateUpdateUsername(formData);
 
-    const userService = new UserService();
+    const repository = new UsernamePgRepository();
 
     const result = await execute<void>(async () => {
-      await userService.updateUsername(session.user.id, username);
+      await repository.update(session.user.id, username);
     });
 
     if (result.success) {

@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { FollowService } from '@/modules/social/follow-user/follow.service';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
-import { UserService } from '../user.service';
+import { ProfileService } from '../profile.service';
 
 export function getIsFollowingUser(
   sessionUserId: string,
@@ -24,10 +24,10 @@ export function getIsFollowingUser(
 }
 
 export function getUserProfile(profileUserId: string) {
-  const userService = new UserService();
+  const profileService = new ProfileService();
 
   return unstable_cache(
-    () => userService.getUser(profileUserId),
+    () => profileService.getUser(profileUserId),
     ['user-profile', profileUserId],
     {
       tags: ['user-profile', NEXT_CACHE_TAGS.getUserProfile(profileUserId)],

@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
-import { loadUserFeedPage } from '@/modules/ratings/list-profile-ratings/user-query-loaders.server';
+import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,

@@ -1,0 +1,17 @@
+import { sql } from 'drizzle-orm';
+import { withDatabase } from '@/platform/database/postgres/db-utils';
+import { users } from '@/platform/database/postgres/schema';
+
+export class UsernamePgRepository {
+  async update(userId: string, username: string): Promise<void> {
+    return await withDatabase(async (db) => {
+      const newUsername = `@${username}`;
+
+      await db.execute(sql`
+        UPDATE ${users}
+        SET username = ${newUsername}
+        WHERE id = ${userId}
+      `);
+    });
+  }
+}

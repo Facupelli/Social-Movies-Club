@@ -3,7 +3,7 @@ import {
   NotificationEventRegistry,
   type UserFollowedEvent,
 } from '@/modules/notifications/notify-user-followed/notification-event-handler';
-import { UserService } from '@/modules/profiles/user.service';
+import { ProfileService } from '@/modules/profiles/profile.service';
 import type {
   GetFollowingUsers,
   GetUserFollowsInfoMap,
@@ -13,7 +13,7 @@ import { FollowsPgRepository } from './follows.pg.repository';
 const notificationService = new NotificationService();
 const eventRegistry = new NotificationEventRegistry(notificationService);
 
-const userService = new UserService();
+const profileService = new ProfileService();
 
 export class FollowService {
   private followPgRepository: FollowsPgRepository;
@@ -53,7 +53,7 @@ export class FollowService {
     try {
       await this.followPgRepository.followUser(userId, followedUserId);
 
-      const user = await userService.getUser(userId);
+      const user = await profileService.getUser(userId);
 
       if (!user?.username) {
         return;
