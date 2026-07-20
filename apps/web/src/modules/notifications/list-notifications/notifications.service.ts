@@ -1,37 +1,21 @@
-import type { NewNotification } from '@/platform/database/postgres/schema';
 import {
   type NotificationFilters,
-  NotificationRepository,
+  NotificationsPgRepository,
   type PaginatedNotifications,
-} from './notifications.repository';
+} from './notifications.pg.repository';
 
-export interface NotificationServiceConfig {
-  maxNotificationsPerUser?: number;
+export interface ListNotificationsServiceConfig {
   defaultPageSize?: number;
 }
 
-export class NotificationService {
-  private config: Required<NotificationServiceConfig>;
-  private repository: NotificationRepository;
+export class ListNotificationsService {
+  private readonly defaultPageSize: number;
 
-  constructor(config: NotificationServiceConfig = {}) {
-    this.repository = new NotificationRepository();
-    this.config = {
-      maxNotificationsPerUser: 1000,
-      defaultPageSize: 20,
-      ...config,
-    };
-  }
-
-  async getUnreadNotificationCount(userId: string): Promise<number> {
-    try {
-      const count = await this.repository.getUnreadCount(userId);
-      return count;
-    } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: preserve notification failure diagnostics
-      console.error(`Failed to get unread count for user ${userId}:`, error);
-      return 0;
-    }
+  constructor(
+    private readonly repository = new NotificationsPgRepository(),
+    config: ListNotificationsServiceConfig = {}
+  ) {
+    this.defaultPageSize = config.defaultPageSize ?? 20;
   }
 
   async getUserNotifications(
@@ -47,48 +31,10 @@ export class NotificationService {
       recipientId: userId,
       includeRead: options.includeRead ?? false,
       typeId: options.typeId,
-      limit: options.limit ?? this.config.defaultPageSize,
+      limit: options.limit ?? this.defaultPageSize,
       cursor: options.cursor,
     };
 
     return await this.repository.getNotifications(filters);
-  }
-
-  async markAsRead(notificationId: string, userId: string): Promise<boolean> {
-    return await this.repository.markAsRead(notificationId, userId);
-  }
-
-  async markAllAsRead(userId: string): Promise<number> {
-    return await this.repository.markAllAsRead(userId);
-  }
-
-  async createNotification(notification: NewNotification): Promise<boolean> {
-    try {
-      await this.repository.createNotification(notification);
-
-      // Cleanup old notifications if user has too many (background cleanup)
-      // this.cleanupOldNotifications(notification.recipientId).catch(error => {
-      //   console.error('Failed to cleanup old notifications:', error);
-      // });
-
-      return true;
-    } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: preserve notification failure diagnostics
-      console.error('Failed to create notification:', error);
-      return false;
-    }
-  }
-
-  async createBulkNotifications(
-    notifications: NewNotification[]
-  ): Promise<boolean> {
-    try {
-      await this.repository.createNotifications(notifications);
-      return true;
-    } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: preserve notification failure diagnostics
-      console.error('Failed to create bulk notifications:', error);
-      return false;
-    }
   }
 }

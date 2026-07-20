@@ -4,12 +4,12 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { NotificationService } from '@/modules/notifications/list-notifications/notifications.service';
+import { ListNotificationsService } from '@/modules/notifications/list-notifications/notifications.service';
 import { InvalidateNotificationsQuery } from '@/modules/notifications/mark-as-read/invalidate-query';
 import { auth } from '@/platform/auth/auth';
 import { formatFeedItemTime } from '@/shared/utilities/utils';
 
-const notificationService = new NotificationService();
+const notificationService = new ListNotificationsService();
 
 export default async function NotificationsPage() {
   const session = await auth.api.getSession({

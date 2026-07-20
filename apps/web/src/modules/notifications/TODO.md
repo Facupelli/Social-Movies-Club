@@ -9,5 +9,5 @@
 - [ ] Standardize error handling
   Failures must not silently become empty results.
 
-- [ ] Split persistence by use case
+- [x] Split persistence by use case
   Separate read and write operations.

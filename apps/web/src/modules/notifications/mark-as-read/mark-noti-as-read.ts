@@ -1,13 +1,13 @@
 'use server';
 
-import { NotificationService } from '@/modules/notifications/list-notifications/notifications.service';
+import { MarkNotificationsReadService } from './mark-notifications-read.service';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 
 export async function markNotiAsRead() {
   return await withAuth(async (session) => {
     try {
-      const notificationService = new NotificationService();
-      await notificationService.markAllAsRead(session.user.id);
+      const notificationService = new MarkNotificationsReadService();
+      await notificationService.markAll(session.user.id);
 
       return { success: true };
     } catch (error) {

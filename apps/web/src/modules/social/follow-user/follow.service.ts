@@ -1,4 +1,4 @@
-import { NotificationService } from '@/modules/notifications/list-notifications/notifications.service';
+import { FollowNotificationService } from '@/modules/notifications/notify-user-followed/follow-notification.service';
 import {
   NotificationEventRegistry,
   type UserFollowedEvent,
@@ -6,7 +6,7 @@ import {
 import { ProfileService } from '@/modules/profiles/profile.service';
 import { FollowPgRepository } from './follow.pg.repository';
 
-const notificationService = new NotificationService();
+const notificationService = new FollowNotificationService();
 const eventRegistry = new NotificationEventRegistry(notificationService);
 
 const profileService = new ProfileService();

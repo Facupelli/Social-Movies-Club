@@ -1,4 +1,4 @@
-import type { NotificationService } from '@/modules/notifications/list-notifications/notifications.service';
+import type { FollowNotificationService } from './follow-notification.service';
 import { createFollowNotification } from './notification.factory';
 
 export interface UserFollowedEvent {
@@ -16,7 +16,7 @@ export interface EventHandler<T> {
 export class NotificationEventRegistry {
   private handlers = new Map<string, (event: unknown) => Promise<boolean>>();
 
-  constructor(notificationService: NotificationService) {
+  constructor(notificationService: FollowNotificationService) {
     this.registerHandler(
       'user_followed',
       new UserFollowEventHandler(notificationService)
@@ -50,7 +50,7 @@ export class NotificationEventRegistry {
 }
 
 export class UserFollowEventHandler implements EventHandler<UserFollowedEvent> {
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationService: FollowNotificationService) {}
 
   async handle(event: UserFollowedEvent): Promise<boolean> {
     const { followerId, followedUserId, followerUsername, followerImage } =
@@ -80,6 +80,6 @@ export class UserFollowEventHandler implements EventHandler<UserFollowedEvent> {
       actorImage: followerImage,
     });
 
-    return await this.notificationService.createNotification(notification);
+    return await this.notificationService.create(notification);
   }
 }
