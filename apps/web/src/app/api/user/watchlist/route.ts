@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import { WatchlistStatusService } from '@/modules/watchlist/get-watchlist-status/watchlist-status.service';
+import { listWatchlistMediaIdentities } from '@/modules/watchlist/get-watchlist-status/watchlist-status.pg';
 import type { WatchlistStatusMap } from '@/modules/watchlist/get-watchlist-status/watchlist-status.types';
 import { auth } from '@/platform/auth/auth';
 import {
@@ -17,11 +17,7 @@ export async function GET() {
     return unauthorizedJson();
   }
 
-  const watchlistStatusService = new WatchlistStatusService();
-
-  const mediaIdentities = await watchlistStatusService.listMediaIdentities(
-    session.user.id
-  );
+  const mediaIdentities = await listWatchlistMediaIdentities(session.user.id);
 
   const statusMap: WatchlistStatusMap = {};
 

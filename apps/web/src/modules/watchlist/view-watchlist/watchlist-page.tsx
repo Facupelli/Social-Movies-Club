@@ -4,17 +4,15 @@ import { redirect } from 'next/navigation';
 import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { WatchlistService } from '@/modules/watchlist/view-watchlist/watchlist.service';
+import { getWatchlist as queryWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
 import { GridMovieCard } from '@/modules/watchlist/view-watchlist/watchlist-movie-card';
 import { auth } from '@/platform/auth/auth';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 
 function getWatchlist(userId: string): Promise<ApiResponse<MovieView[]>> {
-  const watchlistService = new WatchlistService();
-
   return unstable_cache(
-    () => execute<MovieView[]>(() => watchlistService.getWatchlist(userId)),
+    () => execute<MovieView[]>(() => queryWatchlist(userId)),
     ['user-watchlist', userId],
     {
       tags: ['watchlist', NEXT_CACHE_TAGS.getUserWatchlist(userId)],
