@@ -4,11 +4,7 @@ import {
   type UserFollowedEvent,
 } from '@/modules/notifications/notify-user-followed/notification-event-handler';
 import { ProfileService } from '@/modules/profiles/profile.service';
-import type {
-  GetFollowingUsers,
-  GetUserFollowsInfoMap,
-} from '@/modules/social/follows.type';
-import { FollowsPgRepository } from './follows.pg.repository';
+import { FollowPgRepository } from './follow.pg.repository';
 
 const notificationService = new NotificationService();
 const eventRegistry = new NotificationEventRegistry(notificationService);
@@ -16,51 +12,20 @@ const eventRegistry = new NotificationEventRegistry(notificationService);
 const profileService = new ProfileService();
 
 export class FollowService {
-  private followPgRepository: FollowsPgRepository;
-
-  constructor() {
-    this.followPgRepository = new FollowsPgRepository();
-  }
-
-  async getFollowingUsers(
-    userId: string,
-    viewerUserId: string
-  ): Promise<GetFollowingUsers[]> {
-    return await this.followPgRepository.getFollowingUsers(
-      userId,
-      viewerUserId
-    );
-  }
-
-  async getUserFollowsInfo(userId: string): Promise<GetUserFollowsInfoMap> {
-    return await this.followPgRepository.getUserFollowsInfo(userId);
-  }
-
-  async isFollowingUser(
-    userId: string,
-    followedUserId: string
-  ): Promise<boolean> {
-    return await this.followPgRepository.isFollowingUser(
-      userId,
-      followedUserId
-    );
-  }
+  constructor(
+    private readonly repository: FollowPgRepository = new FollowPgRepository()
+  ) {}
 
   async followUser(userId: string, followedUserId: string): Promise<void> {
     if (userId === followedUserId) {
       throw new Error('Users cannot follow themselves');
     }
 
-    const isFollowingUser = await this.followPgRepository.isFollowingUser(
-      userId,
-      followedUserId
-    );
+    const created = await this.repository.follow(userId, followedUserId);
 
-    if (isFollowingUser) {
+    if (!created) {
       throw new Error('User is already being followed');
     }
-
-    await this.followPgRepository.followUser(userId, followedUserId);
 
     try {
       const user = await profileService.getUser(userId);
@@ -85,15 +50,10 @@ export class FollowService {
   }
 
   async unfollowUser(userId: string, followedUserId: string): Promise<void> {
-    const isFollowingUser = await this.followPgRepository.isFollowingUser(
-      userId,
-      followedUserId
-    );
+    const removed = await this.repository.unfollow(userId, followedUserId);
 
-    if (!isFollowingUser) {
+    if (!removed) {
       throw new Error('User is not followed');
     }
-
-    await this.followPgRepository.unfollowUser(userId, followedUserId);
   }
 }

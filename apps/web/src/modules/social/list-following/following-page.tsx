@@ -2,9 +2,9 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { FollowService } from '@/modules/social/follow-user/follow.service';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
-import type { GetFollowingUsers } from '@/modules/social/follows.type';
+import { FollowingService } from '@/modules/social/list-following/following.service';
+import type { FollowingUser } from '@/modules/social/list-following/following.types';
 import { auth } from '@/platform/auth/auth';
 import { execute } from '@/shared/http/safe-execute';
 
@@ -12,14 +12,10 @@ const fetchFollowingUsers = async (
   profileUserId: string,
   viewerUserId: string
 ) => {
-  const followService = new FollowService();
+  const followingService = new FollowingService();
 
-  return await execute<GetFollowingUsers[]>(async () => {
-    const followingUsers = await followService.getFollowingUsers(
-      profileUserId,
-      viewerUserId
-    );
-    return followingUsers;
+  return await execute<FollowingUser[]>(async () => {
+    return await followingService.list(profileUserId, viewerUserId);
   });
 };
 
@@ -72,15 +68,21 @@ export default async function FollowingPage(
       {followingUsers.map((user) => (
         <div className="flex justify-between" key={user.followeeId}>
           <Link className="flex gap-4" href={`/profile/${user.followeeId}`}>
-            <div className="size-[50px] rounded-full bg-secondary-foreground">
-              <Image
-                alt={user.userName}
-                className="h-auto object-cover rounded-full"
-                height={50}
-                src={user.userImage}
-                unoptimized
-                width={50}
-              />
+            <div className="flex size-[50px] items-center justify-center overflow-hidden rounded-full bg-secondary-foreground">
+              {user.userImage ? (
+                <Image
+                  alt={user.userName}
+                  className="size-full object-cover"
+                  height={50}
+                  src={user.userImage}
+                  unoptimized
+                  width={50}
+                />
+              ) : (
+                <span aria-hidden="true" className="font-semibold">
+                  {user.userName.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
             <div>
               <div>{user.userName}</div>

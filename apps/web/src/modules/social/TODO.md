@@ -9,5 +9,5 @@
 - [x] Stop swallowing follow failures
   Persistence failures must not report success.
 
-- [ ] Split follow queries by use case
+- [x] Split follow queries by use case
   Separate list, summary, and status operations.
