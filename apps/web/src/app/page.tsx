@@ -1,9 +1,9 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { HomePageClient } from "./home-page-client";
-import { getServerSession } from "@/lib/auth/get-server-session";
-import { makeQueryClient } from "@/lib/react-query/query-client";
-import { getUserFeedQueryOptions } from "@/users/hooks/use-user-feed";
-import { loadUserFeedPage } from "@/users/user-query-loaders.server";
+import { HomePageClient } from "@/modules/timeline/view-timeline/home-page-client";
+import { getServerSession } from "@/platform/auth/get-server-session";
+import { makeQueryClient } from "@/platform/react-query/query-client";
+import { getUserFeedQueryOptions } from "@/modules/timeline/view-timeline/use-user-feed";
+import { loadUserFeedPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
 
 export default async function HomePage({
 	searchParams,

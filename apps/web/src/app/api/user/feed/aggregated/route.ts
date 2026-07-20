@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import type { AggregatedFeedItem } from "@/users/feed.types";
-import { UserService } from "@/users/user.service";
-import { validateGetUserFeedQuery } from "@/users/user-validation.service";
+import { auth } from "@/platform/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
+import type { AggregatedFeedItem } from "@/modules/timeline/view-timeline/feed.types";
+import { UserService } from "@/modules/profiles/user.service";
+import { validateGetUserFeedQuery } from "@/modules/account/user-validation";
 
 export async function GET(request: Request) {
 	const session = await auth.api.getSession({

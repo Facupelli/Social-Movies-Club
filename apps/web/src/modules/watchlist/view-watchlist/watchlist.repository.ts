@@ -1,0 +1,79 @@
+import { sql } from "drizzle-orm";
+import { withDatabase } from "@/platform/database/postgres/db-utils";
+import { media, watchlist } from "@/platform/database/postgres/schema";
+import type { MediaType } from "@/modules/media-catalog/media.type";
+
+export type UserWatchlist = {
+	watchlistId: string;
+	movieId: string;
+	movieTmdbId: number;
+	movieTitle: string;
+	movieOverview: string;
+	moviePosterPath: string;
+	movieBackdropPath: string;
+	movieYear: string;
+	movieType: MediaType;
+	movieRuntime?: number;
+};
+
+export class WatchlistPgRepository {
+	async addMedia(userId: string, mediaId: string): Promise<void> {
+		return await withDatabase(async (db) => {
+			const query = sql`
+        INSERT INTO ${watchlist} (user_id, media_id)
+        VALUES (${userId}, ${mediaId})
+      `;
+			await db.execute(query);
+		});
+	}
+
+	async removeMedia(userId: string, mediaId: string): Promise<void> {
+		return await withDatabase(async (db) => {
+			const query = sql`
+        DELETE FROM ${watchlist}
+        WHERE user_id = ${userId} AND media_id = ${mediaId}
+      `;
+
+			await db.execute(query);
+		});
+	}
+
+	async getExists(userId: string, movieId: string): Promise<boolean> {
+		return await withDatabase(async (db) => {
+			const query = sql`
+				SELECT EXISTS(
+					SELECT 1
+					FROM ${watchlist}
+					WHERE user_id = ${userId} AND media_id = ${movieId}
+				)
+			`;
+
+			const { rows } = await db.execute<{ exists: boolean }>(query);
+			return rows[0]?.exists;
+		});
+	}
+
+	async getWatchlist(userId: string): Promise<UserWatchlist[]> {
+		return await withDatabase(async (db) => {
+			const query = sql`
+        SELECT
+          m.id AS "movieId",
+          m.tmdb_id AS "movieTmdbId",
+          m.title AS "movieTitle",
+          m.overview AS "movieOverview",
+          m.poster_path AS "moviePosterPath",
+          m.backdrop_path AS "movieBackdropPath",
+          m.year AS "movieYear",
+          m.type AS "movieType",
+          m.runtime AS "movieRuntime"
+        FROM ${watchlist} w  
+        JOIN ${media} m ON m.id = w.media_id 
+        WHERE user_id = ${userId}
+        ORDER BY w.created_at DESC;
+      `;
+
+			const { rows } = await db.execute<UserWatchlist>(query);
+			return rows;
+		});
+	}
+}

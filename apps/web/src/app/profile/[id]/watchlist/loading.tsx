@@ -1,5 +1,5 @@
-import { MovieGrid } from "@/components/movies/movie-grid";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MovieGrid } from "@/modules/media-catalog/components/movie-grid";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 export default function WatchlistLoading() {
 	return (

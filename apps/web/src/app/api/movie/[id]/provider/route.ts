@@ -1,6 +1,6 @@
-import { TmdbService } from "@/infra/TMDB/tmdb.service";
-import type { WatchProviderResult } from "@/infra/TMDB/types/watch-provider";
-import type { MediaType } from "@/media/media.type";
+import { TmdbService } from "@/platform/tmdb/tmdb.service";
+import type { WatchProviderResult } from "@/platform/tmdb/types/watch-provider";
+import type { MediaType } from "@/modules/media-catalog/media.type";
 
 export async function GET(
 	request: Request,

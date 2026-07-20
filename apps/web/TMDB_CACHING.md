@@ -57,7 +57,7 @@ else if (endpoint.includes('/movie/') || endpoint.includes('/tv/')) {
 ## Implementation Details
 
 ### Files Modified:
-1. **`src/infra/TMDB/tmdb.repository.ts`** - Core caching logic
+1. **`src/platform/tmdb/tmdb.repository.ts`** - Core caching logic
 2. **`next.config.ts`** - Image optimization configuration
 3. **`src/components/profile-skeleton.tsx`** - Fixed TypeScript issues
 

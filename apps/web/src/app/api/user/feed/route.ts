@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import { loadUserFeedPage } from "@/users/user-query-loaders.server";
-import { validateGetUserFeedQuery } from "@/users/user-validation.service";
+import { auth } from "@/platform/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
+import { loadUserFeedPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
+import { validateGetUserFeedQuery } from "@/modules/account/user-validation";
 
 export async function GET(request: Request) {
 	const session = await auth.api.getSession({

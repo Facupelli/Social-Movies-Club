@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import { NotificationService } from "@/notifications/notifications.service";
+import { auth } from "@/platform/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
+import { NotificationService } from "@/modules/notifications/list-notifications/notifications.service";
 
 export async function GET() {
 	const session = await auth.api.getSession({

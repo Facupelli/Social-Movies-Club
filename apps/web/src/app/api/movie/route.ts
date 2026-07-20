@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
-import type { MovieView } from "@/media/movie-view";
-import type { MultiSearchResult } from "@/infra/TMDB/tmdb.repository";
-import { TmdbService } from "@/infra/TMDB/tmdb.service";
-import { apiMovieToView } from "@/media/media.adapters";
+import type { MovieView } from "@/modules/media-catalog/movie-view";
+import type { MultiSearchResult } from "@/platform/tmdb/tmdb.repository";
+import { TmdbService } from "@/platform/tmdb/tmdb.service";
+import { apiMovieToView } from "@/modules/media-catalog/get-media-details/media.adapters";
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;

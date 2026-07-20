@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import { loadUserMoviesPage } from "@/users/user-query-loaders.server";
-import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
-import { userMoviesFiltersTransformer } from "@/users/utils/filter-user-movies-transformer";
+import { auth } from "@/platform/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
+import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
+import { userMoviesFiltersUrlParser } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser";
+import { userMoviesFiltersTransformer } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-transformer";
 
 export type UseUserMoviesMap = Record<
 	number,

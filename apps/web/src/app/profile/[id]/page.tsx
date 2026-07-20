@@ -1,11 +1,11 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { getServerSession } from "@/lib/auth/get-server-session";
-import { makeQueryClient } from "@/lib/react-query/query-client";
-import { getUserMoviesQueryOptions } from "@/users/hooks/use-user-movies";
-import { loadUserMoviesPage } from "@/users/user-query-loaders.server";
-import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
-import { ProfileRatingsClient } from "./profile-ratings-client";
+import { getServerSession } from "@/platform/auth/get-server-session";
+import { makeQueryClient } from "@/platform/react-query/query-client";
+import { getUserMoviesQueryOptions } from "@/modules/ratings/list-profile-ratings/use-user-movies";
+import { loadUserMoviesPage } from "@/modules/ratings/list-profile-ratings/user-query-loaders.server";
+import { userMoviesFiltersUrlParser } from "@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser";
+import { ProfileRatingsClient } from "@/modules/ratings/list-profile-ratings/profile-ratings-client";
 
 type ProfileRatingsPageProps = {
 	params: Promise<{ id: string }>;

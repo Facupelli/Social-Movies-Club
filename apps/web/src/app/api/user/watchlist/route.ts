@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { authenticatedJson, unauthorizedJson } from "@/lib/http/authenticated-response";
-import { WatchlistService } from "@/watchlist/watchlist.service";
+import { auth } from "@/platform/auth/auth";
+import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
+import { WatchlistService } from "@/modules/watchlist/view-watchlist/watchlist.service";
 
 export type UseUserWatchlistMap = Record<number, boolean>;
 
