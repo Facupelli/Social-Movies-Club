@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { MovieView } from "@/modules/media-catalog/movie-view";
+import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
 import { MovieGrid } from "@/modules/media-catalog/components/movie-grid";
 import { NEXT_CACHE_TAGS } from "@/shared/utilities/app.constants";
 import { auth } from "@/platform/auth/auth";
@@ -50,7 +51,11 @@ export default async function WatchlistPage(
 		<section className="py-10">
 			<MovieGrid>
 				{watchlist?.map((movie) => (
-					<GridMovieCard isOwner={isOwner} movie={movie} key={movie.tmdbId} />
+					<GridMovieCard
+						isOwner={isOwner}
+						movie={movie}
+						key={getMediaIdentityKey(movie.tmdbId, movie.type)}
+					/>
 				))}
 			</MovieGrid>
 		</section>

@@ -23,6 +23,7 @@ import {
 import { MovieWatchProviders } from "@/modules/media-catalog/get-watch-providers/movie-watch-providers";
 import { MovieGrid } from "@/modules/media-catalog/components/movie-grid";
 import { MovieList } from "@/modules/media-catalog/components/movie-list";
+import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
 import { Button } from "@/shared/ui/button";
 import { CardContent } from "@/shared/ui/card";
 import {
@@ -91,7 +92,7 @@ export function ProfileRatingsClient({
 					{isPending && <p>Cargando...</p>}
 
 					{profileMovies?.map((movie) => (
-						<MovieCard key={movie.tmdbId}>
+						<MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
 							<MoviePoster posterPath={movie.posterPath} title={movie.title} />
 							<CardContent className="flex flex-col gap-1 px-4 py-2">
 								<MovieTitle title={movie.title} />
@@ -117,7 +118,7 @@ export function ProfileRatingsClient({
 					{isPending && <p>Cargando...</p>}
 
 					{profileMovies?.map((movie, idx) => (
-						<MovieCard key={movie.tmdbId}>
+						<MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
 							<div className="flex gap-6">
 								<p className="hidden pl-2 font-bold md:block">{idx + 1}</p>
 

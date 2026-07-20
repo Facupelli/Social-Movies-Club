@@ -1,4 +1,5 @@
 import type { Media } from "@/platform/database/postgres/schema";
+import type { MediaType } from "@/modules/media-catalog/media.type";
 import { MediaPgRepository } from "./media.pg.repository";
 
 export class MediaService {
@@ -10,8 +11,11 @@ export class MediaService {
 		return await this.repo.upsertMedia(movie);
 	}
 
-	async getMediaByTMDBId(tmdbId: number): Promise<{ id: string }> {
-		return await this.repo.getMediaByTMDBId(tmdbId);
+	async getMediaByTmdbIdentity(
+		tmdbId: number,
+		type: MediaType,
+	): Promise<{ id: string } | undefined> {
+		return await this.repo.getMediaByTmdbIdentity(tmdbId, type);
 	}
 
 	async getMediaById(mediaId: bigint): Promise<Media[]> {

@@ -13,7 +13,8 @@ export async function removeMovieFromWatchlist(
 	formData: FormData,
 ): Promise<ApiResponse<void>> {
 	return await withAuth(async (session) => {
-		const { movieTMDBId, userId } = validateRemoveMovieFromWatchlist(formData);
+		const { movieTMDBId, userId, type } =
+			validateRemoveMovieFromWatchlist(formData);
 
 		if (userId !== session.user.id) {
 			return {
@@ -26,7 +27,10 @@ export async function removeMovieFromWatchlist(
 		const watchlistService = new WatchlistService();
 
 		const result = await execute<void>(async () => {
-			const movie = await mediaService.getMediaByTMDBId(movieTMDBId);
+			const movie = await mediaService.getMediaByTmdbIdentity(movieTMDBId, type);
+			if (!movie) {
+				throw new Error("Media not found");
+			}
 			await watchlistService.removeMedia(userId, movie.id);
 		});
 

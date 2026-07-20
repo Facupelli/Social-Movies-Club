@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import type { UseUserMoviesMap } from "@/app/api/user/[id]/movies/route";
+import type { UseUserMoviesMap } from "@/app/api/user/ratings/route";
 import { QUERY_KEYS } from "@/shared/utilities/app.constants";
 
 async function getUserRatings(signal?: AbortSignal): Promise<UseUserMoviesMap> {

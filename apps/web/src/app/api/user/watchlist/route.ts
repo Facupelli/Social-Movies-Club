@@ -2,8 +2,12 @@ import { headers } from "next/headers";
 import { auth } from "@/platform/auth/auth";
 import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
 import { WatchlistService } from "@/modules/watchlist/view-watchlist/watchlist.service";
+import {
+	getMediaIdentityKey,
+	type MediaIdentityKey,
+} from "@/modules/media-catalog/media-identity";
 
-export type UseUserWatchlistMap = Record<number, boolean>;
+export type UseUserWatchlistMap = Record<MediaIdentityKey, boolean>;
 
 export async function GET() {
 	const session = await auth.api.getSession({
@@ -21,8 +25,9 @@ export async function GET() {
 	const statusMap: UseUserWatchlistMap = {};
 
 	for (const result of res) {
-		if (!statusMap[result.tmdbId]) {
-			statusMap[result.tmdbId] = true;
+		const identityKey = getMediaIdentityKey(result.tmdbId, result.type);
+		if (!statusMap[identityKey]) {
+			statusMap[identityKey] = true;
 		}
 	}
 

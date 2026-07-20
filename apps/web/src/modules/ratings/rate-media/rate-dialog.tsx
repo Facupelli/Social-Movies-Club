@@ -21,6 +21,7 @@ import {
 import type { ApiResponse } from "@/shared/http/safe-execute";
 import { addRatingToMovie } from "@/modules/ratings/rate-media/add-rating";
 import { type MediaType, MediaTypeDict } from "@/modules/media-catalog/media.type";
+import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
 import { getUserRatingsQueryOptions } from "@/modules/ratings/get-rating-status/use-user-ratings";
 import { SubmitButton } from "@/shared/components/submit-button";
 import { Button } from "@/shared/ui/button";
@@ -57,6 +58,7 @@ export function RateDialog({
 			? await optimisticallyRateMedia(queryClient, {
 					userId,
 					tmdbId,
+					type,
 					score: rating,
 				})
 			: undefined;
@@ -84,7 +86,7 @@ export function RateDialog({
 		initialState,
 	);
 
-	const userRating = userRatings?.[tmdbId];
+	const userRating = userRatings?.[getMediaIdentityKey(tmdbId, type)];
 	const isMovieRated = userRating?.isRated;
 
 	const [rating, setRating] = useState(userRating?.score ?? 0);

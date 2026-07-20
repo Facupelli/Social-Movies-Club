@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { withDatabase } from "@/platform/database/postgres/db-utils";
 import { type Media, media } from "@/platform/database/postgres/schema";
+import type { MediaType } from "@/modules/media-catalog/media.type";
 
 export class MediaPgRepository {
 	async upsertMedia(movie: Omit<Media, "id">): Promise<{ id: string }> {
@@ -9,14 +10,14 @@ export class MediaPgRepository {
       WITH ins AS (
         INSERT INTO ${media} (title, year, overview, poster_path, backdrop_path, tmdb_id, type, runtime)
         VALUES (${movie.title}, ${movie.year}, ${movie.overview}, ${movie.posterPath}, ${movie.backdropPath}, ${movie.tmdbId}, ${movie.type}, ${movie.runtime})
-        ON CONFLICT (tmdb_id) DO NOTHING
+        ON CONFLICT (tmdb_id, type) DO NOTHING
         RETURNING id
       )
       SELECT id FROM ins
       UNION
       SELECT id
       FROM ${media}
-      WHERE tmdb_id = ${movie.tmdbId}
+      WHERE tmdb_id = ${movie.tmdbId} AND type = ${movie.type}
       `;
 
 			const { rows } = await db.execute<{ id: string }>(query);
@@ -25,10 +26,15 @@ export class MediaPgRepository {
 		});
 	}
 
-	async getMediaByTMDBId(tmdbId: number): Promise<{ id: string }> {
+	async getMediaByTmdbIdentity(
+		tmdbId: number,
+		type: MediaType,
+	): Promise<{ id: string } | undefined> {
 		return await withDatabase(async (db) => {
 			const { rows } = await db.execute<{ id: string }>(sql`
-        SELECT id FROM ${media} WHERE tmdb_id = ${tmdbId};
+        SELECT id
+        FROM ${media}
+        WHERE tmdb_id = ${tmdbId} AND type = ${type};
       `);
 
 			return rows[0];

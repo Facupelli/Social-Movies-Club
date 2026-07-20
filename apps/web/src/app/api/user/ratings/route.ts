@@ -3,9 +3,13 @@ import { auth } from "@/platform/auth/auth";
 import { authenticatedJson, unauthorizedJson } from "@/shared/http/authenticated-response";
 import { UserService } from "@/modules/profiles/user.service";
 import type { GetUserRatingMovies } from "@/modules/profiles/user.types";
+import {
+	getMediaIdentityKey,
+	type MediaIdentityKey,
+} from "@/modules/media-catalog/media-identity";
 
 export type UseUserMoviesMap = Record<
-	number,
+	MediaIdentityKey,
 	{ isRated: boolean; score: number }
 >;
 
@@ -27,11 +31,12 @@ export async function GET() {
 	const statusMap: UseUserMoviesMap = {};
 
 	for (const result of res.data) {
-		if (statusMap[result.tmdbId]) {
+		const identityKey = getMediaIdentityKey(result.tmdbId, result.type);
+		if (statusMap[identityKey]) {
 			continue;
 		}
 
-		statusMap[result.tmdbId] = {
+		statusMap[identityKey] = {
 			isRated: true,
 			score: result.score,
 		};

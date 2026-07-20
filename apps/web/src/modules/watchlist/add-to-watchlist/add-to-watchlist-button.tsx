@@ -12,6 +12,8 @@ import { cn } from "@/shared/utilities/utils";
 import { getUserWatchlistQueryOptions } from "@/modules/watchlist/get-watchlist-status/use-user-watchlist";
 import { addMovieToWatchlist } from "./add-movie";
 import { removeMovieFromWatchlist } from "@/modules/watchlist/remove-from-watchlist/remove-movie";
+import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
+import type { MediaType } from "@/modules/media-catalog/media.type";
 
 export function AddToWatchlistButton({
 	tmdbId,
@@ -20,7 +22,7 @@ export function AddToWatchlistButton({
 	variant,
 }: {
 	tmdbId: number;
-	type: string;
+	type: MediaType;
 	className?: string;
 	variant?:
 		| "default"
@@ -79,7 +81,7 @@ export function AddToWatchlistButton({
 		},
 	);
 
-	const userMovie = userWatchlist?.[tmdbId];
+	const userMovie = userWatchlist?.[getMediaIdentityKey(tmdbId, type)];
 	const isMovieInWatchlist = !!userMovie;
 
 	return (

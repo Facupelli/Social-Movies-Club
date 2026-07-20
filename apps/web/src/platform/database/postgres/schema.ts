@@ -102,7 +102,7 @@ export const media = pgTable(
 	"media",
 	{
 		id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
-		tmdbId: integer("tmdb_id").unique().notNull(),
+		tmdbId: integer("tmdb_id").notNull(),
 		type: mediaTypeEnum("type").notNull(),
 		title: text("title").notNull(),
 		year: text("year").notNull(),
@@ -153,7 +153,7 @@ export const ratings = pgTable(
 			table.userId,
 			table.createdAt,
 		),
-		// Partial index for recent ratings (most common queries)
+		// Index for recent ratings queries
 		index("ratings_recent_idx").on(table.userId, table.createdAt),
 	],
 );

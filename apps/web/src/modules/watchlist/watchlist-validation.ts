@@ -26,6 +26,7 @@ const removeMovieToWatchlistSchema = z.object({
     .regex(/^\d+$/, 'Movie ID must be a valid number')
     .transform(Number),
   userId: z.string().nonempty(),
+  type: z.enum(['movie', 'tv']),
 });
 
 export type removeMovieFromWatchlistInput = z.infer<

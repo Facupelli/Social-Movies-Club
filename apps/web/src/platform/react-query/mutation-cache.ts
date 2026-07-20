@@ -1,8 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/utilities/app.constants";
+import {
+	getMediaIdentityKey,
+	type MediaIdentityKey,
+} from "@/modules/media-catalog/media-identity";
+import type { MediaType } from "@/modules/media-catalog/media.type";
 
 type UserRatingsCache = Record<
-	number,
+	MediaIdentityKey,
 	{
 		isRated: boolean;
 		score: number;
@@ -28,10 +33,12 @@ export async function optimisticallyRateMedia(
 	{
 		userId,
 		tmdbId,
+		type,
 		score,
 	}: {
 		userId: string;
 		tmdbId: number;
+		type: MediaType;
 		score: number;
 	},
 ): Promise<() => void> {
@@ -40,12 +47,13 @@ export async function optimisticallyRateMedia(
 	await queryClient.cancelQueries({ queryKey: ratingsKey });
 
 	const ratings = queryClient.getQueryData<UserRatingsCache>(ratingsKey);
-	const previousRating = ratings?.[tmdbId];
+	const identityKey = getMediaIdentityKey(tmdbId, type);
+	const previousRating = ratings?.[identityKey];
 
 	if (ratings) {
 		queryClient.setQueryData<UserRatingsCache>(ratingsKey, {
 			...ratings,
-			[tmdbId]: { isRated: true, score },
+			[identityKey]: { isRated: true, score },
 		});
 	}
 
@@ -54,9 +62,9 @@ export async function optimisticallyRateMedia(
 			queryClient.setQueryData<UserRatingsCache>(ratingsKey, (current) => {
 				const nextRatings = { ...current };
 				if (previousRating) {
-					nextRatings[tmdbId] = previousRating;
+					nextRatings[identityKey] = previousRating;
 				} else {
-					delete nextRatings[tmdbId];
+					delete nextRatings[identityKey];
 				}
 				return nextRatings;
 			});

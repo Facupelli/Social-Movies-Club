@@ -24,6 +24,7 @@ import {
 } from "@/modules/media-catalog/components/movie-card";
 import { MovieGrid } from "@/modules/media-catalog/components/movie-grid";
 import { MovieWatchProviders } from "@/modules/media-catalog/get-watch-providers/movie-watch-providers";
+import { getMediaIdentityKey } from "@/modules/media-catalog/media-identity";
 import { RateDialog } from "@/modules/ratings/rate-media/rate-dialog";
 import SignInButton from "@/shared/components/sign-in-button";
 import {
@@ -668,7 +669,7 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
 		<div className="px-2 pt-2 md:px-10">
 			<MovieGrid>
 				{movies?.map((movie) => (
-					<MovieCard key={movie.tmdbId}>
+					<MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
 						<MoviePoster posterPath={movie.posterPath} title={movie.title} />
 						<CardContent className="flex flex-col gap-1 px-4 pt-2">
 							<MovieTitle title={movie.title} />
