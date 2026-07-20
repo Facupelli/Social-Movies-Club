@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { db } from "@/platform/database/postgres/db.neon";
+import { db } from "@/platform/database/postgres/db";
 import { withDatabase } from "@/platform/database/postgres/db-utils";
 import { follows, users } from "@/platform/database/postgres/schema";
 import type { GetFollowingUsers, GetUserFollowsInfoMap } from "@/modules/social/follows.type";

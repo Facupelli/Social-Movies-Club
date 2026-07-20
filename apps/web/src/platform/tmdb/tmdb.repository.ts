@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { cache } from "@/platform/cache/cache";
 import type {
 	SearchMovieApiResponse,
 	SearchMovieQueryParams,
@@ -246,21 +246,10 @@ export class TmdbRepository implements ITmdbRepository {
 	}
 
 	async clearCache(endpoint?: string): Promise<void> {
-		if (endpoint) {
-			// Clear specific endpoint cache
-			const pattern = `tmdb_cache:${endpoint}:*`;
-			const keys = await kv.keys(pattern);
-			if (keys.length > 0) {
-				await kv.del(...keys);
-			}
-		} else {
-			// Clear all TMDB cache
-			const pattern = "tmdb_cache:*";
-			const keys = await kv.keys(pattern);
-			if (keys.length > 0) {
-				await kv.del(...keys);
-			}
-		}
+		const pattern = endpoint
+			? `tmdb_cache:${endpoint}:*`
+			: "tmdb_cache:*";
+		await cache.deleteByPattern(pattern);
 	}
 
 	private async request<T>(
@@ -271,12 +260,12 @@ export class TmdbRepository implements ITmdbRepository {
 		const cacheKey = `tmdb_cache:${endpoint}:${new URLSearchParams(qs).toString()}`;
 
 		// Check cache first
-		const cached = await kv.get<T>(cacheKey);
+		const cached = await cache.get<T>(cacheKey);
 		if (cached) {
 			return cached;
 		}
 
-		const isLocked = await kv.get("tmdb_rate_limit_lock");
+		const isLocked = await cache.get("tmdb_rate_limit_lock");
 		if (isLocked) {
 			throw new Error(
 				"TMDB API is currently rate-limited. Please try again later.",
@@ -301,7 +290,7 @@ export class TmdbRepository implements ITmdbRepository {
 				`RATE LIMIT HIT. Setting external lock for ${waitSeconds} seconds.`,
 			);
 
-			await kv.set("tmdb_rate_limit_lock", "true", { ex: waitSeconds });
+			await cache.set("tmdb_rate_limit_lock", "true", waitSeconds);
 
 			throw new Error("Rate limit exceeded.");
 		}
@@ -327,7 +316,7 @@ export class TmdbRepository implements ITmdbRepository {
 
 		// Store in cache
 		try {
-			await kv.set(cacheKey, data, { ex: cacheTTL });
+			await cache.set(cacheKey, data, cacheTTL);
 		} catch (error) {
 			console.warn("Failed to cache data:", error);
 			// Continue without caching

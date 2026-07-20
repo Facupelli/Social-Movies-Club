@@ -1,4 +1,4 @@
-import { db, type PGDb } from "./db.neon";
+import { db, type PGDb } from "./db";
 
 export class DatabaseError extends Error {
 	readonly code: string;

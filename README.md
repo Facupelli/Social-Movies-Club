@@ -15,6 +15,31 @@ Expect rough edges, frequent tweaks, and a lot of fun experiments along the way!
 
 ---
 
+## Local development
+
+The applications run on the host while PostgreSQL and Redis run in Docker.
+
+```bash
+pnpm install
+cp apps/web/.env.example apps/web/.env.local
+cp apps/queue-system/.env.example apps/queue-system/.env
+pnpm infra:up
+pnpm --filter ./apps/web db:push
+pnpm dev
+```
+
+The web application runs at `http://localhost:3000` and the queue service runs at `http://localhost:3001`.
+
+Useful infrastructure commands:
+
+```bash
+pnpm infra:logs
+pnpm infra:down
+pnpm infra:reset # Removes local PostgreSQL and Redis data
+```
+
+Production continues to use Neon through `DATABASE_URL`. Set `CACHE_BACKEND=vercel-kv` in production to use the existing Vercel KV environment variables instead of `REDIS_URL`.
+
 ## 🚀 Features
 
 ### 1. **User Profiles**
