@@ -3,7 +3,7 @@ import {
   getMediaIdentityKey,
   type MediaIdentityKey,
 } from '@/modules/media-catalog/media-identity';
-import { ProfileRatingsService } from '@/modules/ratings/list-profile-ratings/profile-ratings.service';
+import { getUserRatingMovies } from '@/modules/ratings/list-profile-ratings/profile-ratings.pg';
 import type { GetUserRatingMovies } from '@/modules/ratings/list-profile-ratings/profile-ratings.types';
 import { auth } from '@/platform/auth/auth';
 import {
@@ -25,11 +25,7 @@ export async function GET() {
     return unauthorizedJson();
   }
 
-  const ratingsService = new ProfileRatingsService();
-
-  const res: GetUserRatingMovies = await ratingsService.getUserRatingMovies(
-    session.user.id
-  );
+  const res: GetUserRatingMovies = await getUserRatingMovies(session.user.id);
 
   const statusMap: UseUserMoviesMap = {};
 

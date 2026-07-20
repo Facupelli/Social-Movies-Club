@@ -1,6 +1,6 @@
 'use server';
 
-import { UserMediaService } from '@/modules/ratings/rate-media/user-movie.service';
+import { rateMedia } from '@/modules/ratings/rate-media/rate-media';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { validateMovieRating } from './rating-validation';
@@ -12,9 +12,7 @@ export async function addRatingToMovie(
     return await execute<void>(async () => {
       const { movieTMDBId, rating, type, watchedDate } =
         validateMovieRating(formData);
-      const userMediaService = new UserMediaService();
-
-      return await userMediaService.rateMovie({
+      return await rateMedia({
         userId: session.user.id,
         tmdbId: movieTMDBId,
         rating,

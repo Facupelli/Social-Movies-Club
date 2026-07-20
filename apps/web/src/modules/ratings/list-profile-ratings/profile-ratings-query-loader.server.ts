@@ -2,7 +2,7 @@ import 'server-only';
 
 import { dbMovieToView } from '@/modules/media-catalog/get-media-details/media.adapters';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { ProfileRatingsService } from './profile-ratings.service';
+import { getUserRatingMovies } from './profile-ratings.pg';
 import type { UserMoviesServerFilters } from './profile-ratings.types';
 
 export type UserMoviesPage = {
@@ -19,8 +19,7 @@ export async function loadUserMoviesPage({
   viewerUserId: string;
   filters: UserMoviesServerFilters;
 }): Promise<UserMoviesPage> {
-  const service = new ProfileRatingsService();
-  const result = await service.getUserRatingMovies(
+  const result = await getUserRatingMovies(
     profileUserId,
     filters,
     viewerUserId
