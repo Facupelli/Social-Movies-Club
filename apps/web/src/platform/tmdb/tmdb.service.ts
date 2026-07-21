@@ -1,3 +1,4 @@
+import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
   MediaType,
   TMDbMediaMultiSearch,
@@ -7,7 +8,6 @@ import {
   type SearchMoviesResult,
   TmdbRepository,
 } from '@/platform/tmdb/tmdb.repository';
-import type { WatchProviderResult } from '@/platform/tmdb/types/watch-provider';
 
 export class TmdbService {
   constructor(
@@ -18,7 +18,7 @@ export class TmdbService {
 
   async multiSearch(query: string): Promise<MultiSearchResult> {
     return await this.repo.multiSearch({
-      query,
+      query: query.trim(),
     });
   }
 
@@ -41,7 +41,7 @@ export class TmdbService {
   async getWatchProvider(
     mediaId: number,
     type: MediaType
-  ): Promise<{ data: WatchProviderResult }> {
+  ): Promise<WatchProviderResponse> {
     if (type === 'movie') {
       return await this.repo.getMovieWatchProviders(mediaId);
     }

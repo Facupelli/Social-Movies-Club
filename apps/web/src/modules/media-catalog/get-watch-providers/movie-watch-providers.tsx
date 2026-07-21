@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import { useMediaWatchProviders } from '@/modules/media-catalog/get-watch-providers/use-media-watch-providers';
 import type { MediaType } from '@/modules/media-catalog/media.type';
 import { Button } from '@/shared/ui/button';
@@ -13,14 +14,13 @@ export function MovieWatchProviders({
   tmdbId: number;
   type: MediaType;
 }) {
+  const [requested, setRequested] = useState(false);
   const {
     data: watchProviders,
     isLoading,
     error,
-    refetch,
-    isEnabled,
     isFetched,
-  } = useMediaWatchProviders(tmdbId, type);
+  } = useMediaWatchProviders(tmdbId, type, requested);
 
   if (error) {
     return (
@@ -30,21 +30,18 @@ export function MovieWatchProviders({
     );
   }
 
-  if (!watchProviders?.data && isEnabled) {
-    return (
-      <div className="text-muted-foreground text-xs">
-        No esta en ninguna plataforma :(
-      </div>
-    );
-  }
-
+  const flatRateProviders = watchProviders?.data?.flatrate;
   const hasFlatRateProviders =
-    watchProviders?.data?.flatrate && watchProviders.data.flatrate.length > 0;
+    flatRateProviders !== undefined && flatRateProviders.length > 0;
 
   return (
     <div className="md:space-y-2">
       <div className="flex flex-wrap gap-x-2">
-        <Button className="h-auto p-0" onClick={() => refetch()} variant="link">
+        <Button
+          className="h-auto p-0"
+          onClick={() => setRequested(true)}
+          variant="link"
+        >
           Donde ver?
         </Button>
 
@@ -81,7 +78,7 @@ export function MovieWatchProviders({
       {isFetched &&
         (hasFlatRateProviders ? (
           <div className="flex flex-wrap gap-1 py-1">
-            {watchProviders.data.flatrate?.map((provider) => (
+            {flatRateProviders?.map((provider) => (
               <div key={provider.provider_id}>
                 <Image
                   alt={provider.provider_name}

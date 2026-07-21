@@ -1,3 +1,4 @@
+import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
   MediaType,
   TMDbMediaMultiSearch,
@@ -20,10 +21,7 @@ import type {
   TvShowSearchResponse,
   TvShowSummary,
 } from '@/platform/tmdb/types/search-tv';
-import type {
-  WatchProviderApiResponse,
-  WatchProviderResult,
-} from '@/platform/tmdb/types/watch-provider';
+import type { WatchProviderApiResponse } from '@/platform/tmdb/types/watch-provider';
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -45,6 +43,12 @@ export interface MultiSearchResult {
 
 function isTvResult(result: MediaResult): result is TvResult {
   return result.media_type === 'tv';
+}
+
+function isSupportedMediaResult(
+  result: MediaResult
+): result is MediaResult & { media_type: MediaType } {
+  return result.media_type === 'movie' || result.media_type === 'tv';
 }
 
 export class TmdbRepository implements ITmdbRepository {
@@ -70,30 +74,32 @@ export class TmdbRepository implements ITmdbRepository {
         page: String(page),
       });
 
-    const data: TMDbMediaMultiSearch[] = json.results.map((r: MediaResult) => {
-      if (isTvResult(r)) {
+    const data: TMDbMediaMultiSearch[] = json.results
+      .filter(isSupportedMediaResult)
+      .map((r: MediaResult) => {
+        if (isTvResult(r)) {
+          return {
+            id: r.id,
+            title: r.name,
+            posterPath: r.poster_path ?? null,
+            backdropPath: r.backdrop_path ?? null,
+            year: r.first_air_date?.split('-')[0],
+            overview: r.overview,
+            type: r.media_type as MediaType,
+          };
+        }
+
         return {
           id: r.id,
-          title: r.name,
+          title: r.title,
           posterPath: r.poster_path ?? null,
           backdropPath: r.backdrop_path ?? null,
-          year: r.first_air_date?.split('-')[0],
+          year: r.release_date?.split('-')[0],
           overview: r.overview,
           type: r.media_type as MediaType,
+          runtime: r.runtime ?? null,
         };
-      }
-
-      return {
-        id: r.id,
-        title: r.title,
-        posterPath: r.poster_path ?? null,
-        backdropPath: r.backdrop_path ?? null,
-        year: r.release_date?.split('-')[0],
-        overview: r.overview,
-        type: r.media_type as MediaType,
-        runtime: r.runtime ?? null,
-      };
-    });
+      });
 
     return {
       data,
@@ -225,27 +231,25 @@ export class TmdbRepository implements ITmdbRepository {
 
   async getMovieWatchProviders(
     movieId: number
-  ): Promise<{ data: WatchProviderResult }> {
+  ): Promise<WatchProviderResponse> {
     const json: WatchProviderApiResponse =
       await this.request<WatchProviderApiResponse>(
         `/movie/${movieId}/watch/providers`
       );
 
     return {
-      data: json.results.AR,
+      data: json.results.AR ?? null,
     };
   }
 
-  async getTvWatchProviders(
-    tvId: number
-  ): Promise<{ data: WatchProviderResult }> {
+  async getTvWatchProviders(tvId: number): Promise<WatchProviderResponse> {
     const json: WatchProviderApiResponse =
       await this.request<WatchProviderApiResponse>(
         `/tv/${tvId}/watch/providers`
       );
 
     return {
-      data: json.results.AR,
+      data: json.results.AR ?? null,
     };
   }
 
