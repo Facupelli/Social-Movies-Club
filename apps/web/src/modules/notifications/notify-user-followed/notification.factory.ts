@@ -1,4 +1,5 @@
 import type { NewNotification } from '@/platform/database/postgres/schema';
+import { NOTIFICATION_TYPE_IDS } from '../notification.constants';
 
 export interface NotificationData {
   recipientId: string;
@@ -19,7 +20,7 @@ export function createFollowNotification(
 
   return {
     recipientId,
-    typeId: 'user_follow',
+    typeId: NOTIFICATION_TYPE_IDS.USER_FOLLOW,
     actorId,
     actorUsername,
     actorImage,
