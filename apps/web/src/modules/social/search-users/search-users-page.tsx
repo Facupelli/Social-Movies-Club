@@ -5,11 +5,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useDeferredValue, useEffect, useState } from 'react';
 import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
+import {
+  MIN_PROFILE_SEARCH_QUERY_LENGTH,
+  normalizeProfileSearchQuery,
+} from '@/modules/profiles/search-profiles/profile-search-query';
 import { useSearchUsers } from '@/modules/social/search-users/use-search-users';
 import { Input } from '@/shared/ui/input';
 import { Skeleton } from '@/shared/ui/skeleton';
 
-export default function HomePage() {
+export default function SearchUsersPage({
+  viewerUserId,
+}: {
+  viewerUserId: string;
+}) {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const debouncedSearchTerm = useDebounce(deferredQuery, 500);
@@ -73,7 +81,11 @@ export default function HomePage() {
         <SearchInput onChange={handleSearch} />
       </div>
 
-      <UsersList debouncedSearchTerm={debouncedSearchTerm} query={query} />
+      <UsersList
+        debouncedSearchTerm={debouncedSearchTerm}
+        query={query}
+        viewerUserId={viewerUserId}
+      />
     </div>
   );
 }
@@ -95,13 +107,24 @@ function SearchInput({ onChange }: { onChange: (values: string) => void }) {
 function UsersList({
   debouncedSearchTerm,
   query,
+  viewerUserId,
 }: {
   debouncedSearchTerm: string;
   query: string;
+  viewerUserId: string;
 }) {
-  const { data: users, isLoading } = useSearchUsers(debouncedSearchTerm);
+  const normalizedQuery = normalizeProfileSearchQuery(query);
+  const normalizedDebouncedQuery =
+    normalizeProfileSearchQuery(debouncedSearchTerm);
+  const { data: users, isLoading } = useSearchUsers(
+    viewerUserId,
+    normalizedDebouncedQuery
+  );
 
-  if (query.length <= 0 || debouncedSearchTerm.length <= 0) {
+  if (
+    normalizedQuery.length < MIN_PROFILE_SEARCH_QUERY_LENGTH ||
+    normalizedQuery !== normalizedDebouncedQuery
+  ) {
     return null;
   }
 
@@ -113,7 +136,8 @@ function UsersList({
     return (
       <div className="px-4 flex flex-col items-center gap-y-4 pt-4">
         <p className="font-bold text-xl text-center">
-          No se encontraron resultados para {debouncedSearchTerm}
+          No se encontraron resultados para &quot;{normalizedDebouncedQuery}
+          &quot;
         </p>
         <p className="text-muted-foreground text-sm text-center">
           Asegúrate de que el nombre de usuario esté bien escrito o invita a tu
