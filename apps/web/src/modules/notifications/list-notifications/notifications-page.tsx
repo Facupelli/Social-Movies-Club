@@ -1,18 +1,15 @@
 import clsx from 'clsx';
 import { User } from 'lucide-react';
-import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { listNotifications } from '@/modules/notifications/list-notifications/list-notifications';
-import { InvalidateNotificationsQuery } from '@/modules/notifications/mark-as-read/invalidate-query';
-import { auth } from '@/platform/auth/auth';
+import { MarkNotificationsReadOnVisit } from '@/modules/notifications/mark-as-read/mark-notifications-read-on-visit';
+import { getServerSession } from '@/platform/auth/get-server-session';
 import { formatFeedItemTime } from '@/shared/utilities/utils';
 
 export default async function NotificationsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   if (!session) {
     redirect('/');
@@ -24,7 +21,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="py-6 min-h-svh">
-      <InvalidateNotificationsQuery />
+      <MarkNotificationsReadOnVisit viewerUserId={session.user.id} />
 
       <h1 className="font-bold md:text-xl px-2 md:px-10">Notificaciones</h1>
 

@@ -17,6 +17,6 @@ export async function countUnreadNotifications(
         )
       );
 
-    return result[0]?.count ?? 0;
+    return Number(result[0]?.count ?? 0);
   });
 }

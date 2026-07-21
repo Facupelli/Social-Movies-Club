@@ -1,33 +1,16 @@
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
+import type {
+  NotificationListFilters,
+  PaginatedNotifications,
+} from '@/modules/notifications/notification.types';
 import {
-  type Notification,
-  type NotificationType,
   notifications,
   notificationTypes,
 } from '@/platform/database/postgres/schema';
 
-export type NotificationCursor = {
-  createdAt: Date;
-  id: string;
-};
-
-export interface NotificationFilters {
-  recipientId: string;
-  includeRead?: boolean;
-  typeId?: string;
-  limit?: number;
-  cursor?: NotificationCursor;
-}
-
-export interface PaginatedNotifications {
-  data: Array<Notification & { type: NotificationType }>;
-  hasMore: boolean;
-  nextCursor?: NotificationCursor;
-}
-
 export async function getNotifications(
-  filters: NotificationFilters
+  filters: NotificationListFilters
 ): Promise<PaginatedNotifications> {
   const {
     recipientId,
@@ -72,8 +55,13 @@ export async function getNotifications(
 
     const hasMore = results.length > limit;
     const data = results.slice(0, limit).map((row) => ({
-      ...row.notification,
-      type: row.type,
+      id: row.notification.id,
+      actorImage: row.notification.actorImage,
+      actorUsername: row.notification.actorUsername,
+      actionUrl: row.notification.actionUrl,
+      createdAt: row.notification.createdAt,
+      readAt: row.notification.readAt,
+      title: row.notification.title,
     }));
     const lastNotification = data.at(-1);
     const nextCursor =

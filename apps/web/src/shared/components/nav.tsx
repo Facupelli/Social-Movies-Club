@@ -58,9 +58,9 @@ export function Nav() {
         <li>
           <Link className="flex items-center gap-2" href="/notifications">
             <div className="relative">
-              {notificationsCount && notificationsCount > 0 ? (
-                <div className="absolute -right-1 -top-1 bg-primary size-4 rounded-full flex items-center justify-center text-sm">
-                  {notificationsCount}
+              {notificationsCount !== undefined && notificationsCount > 0 ? (
+                <div className="absolute -right-2 -top-2 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs leading-4">
+                  {notificationsCount > 99 ? '99+' : notificationsCount}
                 </div>
               ) : null}
               <Bell />
