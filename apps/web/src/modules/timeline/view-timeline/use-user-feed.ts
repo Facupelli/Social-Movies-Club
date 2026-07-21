@@ -1,16 +1,16 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
 import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
-import type { FeedItem } from './feed.types';
+import type { UserFeedPage } from './feed.types';
 
 export const timelineQueryKeys = {
   chronological: (viewerUserId: string | undefined) =>
-    personalizedQueryKeys.resource(viewerUserId, 'timeline', 'chronological', 'infinite'),
+    personalizedQueryKeys.resource(
+      viewerUserId,
+      'timeline',
+      'chronological',
+      'infinite'
+    ),
 } as const;
-
-type UserFeedPage = {
-  items: FeedItem[];
-  nextCursor: string | null;
-};
 
 type LoadUserFeedPage = (params: {
   cursor: string | null;
@@ -35,7 +35,7 @@ async function getUserFeed({
     signal,
   });
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    throw new Error('Unable to load the timeline feed');
   }
   return response.json();
 }
@@ -51,8 +51,9 @@ const getUserFeedQueryOptions = (
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: Boolean(userId),
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: false,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
 export { getUserFeedQueryOptions, getUserFeed };

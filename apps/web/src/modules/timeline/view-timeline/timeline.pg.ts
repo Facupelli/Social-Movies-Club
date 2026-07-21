@@ -1,158 +1,17 @@
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
-import {
-  feedItemRatings,
-  feedMediaBucket,
-  follows,
-  media,
-  ratings,
-  users,
-} from '@/platform/database/postgres/schema';
 import type {
-  AggregatedFeedItem,
   FeedItem,
   FeedItemRaw,
   GetUserFeedParams,
+  UserFeedPage,
 } from './feed.types';
-
-// This query scans all ratings from followed users and aggregates them by media.
-export async function getUserAggregatedFeedOnTheFly(
-  userId: string,
-  cursor: string | null = null,
-  limit = 20
-) {
-  return await withDatabase(async (db) => {
-    const query = sql`
-      WITH follower_ratings AS (
-        SELECT
-          r.media_id,
-          r.user_id,
-          r.score,
-          r.created_at,
-          u.name as user_name,
-          u.image as user_image
-        FROM ${ratings} r
-        JOIN ${users} u ON u.id = r.user_id
-        WHERE EXISTS (
-          SELECT 1
-          FROM ${follows} f
-          WHERE f.follower_id = ${userId}
-            AND f.followee_id = r.user_id
-        )
-        ${cursor ? sql`AND r.created_at < ${cursor}::timestamptz` : sql``}
-        ORDER BY r.media_id, r.user_id, r.created_at DESC
-      ),
-      latest AS (
-        SELECT
-          fr.media_id,
-          jsonb_agg(
-            jsonb_build_object(
-              'userId', fr.user_id,
-              'score', fr.score,
-              'createdAt', fr.created_at,
-              'user', jsonb_build_object(
-                'name', fr.user_name,
-                'image', fr.user_image
-              )
-            ) ORDER BY fr.created_at DESC
-          ) AS ratings,
-          MAX(fr.created_at) AS updated_at
-        FROM follower_ratings fr
-        GROUP BY fr.media_id
-      )
-      SELECT
-        m.id as "mediaId",
-        m.title,
-        m.poster_path as "posterPath",
-        m.backdrop_path as "backdropPath",
-        l.ratings,
-        l.updated_at as "udpatedAt"
-      FROM latest l
-      JOIN ${media} m ON m.id = l.media_id
-      ORDER BY l.updated_at DESC, m.id DESC
-      LIMIT ${limit}
-    `;
-
-    const { rows } = await db.execute(query);
-    return rows;
-  });
-}
-
-export function getUserAggregatedFeed({
-  userId,
-  limit = 20,
-  cursor = null,
-}: GetUserFeedParams): Promise<{
-  items: AggregatedFeedItem[];
-  nextCursor: string | null;
-}> {
-  return withDatabase(async (db) => {
-    const query = sql`
-      SELECT
-        fmb.id as "bucketId",
-        fmb.media_id as "mediaId",
-        fmb.rating_count as "ratingCount",
-        fmb.last_rating_at as "lastRatingAt",
-        fmb.seen_at as "seenAt",
-        jsonb_build_object(
-          'id',           m.id,
-          'tmdbId',       m.tmdb_id,
-          'type',         m.type,
-          'title',        m.title,
-          'year',         m.year,
-          'posterPath',   m.poster_path,
-          'backdropPath', m.backdrop_path,
-          'overview',     m.overview
-        ) AS media,
-        (
-          SELECT json_agg(
-            json_build_object(
-              'ratingId', r.id,
-              'score', r.score,
-              'createdAt', r.created_at,
-              'user', jsonb_build_object(
-                'id',       u.id,
-                'name',     u.name,
-                'image',    u.image,
-                'username', u.username
-              )
-            )
-            ORDER BY r.created_at DESC
-          )
-          FROM ${feedItemRatings} fir
-          JOIN ${ratings} r ON fir.rating_id = r.id
-          JOIN ${users} u ON u.id = r.user_id
-          WHERE fir.aggregated_feed_item_id = fmb.id
-        ) as ratings
-      FROM ${feedMediaBucket} fmb
-      JOIN ${media} m ON m.id = fmb.media_id
-      WHERE fmb.user_id = ${userId}
-      ${cursor ? sql`AND fmb.last_rating_at < ${cursor}` : sql``}
-      ORDER BY fmb.last_rating_at DESC
-      LIMIT ${limit}
-    `;
-
-    const { rows: aggregatedFeedItems } =
-      await db.execute<AggregatedFeedItem>(query);
-
-    const lastElement = aggregatedFeedItems.at(-1);
-    const nextCursor =
-      lastElement && aggregatedFeedItems.length === limit
-        ? new Date(lastElement.lastRatingAt).toISOString()
-        : null;
-
-    return { items: aggregatedFeedItems, nextCursor };
-  });
-}
 
 export async function getUserFeed({
   userId,
   limit = 20,
   cursor = null,
-}: GetUserFeedParams): Promise<{
-  items: FeedItem[];
-  nextCursor: string | null;
-}> {
+}: GetUserFeedParams): Promise<UserFeedPage> {
   return await withDatabase(async (db) => {
     const feedResult = await db.execute<FeedItemRaw>(sql`
       SELECT
@@ -198,14 +57,14 @@ export async function getUserFeed({
       movieBackdrop: row.movie_backdrop,
       movieType: row.movie_type,
       score: row.score,
-      ratedAt: row.rated_at,
-      seenAt: row.seen_at,
+      ratedAt: row.rated_at.toISOString(),
+      seenAt: row.seen_at?.toISOString() ?? null,
     }));
 
-    const lastElement = items.at(-1);
+    const lastRow = feedResult.rows.at(-1);
     const nextCursor =
-      lastElement && items.length === limit
-        ? new Date(lastElement.ratedAt).toISOString()
+      lastRow && items.length === limit
+        ? lastRow.feed_created_at.toISOString()
         : null;
 
     return { items, nextCursor };

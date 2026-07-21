@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
+import { ZodError } from 'zod';
 import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
-import { getUserFeed } from '@/modules/timeline/view-timeline/timeline.pg';
+import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
 import { auth } from '@/platform/auth/auth';
 import {
   authenticatedJson,
@@ -16,12 +17,26 @@ export async function GET(request: Request) {
     return unauthorizedJson();
   }
 
-  const { searchParams } = new URL(request.url);
-  const { cursor } = validateGetUserFeedQuery(searchParams);
+  try {
+    const { searchParams } = new URL(request.url);
+    const { cursor } = validateGetUserFeedQuery(searchParams);
+    const page = await loadUserFeedPage({
+      userId: session.user.id,
+      cursor,
+    });
 
-  const res = await getUserFeed({
-    userId: session.user.id,
-    cursor,
-  });
-  return authenticatedJson(res);
+    return authenticatedJson(page);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return authenticatedJson(
+        { success: false, error: 'Invalid feed cursor' },
+        { status: 400 }
+      );
+    }
+
+    return authenticatedJson(
+      { success: false, error: 'Unable to load the timeline feed' },
+      { status: 500 }
+    );
+  }
 }

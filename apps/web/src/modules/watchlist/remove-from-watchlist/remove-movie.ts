@@ -32,7 +32,7 @@ export async function removeMovieFromWatchlist(
     });
 
     if (result.success) {
-      revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+      revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId), 'max');
     }
 
     return result;

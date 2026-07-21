@@ -11,9 +11,15 @@ import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 
 function revalidateFollowTags(userId: string, followedUserId: string): void {
-  revalidateTag(NEXT_CACHE_TAGS.getIsFollowingUser(userId, followedUserId));
-  revalidateTag(NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId));
-  revalidateTag(NEXT_CACHE_TAGS.getIsFollowingUserBySession(userId));
+  revalidateTag(
+    NEXT_CACHE_TAGS.getIsFollowingUser(userId, followedUserId),
+    'max'
+  );
+  revalidateTag(
+    NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId),
+    'max'
+  );
+  revalidateTag(NEXT_CACHE_TAGS.getIsFollowingUserBySession(userId), 'max');
 }
 
 export async function followUserAction(

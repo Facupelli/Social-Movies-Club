@@ -1,15 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import {
-  Calendar,
-  ChevronDown,
-  Clapperboard,
-  Search,
-  Star,
-  UserPlus,
-  Users,
-} from 'lucide-react';
+import { Clapperboard, Search, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -29,11 +21,7 @@ import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
 import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
-import type {
-  AggregatedFeedItem,
-  FeedItem,
-} from '@/modules/timeline/view-timeline/feed.types';
-import { getUserAggregatedFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-aggregated-feed';
+import type { FeedItem } from '@/modules/timeline/view-timeline/feed.types';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
 import SignInButton from '@/shared/components/sign-in-button';
@@ -48,14 +36,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardFooter } from '@/shared/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
 import { Input } from '@/shared/ui/input';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { formatFeedItemTime } from '@/shared/utilities/utils';
@@ -123,7 +103,6 @@ function HomeContent({
   return (
     <>
       <SessionMessage isAuthenticated={Boolean(viewerUserId)} />
-      {/* <AggregatedFeed /> */}
       <Feed viewerUserId={viewerUserId} />
     </>
   );
@@ -163,272 +142,6 @@ function SessionMessage({ isAuthenticated }: { isAuthenticated: boolean }) {
   }
 
   return null;
-}
-
-function _AggregatedFeed({ viewerUserId }: { viewerUserId?: string }) {
-  const {
-    data,
-    isPending,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    isEnabled,
-  } = useInfiniteQuery({
-    ...getUserAggregatedFeedQueryOptions(viewerUserId),
-  });
-
-  if (isPending && isEnabled) {
-    return (
-      <div className="grid gap-4 px-2 pt-4 md:px-10">
-        {[...Array(5)].map((_, idx) => (
-          // biome-ignore lint:reason
-          <Skeleton className="w-full h-[200px] rounded-sm" key={idx} />
-        ))}
-      </div>
-    );
-  }
-
-  const flatItems = data?.pages.flatMap((page) => page.items);
-
-  return (
-    <div>
-      <div className="divide-y divide-accent-foreground">
-        {flatItems &&
-          flatItems.length > 0 &&
-          flatItems.map((item) => (
-            <div className="px-2 md:px-10" key={item.bucketId}>
-              <AggregatedFeedItemCard item={item} />
-            </div>
-          ))}
-      </div>
-
-      {hasNextPage && (
-        <button
-          disabled={isFetchingNextPage}
-          onClick={() => fetchNextPage()}
-          type="button"
-        >
-          {isFetchingNextPage ? 'Cargando más...' : 'Cargar más'}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function AggregatedFeedItemCard({ item }: { item: AggregatedFeedItem }) {
-  const isMobile = useIsMobile();
-  const lastRating = item.ratings?.at(0);
-
-  if (!lastRating) {
-    return null;
-  }
-
-  const otherRatings = item.ratings?.slice(1);
-  const hasMoreRatings = otherRatings && otherRatings.length > 0;
-
-  return (
-    <MovieCard className="w-full py-4 px-2 md:px-0 overflow-hidden shadow-none border-none bg-transparent">
-      <div className="flex flex-col md:flex-row gap-2 md:gap-6">
-        <div className="md:block hidden">
-          <Link
-            className="size-[30px] rounded-full bg-accent-foreground md:size-[50px]"
-            href={`/profile/${lastRating.user.id}`}
-          >
-            <Avatar className="size-7 md:size-10">
-              <AvatarImage
-                alt={lastRating.user.name}
-                src={lastRating.user.image || '/placeholder.svg'}
-              />
-              <AvatarFallback>
-                {lastRating.user.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-        </div>
-
-        <div className="relative flex-shrink-0 w-full md:w-44">
-          <div className="sticky top-0">
-            <div className="relative">
-              <Image
-                alt={item.media.title}
-                className="rounded-xs object-cover w-full h-auto max-h-[250px] md:max-h-[300px]"
-                height={288}
-                src={
-                  (isMobile
-                    ? `https://image.tmdb.org/t/p/w500${item.media.backdropPath}`
-                    : `https://image.tmdb.org/t/p/original${item.media.posterPath}`) ||
-                  '/placeholder.svg?height=288&width=192'
-                }
-                width={192}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xs" />
-              <Badge
-                className="absolute top-2 right-2 text-xs font-medium bg-black/60 text-white border-0"
-                variant="secondary"
-              >
-                {TYPE_DICT[item.media.type]}
-              </Badge>
-              <div className="absolute bottom-3 left-3 right-3 text-white">
-                <p className="text-xs font-medium opacity-90">
-                  {item.media.year}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1  flex flex-col">
-          <div className="grid ">
-            <div className="flex items-baseline">
-              <div className="flex-1">
-                <MovieTitle className="md:text-xl" title={item.media.title} />
-              </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
-                <span>hace</span>
-                {formatFeedItemTime(item.lastRatingAt)}
-              </div>
-            </div>
-
-            <div className="flex-1 pt-2">
-              <Accordion collapsible type="single">
-                <AccordionItem value="item-1">
-                  <AccordionTrigger className="py-0 pb-2">
-                    Sinopsis
-                  </AccordionTrigger>
-                  <AccordionContent>{item.media.overview}</AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              <MovieWatchProviders
-                tmdbId={item.media.tmdbId}
-                type={item.media.type}
-              />
-            </div>
-          </div>
-
-          <div className="mt-auto pt-4 md:pt-2">
-            {/* Latest Rating */}
-            <div className="flex items-center gap-2 md:gap-4 p-3 bg-muted/50 rounded-sm">
-              <div className="flex-1 flex md:justify-between gap-3 md:gap-0 items-center pr-2">
-                <Avatar className="size-7 md:size-10">
-                  <AvatarImage
-                    alt={lastRating.user.name}
-                    src={lastRating.user.image || '/placeholder.svg'}
-                  />
-                  <AvatarFallback>
-                    {lastRating.user.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="flex lead items-center gap-2">
-                    <span className="font-semibold text-sm">
-                      {lastRating.user.name}
-                    </span>
-                  </div>
-                  <span className="text-xs lead text-muted-foreground">
-                    {lastRating.user.username}
-                  </span>
-                </div>
-              </div>
-
-              {/* Dropdown for Additional Ratings */}
-              {hasMoreRatings && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="text-muted-foreground hover:text-foreground"
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <Users className="w-4 h-4 mr-1" />+{otherRatings.length}
-                      <ChevronDown className="w-3 h-3 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                      Otras calificaciones
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {otherRatings.map((rating) => (
-                      <DropdownMenuItem
-                        className="p-3 focus:bg-muted/50"
-                        key={rating.ratingId}
-                      >
-                        <div className="flex items-center gap-3 w-full">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage
-                              alt={rating.user.name}
-                              src={rating.user.image || '/placeholder.svg'}
-                            />
-                            <AvatarFallback className="text-xs">
-                              {rating.user.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm truncate">
-                                {rating.user.name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {rating.user.username}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <ScoreDisplay score={rating.score} />
-                              <span className="text-xs text-muted-foreground">
-                                {formatFeedItemTime(rating.createdAt)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
-              <MovieScore score={lastRating.score} />
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center justify-end gap-4 pt-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {item.ratingCount} total
-              </div>
-              {item.seenAt && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  Seen {formatFeedItemTime(item.seenAt)}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </MovieCard>
-  );
-}
-
-function ScoreDisplay({ score }: { score: number }) {
-  const stars = Math.round(score / 2); // Assuming score is out of 10, convert to 5 stars
-
-  return (
-    <div className="flex items-center gap-1">
-      <div className="flex">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            className={`size-3 ${i < stars ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed five-star scale
-            key={i}
-          />
-        ))}
-      </div>
-      <span className="text-sm font-medium text-muted-foreground ml-1">
-        {score}/10
-      </span>
-    </div>
-  );
 }
 
 function Feed({ viewerUserId }: { viewerUserId?: string }) {

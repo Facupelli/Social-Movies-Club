@@ -50,7 +50,7 @@ export async function updateUsername(
     const result = await validateAndPersistUsername(session.user.id, formData);
 
     if (result.success) {
-      revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id));
+      revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id), 'max');
     }
 
     return result;
@@ -68,7 +68,7 @@ export async function createUsername(
       return result;
     }
 
-    revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id));
+    revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id), 'max');
     redirect('/');
   });
 }

@@ -75,7 +75,7 @@ export async function rateMedia(
 
   if (await dependencies.isMediaInWatchlist(userId, mediaId)) {
     await dependencies.removeFromWatchlist(userId, mediaId);
-    dependencies.revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId));
+    dependencies.revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId), 'max');
   }
 }
 

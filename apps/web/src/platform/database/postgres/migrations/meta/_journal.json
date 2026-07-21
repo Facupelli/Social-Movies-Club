@@ -64,6 +64,13 @@
       "when": 1784584181218,
       "tag": "0009_wise_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784642454915,
+      "tag": "0010_dry_stryfe",
+      "breakpoints": true
     }
   ]
 }

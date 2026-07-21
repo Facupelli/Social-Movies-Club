@@ -1,44 +1,5 @@
 import type { MediaType } from '@/modules/media-catalog/media.type';
 
-export interface UserCompact {
-  id: string;
-  name: string;
-  image: string;
-  username: string;
-}
-
-export interface MediaCompact {
-  id: string;
-  type: MediaType;
-  year: string;
-  title: string;
-  tmdbId: number;
-  overview: string;
-  posterPath: string;
-  backdropPath: string;
-}
-
-export interface RatingInFeed {
-  ratingId: string;
-  score: number;
-  createdAt: string; // ISO-8601
-  user: UserCompact;
-}
-
-export type AggregatedFeedItem = {
-  bucketId: string;
-  mediaId: string;
-  ratingCount: number;
-  lastRatingAt: string; // ISO-8601
-  seenAt: string | null;
-  media: MediaCompact;
-  ratings: RatingInFeed[] | null;
-};
-
-export interface AggregatedFeedResponse {
-  aggregatedFeed: AggregatedFeedItem[];
-}
-
 export interface GetUserFeedParams {
   userId: string;
   limit?: number;
@@ -62,7 +23,8 @@ export type FeedItemRaw = {
   movie_tmdb_id: number;
   score: number;
   rated_at: Date;
-  seen_at: Date;
+  seen_at: Date | null;
+  feed_created_at: Date;
 };
 
 export type FeedItem = {
@@ -80,6 +42,11 @@ export type FeedItem = {
   movieOverview: string;
   movieType: MediaType;
   score: number;
-  ratedAt: Date;
-  seenAt: Date;
+  ratedAt: string;
+  seenAt: string | null;
+};
+
+export type UserFeedPage = {
+  items: FeedItem[];
+  nextCursor: string | null;
 };
