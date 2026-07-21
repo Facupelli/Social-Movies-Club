@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   CalendarDays,
   ChevronDown,
@@ -17,14 +17,9 @@ import {
 } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
-import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
-import type { RateMediaResult } from '@/modules/ratings/rate-media/rate-media';
+import { useRateMediaMutation } from '@/modules/ratings/rate-media/use-rate-media-mutation';
+import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { authClient } from '@/platform/auth/auth-client';
-import {
-  invalidateAfterRating,
-  optimisticallyRateMedia,
-  removeRatedMediaFromWatchlistStatus,
-} from '@/modules/ratings/rate-media/rating-mutation-cache';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
 import type { ApiResponse } from '@/shared/http/safe-execute';
@@ -182,8 +177,8 @@ function RateDialogBody({
   userId,
   userRating,
 }: RateDialogBodyProps) {
-  const queryClient = useQueryClient();
   const hasInteracted = useRef(false);
+  const mutateRateMedia = useRateMediaMutation(userId);
 
   const [rating, setRating] = useState(userRating?.score ?? 0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -202,41 +197,12 @@ function RateDialogBody({
     _state: ApiResponse<RateMediaResult>,
     formData: FormData
   ) => {
-    const rollback = userId
-      ? await optimisticallyRateMedia(queryClient, {
-          userId,
-          tmdbId,
-          type,
-          score: rating,
-          watchedDate,
-        })
-      : undefined;
-
-    try {
-      const result = await addRatingToMovie(formData);
-
-      if (!result.success) {
-        rollback?.();
-        return result;
-      }
-
-      if (userId) {
-        if (result.data.removedFromWatchlist) {
-          removeRatedMediaFromWatchlistStatus(
-            queryClient,
-            userId,
-            result.data.tmdbId,
-            result.data.type
-          );
-        }
-        await invalidateAfterRating(queryClient, userId);
-      }
-
-      return result;
-    } catch (error) {
-      rollback?.();
-      throw error;
-    }
+    return await mutateRateMedia(formData, {
+      tmdbId,
+      type,
+      score: rating,
+      watchedDate,
+    });
   };
 
   const [state, action, isPending] = useActionState(

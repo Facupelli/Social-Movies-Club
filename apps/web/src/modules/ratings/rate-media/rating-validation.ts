@@ -1,14 +1,21 @@
 import z from 'zod';
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(now.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const MovieRatingSchema = z.object({
   movieTMDBId: z
     .string()
     .regex(/^\d+$/, 'Movie ID must be a valid number')
-    .transform(Number),
+    .transform(Number)
+    .refine((value) => Number.isSafeInteger(value) && value > 0, {
+      message: 'Movie ID must be a positive integer',
+    }),
   rating: z
     .string()
     .regex(/^\d+$/, 'Rating must be a valid number')

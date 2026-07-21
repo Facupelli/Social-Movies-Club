@@ -1,10 +1,8 @@
 'use server';
 
 import { refresh } from 'next/cache';
-import {
-  rateMedia,
-  type RateMediaResult,
-} from '@/modules/ratings/rate-media/rate-media';
+import { rateMedia } from '@/modules/ratings/rate-media/rate-media';
+import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { validateMovieRating } from './rating-validation';

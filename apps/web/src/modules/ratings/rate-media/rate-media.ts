@@ -1,37 +1,23 @@
-import { upsertMedia } from '@/modules/media-catalog/get-media-details/media.pg';
 import type {
   MediaType,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
-import { isMediaInWatchlist } from '@/modules/watchlist/get-watchlist-status/watchlist-status.pg';
-import { removeFromWatchlist } from '@/modules/watchlist/remove-from-watchlist/remove-from-watchlist.pg';
+import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import type { Media } from '@/platform/database/postgres/schema';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import { projectRatingToFollowerTimelines } from './project-rating-to-timelines';
-import { upsertRating } from './rating.pg';
-
-export type RateMediaResult = {
-  tmdbId: number;
-  type: MediaType;
-  removedFromWatchlist: boolean;
-};
+import { persistRatingMutation } from './rating.pg';
 
 type RateMediaDependencies = {
   tmdb: Pick<TmdbService, 'getMovieDetail' | 'getTvDetail'>;
-  upsertMedia: typeof upsertMedia;
-  upsertRating: typeof upsertRating;
+  persistRatingMutation: typeof persistRatingMutation;
   projectRatingToFollowerTimelines: typeof projectRatingToFollowerTimelines;
-  isMediaInWatchlist: typeof isMediaInWatchlist;
-  removeFromWatchlist: typeof removeFromWatchlist;
 };
 
 const defaultDependencies: RateMediaDependencies = {
   tmdb: new TmdbService(),
-  upsertMedia,
-  upsertRating,
+  persistRatingMutation,
   projectRatingToFollowerTimelines,
-  isMediaInWatchlist,
-  removeFromWatchlist,
 };
 
 export async function rateMedia(
@@ -50,6 +36,7 @@ export async function rateMedia(
   },
   dependencies: RateMediaDependencies = defaultDependencies
 ): Promise<RateMediaResult> {
+  // Keep the external lookup outside the database transaction.
   const media = await getMediaDetail(tmdbId, type, dependencies.tmdb);
   const mediaData: Omit<Media, 'id'> = {
     posterPath: media.posterPath,
@@ -62,28 +49,24 @@ export async function rateMedia(
     runtime: media.runtime ?? null,
   };
 
-  const { id: mediaId } = await dependencies.upsertMedia(mediaData);
-  const persistedRating = await dependencies.upsertRating(
+  const persisted = await dependencies.persistRatingMutation(
     userId,
-    mediaId,
+    mediaData,
     rating,
     watchedDate
   );
 
-  // biome-ignore lint/suspicious/noConsole: preserve rating persistence diagnostics
-  console.log(`✅ Rating created/updated: ${persistedRating.id}`);
+  // Feed fan-out is intentionally post-commit and does not delay persistence.
+  await dependencies.projectRatingToFollowerTimelines(persisted.rating);
 
-  await dependencies.projectRatingToFollowerTimelines(persistedRating);
-
-  const removedFromWatchlist = await dependencies.isMediaInWatchlist(
-    userId,
-    mediaId
-  );
-  if (removedFromWatchlist) {
-    await dependencies.removeFromWatchlist(userId, mediaId);
-  }
-
-  return { tmdbId, type, removedFromWatchlist };
+  return {
+    mediaIdentity: { tmdbId, type },
+    rating: {
+      score: persisted.rating.score,
+      watchedDate: persisted.rating.watched_date,
+    },
+    removedFromWatchlist: persisted.removedFromWatchlist,
+  };
 }
 
 async function getMediaDetail(
@@ -97,7 +80,7 @@ async function getMediaDetail(
       : await tmdb.getTvDetail(tmdbId);
 
   if (!result.data) {
-    throw new Error('Invalid media type');
+    throw new Error('Media not found');
   }
 
   return result.data;
