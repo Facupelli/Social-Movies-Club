@@ -47,7 +47,6 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel production configuration
-        working-directory: apps/web
         run: >
           vercel pull
           --yes
@@ -55,7 +54,6 @@ jobs:
           --token="${{ secrets.VERCEL_TOKEN }}"
 
       - name: Build production deployment
-        working-directory: apps/web
         run: >
           vercel build
           --prod
@@ -69,7 +67,6 @@ jobs:
 
       - name: Deploy production build
         id: deploy
-        working-directory: apps/web
         run: |
           DEPLOYMENT_URL="$(
             vercel deploy \
