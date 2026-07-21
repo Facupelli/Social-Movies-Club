@@ -22,6 +22,7 @@ import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
 import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
 import type { FeedItem } from '@/modules/timeline/view-timeline/feed.types';
+import { FeedSkeleton } from '@/modules/timeline/view-timeline/home-page-skeleton';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
 import SignInButton from '@/shared/components/sign-in-button';
@@ -153,14 +154,7 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
   }
 
   if (isPending) {
-    return (
-      <div className="grid gap-4 px-2 pt-4 md:px-10">
-        {[...Array(5)].map((_, idx) => (
-          // biome-ignore lint:reason
-          <Skeleton className="w-full h-[200px] rounded-sm" key={idx} />
-        ))}
-      </div>
-    );
+    return <FeedSkeleton />;
   }
 
   const flatItems = data?.pages.flatMap((page) => page.items);
