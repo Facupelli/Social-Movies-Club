@@ -25,7 +25,7 @@ export default async function NotificationsPage() {
 
       <h1 className="font-bold md:text-xl px-2 md:px-10">Notificaciones</h1>
 
-      <section className="pt-8 flex flex-col divide-y divide-border ">
+      <section className="pt-4 flex flex-col divide-y divide-border ">
         {notifications.data.map((notification, index) => (
           <Link
             className={clsx(

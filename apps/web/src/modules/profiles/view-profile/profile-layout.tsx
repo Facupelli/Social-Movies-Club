@@ -29,7 +29,7 @@ export default async function ProfileLayout(
 
   return (
     <div className="min-h-svh">
-      <div className="bg-card px-2 py-2 md:px-10">
+      <div className="px-2 py-2 md:px-10">
         <Link href="/">
           <ArrowLeft />
         </Link>

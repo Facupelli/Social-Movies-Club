@@ -119,7 +119,7 @@ function SearchInput({
     <div className="relative">
       <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-primary" />
       <Input
-        className="w-full bg-white px-10"
+        className="w-full px-10"
         onChange={(e) => onChange(e.target.value)}
         placeholder="Buscar película o serie"
         type="search"

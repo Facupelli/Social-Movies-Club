@@ -102,7 +102,12 @@ export function Nav() {
                 <p>{session.user.name}</p>
               </div>
             </div>
-            <Button onClick={handleLogOut} type="button">
+            <Button
+              className="w-full justify-start"
+              onClick={handleLogOut}
+              type="button"
+              variant="outline"
+            >
               Salir
             </Button>
           </div>

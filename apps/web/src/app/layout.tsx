@@ -33,13 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <div className="dark bg-sidebar">
+          <div className="dark bg-background">
             <div className="relative mx-auto flex max-w-5xl flex-col text-card-foreground md:flex-row">
               <Nav />
-              <div className="flex-1 border-border bg-background pb-[60px] md:border-r md:border-l md:pb-0">
+              <div className="flex-1 border-border bg-surface pb-[60px] md:border-r md:border-l md:pb-0">
                 {children}
               </div>
             </div>
