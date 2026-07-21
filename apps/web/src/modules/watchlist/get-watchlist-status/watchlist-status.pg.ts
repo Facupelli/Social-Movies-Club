@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, watchlist } from '@/platform/database/postgres/schema';
-import type { WatchlistMediaIdentity } from './watchlist-status.types';
+import type { WatchlistMediaIdentity } from '@/modules/watchlist/watchlist.types';
 
 export async function isMediaInWatchlist(
   userId: string,

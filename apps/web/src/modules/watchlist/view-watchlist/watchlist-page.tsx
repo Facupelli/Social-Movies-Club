@@ -1,54 +1,41 @@
-import { unstable_cache } from 'next/cache';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import z from 'zod';
 import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { getWatchlist as queryWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
 import { GridMovieCard } from '@/modules/watchlist/view-watchlist/watchlist-movie-card';
-import { auth } from '@/platform/auth/auth';
-import { type ApiResponse, execute } from '@/shared/http/safe-execute';
-import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
+import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import { execute } from '@/shared/http/safe-execute';
 
-function getWatchlist(userId: string): Promise<ApiResponse<MovieView[]>> {
-  return unstable_cache(
-    () => execute<MovieView[]>(() => queryWatchlist(userId)),
-    ['user-watchlist', userId],
-    {
-      tags: ['watchlist', NEXT_CACHE_TAGS.getUserWatchlist(userId)],
-    }
-  )();
-}
+const profileIdSchema = z.uuid();
 
 export default async function WatchlistPage(
   props: Readonly<{
     params: Promise<{ id: string }>;
   }>
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const [session, params] = await Promise.all([getServerSession(), props.params]);
 
   if (!session) {
     redirect('/');
   }
 
-  const params = await props.params;
-  const userId = params.id;
-  const isOwner = session.user.id === userId;
+  const profileId = profileIdSchema.safeParse(params.id);
+  if (!profileId.success) {
+    notFound();
+  }
 
-  const watchlistResult = await getWatchlist(userId);
+  const isOwner = session.user.id === profileId.data;
+  const watchlistResult = await execute(() => getWatchlist(profileId.data));
 
   if (!watchlistResult.success) {
     return <section className="py-10">{watchlistResult.error}</section>;
   }
 
-  const watchlist = watchlistResult.data;
-
   return (
     <section className="py-10">
       <MovieGrid>
-        {watchlist?.map((movie) => (
+        {watchlistResult.data.map((movie) => (
           <GridMovieCard
             isOwner={isOwner}
             key={getMediaIdentityKey(movie.tmdbId, movie.type)}

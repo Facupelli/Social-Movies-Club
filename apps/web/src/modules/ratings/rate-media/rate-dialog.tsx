@@ -18,10 +18,12 @@ import {
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
+import type { RateMediaResult } from '@/modules/ratings/rate-media/rate-media';
 import { authClient } from '@/platform/auth/auth-client';
 import {
   invalidateAfterRating,
   optimisticallyRateMedia,
+  removeRatedMediaFromWatchlistStatus,
 } from '@/modules/ratings/rate-media/rating-mutation-cache';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
@@ -41,7 +43,7 @@ import {
 } from '@/shared/ui/drawer';
 import { cn } from '@/shared/utilities/utils';
 
-const initialState: ApiResponse<void> = {
+const initialState: ApiResponse<RateMediaResult> = {
   success: false,
   error: '',
 };
@@ -197,7 +199,7 @@ function RateDialogBody({
   }, [userRating]);
 
   const handleAddRatingToMovie = async (
-    _state: ApiResponse<void>,
+    _state: ApiResponse<RateMediaResult>,
     formData: FormData
   ) => {
     const rollback = userId
@@ -219,6 +221,14 @@ function RateDialogBody({
       }
 
       if (userId) {
+        if (result.data.removedFromWatchlist) {
+          removeRatedMediaFromWatchlistStatus(
+            queryClient,
+            userId,
+            result.data.tmdbId,
+            result.data.type
+          );
+        }
         await invalidateAfterRating(queryClient, userId);
       }
 

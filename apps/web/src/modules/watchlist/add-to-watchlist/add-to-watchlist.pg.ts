@@ -10,6 +10,7 @@ export async function addToWatchlist(
     await db.execute(sql`
       INSERT INTO ${watchlist} (user_id, media_id)
       VALUES (${userId}, ${mediaId})
+      ON CONFLICT (user_id, media_id) DO NOTHING
     `);
   });
 }

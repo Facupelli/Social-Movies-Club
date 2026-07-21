@@ -1,41 +1,22 @@
 import z from 'zod';
 
-const addMovieToWatchlistSchema = z.object({
+const watchlistMutationSchema = z.object({
   movieTMDBId: z
     .string()
     .regex(/^\d+$/, 'Movie ID must be a valid number')
-    .transform(Number),
-  userId: z.string().nonempty(),
+    .transform(Number)
+    .refine((value) => Number.isSafeInteger(value) && value > 0, {
+      message: 'Movie ID must be a positive integer',
+    }),
   type: z.enum(['movie', 'tv']),
 });
 
-export type AddMovieToWatchlistInput = z.infer<
-  typeof addMovieToWatchlistSchema
+export type WatchlistMutationInput = z.infer<
+  typeof watchlistMutationSchema
 >;
 
-export function validateAddMovieToWatchlist(
+export function validateWatchlistMutation(
   formData: FormData
-): AddMovieToWatchlistInput {
-  const data = Object.fromEntries(formData.entries());
-  return addMovieToWatchlistSchema.parse(data);
-}
-
-const removeMovieToWatchlistSchema = z.object({
-  movieTMDBId: z
-    .string()
-    .regex(/^\d+$/, 'Movie ID must be a valid number')
-    .transform(Number),
-  userId: z.string().nonempty(),
-  type: z.enum(['movie', 'tv']),
-});
-
-export type removeMovieFromWatchlistInput = z.infer<
-  typeof removeMovieToWatchlistSchema
->;
-
-export function validateRemoveMovieFromWatchlist(
-  formData: FormData
-): removeMovieFromWatchlistInput {
-  const data = Object.fromEntries(formData.entries());
-  return removeMovieToWatchlistSchema.parse(data);
+): WatchlistMutationInput {
+  return watchlistMutationSchema.parse(Object.fromEntries(formData.entries()));
 }

@@ -1,6 +1,4 @@
-import type {
-  MediaIdentityKey,
-} from '@/modules/media-catalog/media-identity';
+import type { MediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { MediaType } from '@/modules/media-catalog/media.type';
 
 export type WatchlistMediaIdentity = {
@@ -9,3 +7,7 @@ export type WatchlistMediaIdentity = {
 };
 
 export type WatchlistStatusMap = Record<MediaIdentityKey, boolean>;
+
+export type WatchlistMutationResult = WatchlistMediaIdentity & {
+  inWatchlist: boolean;
+};

@@ -4,6 +4,8 @@ import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { RatingStatusMap } from '@/modules/ratings/get-rating-status/rating-status.types';
 import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { profileRatingsQueryKeys } from '@/modules/ratings/list-profile-ratings/use-user-movies';
+import { watchlistStatusQueryKeys } from '@/modules/watchlist/get-watchlist-status/use-user-watchlist';
+import type { WatchlistStatusMap } from '@/modules/watchlist/watchlist.types';
 
 export async function invalidateAfterRating(
   queryClient: QueryClient,
@@ -17,6 +19,26 @@ export async function invalidateAfterRating(
       queryKey: profileRatingsQueryKeys.viewerScope(userId),
     }),
   ]);
+}
+
+export function removeRatedMediaFromWatchlistStatus(
+  queryClient: QueryClient,
+  userId: string,
+  tmdbId: number,
+  type: MediaType
+): void {
+  const identityKey = getMediaIdentityKey(tmdbId, type);
+  queryClient.setQueryData<WatchlistStatusMap>(
+    watchlistStatusQueryKeys.map(userId),
+    (current) => {
+      if (!current) {
+        return current;
+      }
+      const next = { ...current };
+      delete next[identityKey];
+      return next;
+    }
+  );
 }
 
 export async function optimisticallyRateMedia(

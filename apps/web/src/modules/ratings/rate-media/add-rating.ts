@@ -1,15 +1,19 @@
 'use server';
 
-import { rateMedia } from '@/modules/ratings/rate-media/rate-media';
+import { refresh } from 'next/cache';
+import {
+  rateMedia,
+  type RateMediaResult,
+} from '@/modules/ratings/rate-media/rate-media';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { validateMovieRating } from './rating-validation';
 
 export async function addRatingToMovie(
   formData: FormData
-): Promise<ApiResponse<void>> {
+): Promise<ApiResponse<RateMediaResult>> {
   return await withAuth(async (session) => {
-    return await execute<void>(async () => {
+    const result = await execute(async () => {
       const { movieTMDBId, rating, type, watchedDate } =
         validateMovieRating(formData);
       return await rateMedia({
@@ -20,5 +24,11 @@ export async function addRatingToMovie(
         watchedDate,
       });
     });
+
+    if (result.success) {
+      refresh();
+    }
+
+    return result;
   });
 }

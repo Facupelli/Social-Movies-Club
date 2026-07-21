@@ -1,4 +1,3 @@
-import { revalidateTag } from 'next/cache';
 import { upsertMedia } from '@/modules/media-catalog/get-media-details/media.pg';
 import type {
   MediaType,
@@ -8,9 +7,14 @@ import { isMediaInWatchlist } from '@/modules/watchlist/get-watchlist-status/wat
 import { removeFromWatchlist } from '@/modules/watchlist/remove-from-watchlist/remove-from-watchlist.pg';
 import type { Media } from '@/platform/database/postgres/schema';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
-import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 import { projectRatingToFollowerTimelines } from './project-rating-to-timelines';
 import { upsertRating } from './rating.pg';
+
+export type RateMediaResult = {
+  tmdbId: number;
+  type: MediaType;
+  removedFromWatchlist: boolean;
+};
 
 type RateMediaDependencies = {
   tmdb: Pick<TmdbService, 'getMovieDetail' | 'getTvDetail'>;
@@ -19,7 +23,6 @@ type RateMediaDependencies = {
   projectRatingToFollowerTimelines: typeof projectRatingToFollowerTimelines;
   isMediaInWatchlist: typeof isMediaInWatchlist;
   removeFromWatchlist: typeof removeFromWatchlist;
-  revalidateTag: typeof revalidateTag;
 };
 
 const defaultDependencies: RateMediaDependencies = {
@@ -29,7 +32,6 @@ const defaultDependencies: RateMediaDependencies = {
   projectRatingToFollowerTimelines,
   isMediaInWatchlist,
   removeFromWatchlist,
-  revalidateTag,
 };
 
 export async function rateMedia(
@@ -47,7 +49,7 @@ export async function rateMedia(
     watchedDate: string;
   },
   dependencies: RateMediaDependencies = defaultDependencies
-): Promise<void> {
+): Promise<RateMediaResult> {
   const media = await getMediaDetail(tmdbId, type, dependencies.tmdb);
   const mediaData: Omit<Media, 'id'> = {
     posterPath: media.posterPath,
@@ -73,10 +75,15 @@ export async function rateMedia(
 
   await dependencies.projectRatingToFollowerTimelines(persistedRating);
 
-  if (await dependencies.isMediaInWatchlist(userId, mediaId)) {
+  const removedFromWatchlist = await dependencies.isMediaInWatchlist(
+    userId,
+    mediaId
+  );
+  if (removedFromWatchlist) {
     await dependencies.removeFromWatchlist(userId, mediaId);
-    dependencies.revalidateTag(NEXT_CACHE_TAGS.getUserWatchlist(userId), 'max');
   }
+
+  return { tmdbId, type, removedFromWatchlist };
 }
 
 async function getMediaDetail(

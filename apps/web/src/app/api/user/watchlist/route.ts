@@ -1,35 +1,24 @@
-import { headers } from 'next/headers';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import { listWatchlistMediaIdentities } from '@/modules/watchlist/get-watchlist-status/watchlist-status.pg';
-import type { WatchlistStatusMap } from '@/modules/watchlist/get-watchlist-status/watchlist-status.types';
-import { auth } from '@/platform/auth/auth';
+import { getWatchlistStatusMap } from '@/modules/watchlist/get-watchlist-status/watchlist-status';
+import { getServerSession } from '@/platform/auth/get-server-session';
 import {
   authenticatedJson,
   unauthorizedJson,
 } from '@/shared/http/authenticated-response';
 
 export async function GET() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   if (!session) {
     return unauthorizedJson();
   }
 
-  const mediaIdentities = await listWatchlistMediaIdentities(session.user.id);
-
-  const statusMap: WatchlistStatusMap = {};
-
-  for (const mediaIdentity of mediaIdentities) {
-    const identityKey = getMediaIdentityKey(
-      mediaIdentity.tmdbId,
-      mediaIdentity.type
+  try {
+    const statusMap = await getWatchlistStatusMap(session.user.id);
+    return authenticatedJson(statusMap);
+  } catch {
+    return authenticatedJson(
+      { success: false, error: 'Unable to load watchlist status' },
+      { status: 500 }
     );
-    if (!statusMap[identityKey]) {
-      statusMap[identityKey] = true;
-    }
   }
-
-  return authenticatedJson(statusMap);
 }

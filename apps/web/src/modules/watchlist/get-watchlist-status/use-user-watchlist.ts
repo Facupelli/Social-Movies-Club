@@ -1,13 +1,13 @@
 import { queryOptions } from '@tanstack/react-query';
 import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
-import type { WatchlistStatusMap } from './watchlist-status.types';
+import type { WatchlistStatusMap } from '@/modules/watchlist/watchlist.types';
 
 export const watchlistStatusQueryKeys = {
   map: (viewerUserId: string | undefined) =>
     personalizedQueryKeys.resource(viewerUserId, 'watchlist-status'),
 } as const;
 
-async function getUserWatchlist(
+async function getViewerWatchlistStatusMap(
   signal?: AbortSignal
 ): Promise<WatchlistStatusMap> {
   const response = await fetch('/api/user/watchlist', {
@@ -15,17 +15,22 @@ async function getUserWatchlist(
     signal,
   });
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    throw new Error('Unable to load watchlist status');
   }
   return response.json();
 }
 
-const getUserWatchlistQueryOptions = (userId: string | undefined) =>
-  queryOptions({
-    queryKey: watchlistStatusQueryKeys.map(userId),
-    queryFn: ({ signal }) => getUserWatchlist(signal),
-    enabled: Boolean(userId),
-    refetchOnWindowFocus: false,
+export function getWatchlistStatusQueryOptions(
+  viewerUserId: string | undefined
+) {
+  return queryOptions({
+    queryKey: watchlistStatusQueryKeys.map(viewerUserId),
+    queryFn: ({ signal }) => getViewerWatchlistStatusMap(signal),
+    enabled: Boolean(viewerUserId),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
+}
 
-export { getUserWatchlistQueryOptions, getUserWatchlist };
+export { getViewerWatchlistStatusMap };
