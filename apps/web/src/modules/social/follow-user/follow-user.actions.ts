@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
+import { refresh } from 'next/cache';
 import { validateFollowUser } from '@/modules/account/user-validation';
 import {
   followUser,
@@ -8,18 +8,15 @@ import {
 } from '@/modules/social/follow-user/follow-user';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
-import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 
-function revalidateFollowTags(userId: string, followedUserId: string): void {
-  revalidateTag(
-    NEXT_CACHE_TAGS.getIsFollowingUser(userId, followedUserId),
-    'max'
-  );
-  revalidateTag(
-    NEXT_CACHE_TAGS.getIsFollowingUserByProfile(followedUserId),
-    'max'
-  );
-  revalidateTag(NEXT_CACHE_TAGS.getIsFollowingUserBySession(userId), 'max');
+function getValidatedTargetUserId(formData: FormData, viewerUserId: string) {
+  const { followedUserId } = validateFollowUser(formData);
+
+  if (followedUserId === viewerUserId) {
+    throw new Error('Users cannot follow themselves');
+  }
+
+  return followedUserId;
 }
 
 export async function followUserAction(
@@ -27,14 +24,16 @@ export async function followUserAction(
   formData: FormData
 ): Promise<ApiResponse<void>> {
   return await withAuth(async (session) => {
-    const { followedUserId } = validateFollowUser(formData);
-
     const result = await execute<void>(async () => {
+      const followedUserId = getValidatedTargetUserId(
+        formData,
+        session.user.id
+      );
       await followUser(session.user.id, followedUserId);
     });
 
     if (result.success) {
-      revalidateFollowTags(session.user.id, followedUserId);
+      refresh();
     }
 
     return result;
@@ -46,14 +45,16 @@ export async function unfollowUserAction(
   formData: FormData
 ): Promise<ApiResponse<void>> {
   return await withAuth(async (session) => {
-    const { followedUserId } = validateFollowUser(formData);
-
     const result = await execute<void>(async () => {
+      const followedUserId = getValidatedTargetUserId(
+        formData,
+        session.user.id
+      );
       await unfollowUser(session.user.id, followedUserId);
     });
 
     if (result.success) {
-      revalidateFollowTags(session.user.id, followedUserId);
+      refresh();
     }
 
     return result;

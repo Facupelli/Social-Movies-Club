@@ -1,12 +1,9 @@
-import { headers } from 'next/headers';
-import { auth } from '@/platform/auth/auth';
+import { getServerSession } from '@/platform/auth/get-server-session';
 
 export async function withAuth<T>(
   action: (session: { user: { id: string } }) => Promise<T>
 ): Promise<T | { success: false; error: string }> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   if (!session) {
     return { success: false, error: 'Unauthorized' };

@@ -4,14 +4,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { UpsertUsernameDialog } from '@/modules/account/update-username/upsert-username-dialog';
-import {
-  getIsFollowingUser,
-  getUserProfile,
-} from '@/modules/profiles/view-profile/get-user-info';
+import { getPublicProfile } from '@/modules/profiles/view-profile/profile';
 import ProfileNav from '@/modules/profiles/view-profile/profile-nav';
 import { ProfileSkeleton } from '@/modules/profiles/view-profile/profile-skeleton';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
-import { getFollowSummary } from '@/modules/social/get-follow-summary/follow-summary.pg';
+import { getIsFollowingUser } from '@/modules/social/get-follow-status/get-follow-status';
+import { getFollowSummary } from '@/modules/social/get-follow-summary/get-follow-summary';
 import { getServerSession } from '@/platform/auth/get-server-session';
 
 export default async function ProfileLayout(
@@ -54,13 +52,12 @@ export default async function ProfileLayout(
 }
 
 async function getUserInfo(profileUserId: string, sessionUserId: string) {
-  const profileUserPromise = getUserProfile(profileUserId);
-
+  const profileUserPromise = getPublicProfile(profileUserId);
   const profileFollowsInfoPromise = getFollowSummary(profileUserId);
-  const isFollowingUserPromise = getIsFollowingUser(
-    sessionUserId,
-    profileUserId
-  );
+  const isFollowingUserPromise =
+    sessionUserId === profileUserId
+      ? Promise.resolve(false)
+      : getIsFollowingUser(sessionUserId, profileUserId);
 
   const [profileUser, profileFollowsInfo, isFollowing] = await Promise.all([
     profileUserPromise,

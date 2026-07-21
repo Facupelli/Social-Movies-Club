@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ZodError } from 'zod';
 import { validateUpdateUsername } from '@/modules/account/user-validation';
@@ -11,7 +10,6 @@ import {
   type ApiResponse,
   execute,
 } from '@/shared/http/safe-execute';
-import { NEXT_CACHE_TAGS } from '@/shared/utilities/app.constants';
 import { persistUsername } from './username.pg';
 
 const USERNAME_TAKEN_ERROR = 'Ese nombre de usuario ya está en uso.';
@@ -49,10 +47,6 @@ export async function updateUsername(
   return await withAuth(async (session) => {
     const result = await validateAndPersistUsername(session.user.id, formData);
 
-    if (result.success) {
-      revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id), 'max');
-    }
-
     return result;
   });
 }
@@ -68,7 +62,6 @@ export async function createUsername(
       return result;
     }
 
-    revalidateTag(NEXT_CACHE_TAGS.getUserProfile(session.user.id), 'max');
     redirect('/');
   });
 }
