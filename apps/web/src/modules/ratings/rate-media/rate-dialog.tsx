@@ -22,7 +22,7 @@ import { authClient } from '@/platform/auth/auth-client';
 import {
   invalidateAfterRating,
   optimisticallyRateMedia,
-} from '@/platform/react-query/mutation-cache';
+} from '@/modules/ratings/rate-media/rating-mutation-cache';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
 import type { ApiResponse } from '@/shared/http/safe-execute';

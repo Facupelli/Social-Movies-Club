@@ -1,6 +1,11 @@
 import { queryOptions } from '@tanstack/react-query';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 import type { WatchlistStatusMap } from './watchlist-status.types';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+
+export const watchlistStatusQueryKeys = {
+  map: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'watchlist-status'),
+} as const;
 
 async function getUserWatchlist(
   signal?: AbortSignal
@@ -17,7 +22,7 @@ async function getUserWatchlist(
 
 const getUserWatchlistQueryOptions = (userId: string | undefined) =>
   queryOptions({
-    queryKey: QUERY_KEYS.getUserWatchlist(userId),
+    queryKey: watchlistStatusQueryKeys.map(userId),
     queryFn: ({ signal }) => getUserWatchlist(signal),
     enabled: Boolean(userId),
     refetchOnWindowFocus: false,

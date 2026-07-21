@@ -3,7 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { authClient } from '@/platform/auth/auth-client';
 import type { ProfileSearchResult } from '@/modules/profiles/search-profiles/profile-search.pg';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
+
+export const profileSearchQueryKeys = {
+  results: (viewerUserId: string | undefined, query: string) =>
+    personalizedQueryKeys.resource(viewerUserId, 'profile-search', { query }),
+} as const;
 
 async function getUsersByQuery(
   query: string,
@@ -22,11 +27,12 @@ async function getUsersByQuery(
 
 const useSearchUsers = (query: string) => {
   const { data: session } = authClient.useSession();
+  const viewerUserId = session?.user.id;
 
   return useQuery({
-    queryKey: QUERY_KEYS.getSearchUsers(query),
+    queryKey: profileSearchQueryKeys.results(viewerUserId, query),
     queryFn: ({ signal }) => getUsersByQuery(query, signal),
-    enabled: Boolean(session?.user.id) && query !== '',
+    enabled: Boolean(viewerUserId) && query !== '',
     refetchOnWindowFocus: false,
   });
 };

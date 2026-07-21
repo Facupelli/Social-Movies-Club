@@ -1,8 +1,13 @@
 'use client';
 
 import { infiniteQueryOptions } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 import type { AggregatedFeedItem } from './feed.types';
+
+export const aggregatedTimelineQueryKeys = {
+  infinite: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'timeline', 'aggregated', 'infinite'),
+} as const;
 
 async function getUserFeed({
   cursor,
@@ -25,7 +30,7 @@ async function getUserFeed({
 
 const getUserAggregatedFeedQueryOptions = (userId: string | undefined) =>
   infiniteQueryOptions({
-    queryKey: QUERY_KEYS.getUserAggregatedFeed(userId),
+    queryKey: aggregatedTimelineQueryKeys.infinite(userId),
     queryFn: async ({ pageParam = null, signal }) =>
       await getUserFeed({ cursor: pageParam, signal }),
     initialPageParam: null as string | null,

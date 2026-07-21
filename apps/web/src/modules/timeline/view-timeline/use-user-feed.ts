@@ -1,6 +1,11 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 import type { FeedItem } from './feed.types';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+
+export const timelineQueryKeys = {
+  chronological: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'timeline', 'chronological', 'infinite'),
+} as const;
 
 type UserFeedPage = {
   items: FeedItem[];
@@ -40,7 +45,7 @@ const getUserFeedQueryOptions = (
   loadPage: LoadUserFeedPage = getUserFeed
 ) =>
   infiniteQueryOptions({
-    queryKey: QUERY_KEYS.getUserFeed(userId),
+    queryKey: timelineQueryKeys.chronological(userId),
     queryFn: ({ pageParam = null, signal }) =>
       loadPage({ cursor: pageParam, signal }),
     initialPageParam: null as string | null,

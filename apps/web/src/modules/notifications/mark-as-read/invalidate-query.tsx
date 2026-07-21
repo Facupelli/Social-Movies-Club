@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { getUserNotificationsCountQueryOptions } from '@/modules/notifications/count-unread/use-user-notifications-count';
 import { authClient } from '@/platform/auth/auth-client';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 import { markNotiAsRead } from './mark-noti-as-read';
 
 export function InvalidateNotificationsQuery() {
@@ -16,7 +16,7 @@ export function InvalidateNotificationsQuery() {
     onSuccess: (data, mutationUserId) => {
       if (data.success) {
         queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.getUserNotificationsCount(mutationUserId),
+          queryKey: getUserNotificationsCountQueryOptions(mutationUserId).queryKey,
         });
       }
     },

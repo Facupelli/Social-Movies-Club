@@ -4,7 +4,8 @@ import {
   getMediaIdentityKey,
   type MediaIdentityKey,
 } from '@/modules/media-catalog/media-identity';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
+import { profileRatingsQueryKeys } from '@/modules/ratings/list-profile-ratings/use-user-movies';
 
 type UserRatingsCache = Record<
   MediaIdentityKey,
@@ -21,10 +22,10 @@ export async function invalidateAfterRating(
 ): Promise<void> {
   await Promise.all([
     queryClient.invalidateQueries({
-      queryKey: QUERY_KEYS.getUserRatings(userId),
+      queryKey: ratingStatusQueryKeys.map(userId),
     }),
     queryClient.invalidateQueries({
-      queryKey: QUERY_KEYS.getUserMoviesScope(userId),
+      queryKey: profileRatingsQueryKeys.viewerScope(userId),
     }),
   ]);
 }
@@ -45,7 +46,7 @@ export async function optimisticallyRateMedia(
     watchedDate: string;
   }
 ): Promise<() => void> {
-  const ratingsKey = QUERY_KEYS.getUserRatings(userId);
+  const ratingsKey = ratingStatusQueryKeys.map(userId);
 
   await queryClient.cancelQueries({ queryKey: ratingsKey });
 

@@ -1,5 +1,10 @@
 import { queryOptions } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
+
+export const notificationQueryKeys = {
+  unreadCount: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'notifications', 'unread-count'),
+} as const;
 
 async function getUserNotificationsCount(
   signal?: AbortSignal
@@ -16,7 +21,7 @@ async function getUserNotificationsCount(
 
 const getUserNotificationsCountQueryOptions = (userId: string | undefined) =>
   queryOptions({
-    queryKey: QUERY_KEYS.getUserNotificationsCount(userId),
+    queryKey: notificationQueryKeys.unreadCount(userId),
     queryFn: ({ signal }) => getUserNotificationsCount(signal),
     enabled: Boolean(userId),
     refetchOnWindowFocus: false,

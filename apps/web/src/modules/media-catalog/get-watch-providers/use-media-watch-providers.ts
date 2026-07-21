@@ -2,8 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { WatchProviderResult } from '@/platform/tmdb/types/watch-provider';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 import type { MediaType } from '../media.type';
+
+export const watchProviderQueryKeys = {
+  detail: (mediaId: number, type: MediaType) =>
+    ['watch-providers', { mediaId, type }] as const,
+} as const;
 
 async function getMovieWatchProviders(
   mediaId: number,
@@ -22,7 +26,7 @@ export function useMediaWatchProviders(
   fetch = false
 ) {
   return useQuery({
-    queryKey: QUERY_KEYS.getWatchProviders(mediaId, type),
+    queryKey: watchProviderQueryKeys.detail(mediaId, type),
     queryFn: () => getMovieWatchProviders(mediaId, type),
     enabled: fetch,
     refetchOnWindowFocus: false,

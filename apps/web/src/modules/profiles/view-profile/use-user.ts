@@ -3,7 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { authClient } from '@/platform/auth/auth-client';
 import type { User } from '@/platform/database/postgres/schema';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
+
+export const currentViewerQueryKeys = {
+  account: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'account'),
+} as const;
 
 async function getUser(signal?: AbortSignal): Promise<User | null> {
   const response = await fetch('/api/user', { cache: 'no-store', signal });
@@ -18,7 +23,7 @@ const useUser = () => {
   const userId = session?.user.id;
 
   return useQuery({
-    queryKey: QUERY_KEYS.getUser(userId),
+    queryKey: currentViewerQueryKeys.account(userId),
     queryFn: ({ signal }) => getUser(signal),
     enabled: Boolean(userId),
     refetchOnWindowFocus: false,

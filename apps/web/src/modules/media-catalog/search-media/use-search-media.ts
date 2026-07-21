@@ -2,7 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+
+export const mediaSearchQueryKeys = {
+  results: (query: string) => ['media-search', { query }] as const,
+} as const;
 
 async function getMediaByQuery(query: string): Promise<MovieView[]> {
   const searchParams = new URLSearchParams({ q: query });
@@ -16,7 +19,7 @@ async function getMediaByQuery(query: string): Promise<MovieView[]> {
 
 const useSearchMedia = (query: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.getSearchMedia(query),
+    queryKey: mediaSearchQueryKeys.results(query),
     queryFn: () => getMediaByQuery(query),
     enabled: query !== '',
     refetchOnWindowFocus: false,

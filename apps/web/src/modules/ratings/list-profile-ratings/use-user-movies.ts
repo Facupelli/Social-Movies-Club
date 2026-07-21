@@ -1,12 +1,37 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 import { userMoviesFiltersUrlParser } from './filters/filter-user-movies-parser';
 import { userMoviesFiltersTransformer } from './filters/filter-user-movies-transformer';
 import type {
   UserMoviesClientFilters,
   UserMoviesServerFilters,
 } from './profile-ratings.types';
+
+export const profileRatingsQueryKeys = {
+  viewerScope: (viewerUserId: string | undefined) =>
+    personalizedQueryKeys.resource(viewerUserId, 'profile-ratings'),
+  profileScope: (
+    viewerUserId: string | undefined,
+    profileUserId: string
+  ) => [
+    ...profileRatingsQueryKeys.viewerScope(viewerUserId),
+    { profileUserId },
+  ] as const,
+  infinite: (
+    viewerUserId: string | undefined,
+    filters: UserMoviesClientFilters & { userId: string }
+  ) => [
+    ...profileRatingsQueryKeys.profileScope(viewerUserId, filters.userId),
+    'infinite',
+    {
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+      typeFilter: filters.typeFilter,
+      bothRated: filters.bothRated,
+    },
+  ] as const,
+} as const;
 
 type UserMoviesPage = {
   nextCursor: number | null;
@@ -47,7 +72,7 @@ const getUserMoviesQueryOptions = (
   loadPage: LoadUserMoviesPage = getUserMovies
 ) =>
   infiniteQueryOptions({
-    queryKey: QUERY_KEYS.getUserMovies(viewerUserId, filters),
+    queryKey: profileRatingsQueryKeys.infinite(viewerUserId, filters),
     queryFn: ({ pageParam = 0, signal }) => {
       const serverFilters = userMoviesFiltersTransformer.clientToServer(
         filters,

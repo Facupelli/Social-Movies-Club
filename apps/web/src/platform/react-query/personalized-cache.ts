@@ -1,11 +1,11 @@
 import type { Query, QueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
+import { PERSONALIZED_QUERY_PREFIX } from '@/platform/react-query/personalized-query-keys';
 
 function isPersonalizedQuery(query: Query, exceptUserId?: string): boolean {
   const [scope, userId] = query.queryKey;
 
   return (
-    scope === QUERY_KEYS.VIEWER[0] &&
+    scope === PERSONALIZED_QUERY_PREFIX &&
     (exceptUserId === undefined || userId !== exceptUserId)
   );
 }

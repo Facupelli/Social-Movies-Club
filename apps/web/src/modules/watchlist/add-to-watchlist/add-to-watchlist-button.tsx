@@ -11,7 +11,6 @@ import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsOwner } from '@/shared/hooks/use-is-owner';
 import type { ApiResponse } from '@/shared/http/safe-execute';
-import { QUERY_KEYS } from '@/shared/utilities/app.constants';
 import { cn } from '@/shared/utilities/utils';
 import { addMovieToWatchlist } from './add-movie';
 
@@ -47,7 +46,7 @@ export function AddToWatchlistButton({
     const result = await addMovieToWatchlist(formData);
     if (result.success && session?.user.id) {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.getUserWatchlist(session.user.id),
+        queryKey: getUserWatchlistQueryOptions(session.user.id).queryKey,
       });
     }
 
@@ -61,7 +60,7 @@ export function AddToWatchlistButton({
     const result = await removeMovieFromWatchlist(_state, formData);
     if (result.success && session?.user.id) {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.getUserWatchlist(session.user.id),
+        queryKey: getUserWatchlistQueryOptions(session.user.id).queryKey,
       });
     }
 
