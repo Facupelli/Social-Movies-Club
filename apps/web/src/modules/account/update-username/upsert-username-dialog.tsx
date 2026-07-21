@@ -2,9 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { UsernameField } from '@/modules/account/username-field';
-import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
-import { useIsOwner } from '@/shared/hooks/use-is-owner';
 import type { ApiResponse } from '@/shared/http/safe-execute';
 import { Button } from '@/shared/ui/button';
 import {
@@ -19,78 +17,88 @@ import {
 } from '@/shared/ui/dialog';
 import { updateUsername } from './update-username';
 
+const INITIAL_STATE: ApiResponse<void> = { success: false, error: '' };
+
 export function UpsertUsernameDialog({
+  canEdit,
   username,
 }: {
+  canEdit: boolean;
   username: string | null;
 }) {
-  const { data: session } = authClient.useSession();
   const [open, setOpen] = useState(false);
-
-  const { isOwner } = useIsOwner();
-
-  const handleUpdateUsername = async (
-    _state: ApiResponse<void>,
-    formData: FormData
-  ) => {
-    const result = await updateUsername(formData);
-    if (result.success) {
-      setOpen(false);
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(handleUpdateUsername, {
-    success: false,
-    error: '',
-  });
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild className="cursor-pointer">
         <Button
           className="px-0 h-auto"
-          disabled={!(session && isOwner)}
+          disabled={!canEdit}
           size="sm"
           variant="link"
         >
-          {username ? username : 'Crear nombre de usuario'}
+          {username ?? 'Crear nombre de usuario'}
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {username ? 'Actualizar' : 'Crear'} nombre de usuario
-          </DialogTitle>
-          <DialogDescription>
-            Al crear un nombre de usuario, los demás usuarios podrán buscarte en
-            el buscador principal escribiendo tu @ para seguirte!
-          </DialogDescription>
-
-          <form className="pt-4">
-            <UsernameField
-              currentUsername={username}
-              error={state.success ? undefined : state.error}
-            />
-
-            <DialogFooter className="gap-2 pt-4 md:gap-6">
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancelar
-                </Button>
-              </DialogClose>
-
-              <SubmitButton
-                formAction={action}
-                loadingText={username ? 'Actualizando' : 'Creando'}
-              >
-                {username ? 'Actualizar' : 'Crear'}
-              </SubmitButton>
-            </DialogFooter>
-          </form>
-        </DialogHeader>
-      </DialogContent>
+      {open && (
+        <UsernameDialogContent
+          close={() => setOpen(false)}
+          username={username}
+        />
+      )}
     </Dialog>
+  );
+}
+
+function UsernameDialogContent({
+  close,
+  username,
+}: {
+  close: () => void;
+  username: string | null;
+}) {
+  const handleUpdateUsername = async (
+    _state: ApiResponse<void>,
+    formData: FormData
+  ) => {
+    const result = await updateUsername(formData);
+    if (result.success) {
+      close();
+    }
+    return result;
+  };
+  const [state, action] = useActionState(handleUpdateUsername, INITIAL_STATE);
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>
+          {username ? 'Actualizar' : 'Crear'} nombre de usuario
+        </DialogTitle>
+        <DialogDescription>
+          Al crear un nombre de usuario, los demás usuarios podrán buscarte en
+          el buscador principal escribiendo tu @ para seguirte!
+        </DialogDescription>
+
+        <form action={action} className="pt-4">
+          <UsernameField
+            currentUsername={username}
+            error={state.success ? undefined : state.error}
+          />
+
+          <DialogFooter className="gap-2 pt-4 md:gap-6">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancelar
+              </Button>
+            </DialogClose>
+
+            <SubmitButton loadingText={username ? 'Actualizando' : 'Creando'}>
+              {username ? 'Actualizar' : 'Crear'}
+            </SubmitButton>
+          </DialogFooter>
+        </form>
+      </DialogHeader>
+    </DialogContent>
   );
 }

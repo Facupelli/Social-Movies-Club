@@ -1,9 +1,8 @@
+import 'server-only';
+
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
-import {
-  type User,
-  users,
-} from '@/platform/database/postgres/schema';
+import { type User, users } from '@/platform/database/postgres/schema';
 
 export type PublicProfile = Pick<User, 'id' | 'name' | 'image' | 'username'>;
 

@@ -111,7 +111,10 @@ async function UserInfo({
       </div>
       <div>
         <p className="font-bold">{profileUser.name}</p>
-        <UpsertUsernameDialog username={profileUser.username} />
+        <UpsertUsernameDialog
+          canEdit={sessionUserId === profileUser.id}
+          username={profileUser.username}
+        />
       </div>
       <div className="flex items-center gap-2 font-bold text-sm">
         <p>

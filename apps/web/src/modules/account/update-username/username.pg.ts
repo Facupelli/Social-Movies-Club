@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { users } from '@/platform/database/postgres/schema';
