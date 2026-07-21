@@ -3,6 +3,9 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 
+export const MIN_MEDIA_SEARCH_QUERY_LENGTH = 3;
+export const MAX_MEDIA_SEARCH_QUERY_LENGTH = 200;
+
 export function normalizeMediaSearchQuery(query: string): string {
   return query.trim();
 }
@@ -17,7 +20,10 @@ async function getMediaByQuery(
   signal?: AbortSignal
 ): Promise<MovieView[]> {
   const normalizedQuery = normalizeMediaSearchQuery(query);
-  if (normalizedQuery.length < 3) {
+  if (
+    normalizedQuery.length < MIN_MEDIA_SEARCH_QUERY_LENGTH ||
+    normalizedQuery.length > MAX_MEDIA_SEARCH_QUERY_LENGTH
+  ) {
     return [];
   }
 
@@ -38,7 +44,9 @@ export function getMediaSearchQueryOptions(query: string) {
   return queryOptions({
     queryKey: mediaSearchQueryKeys.results(normalizedQuery),
     queryFn: ({ signal }) => getMediaByQuery(normalizedQuery, signal),
-    enabled: normalizedQuery.length >= 3,
+    enabled:
+      normalizedQuery.length >= MIN_MEDIA_SEARCH_QUERY_LENGTH &&
+      normalizedQuery.length <= MAX_MEDIA_SEARCH_QUERY_LENGTH,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,

@@ -23,7 +23,9 @@ const getUserRatingsQueryOptions = (userId: string | undefined) =>
     queryKey: ratingStatusQueryKeys.map(userId),
     queryFn: ({ signal }) => getUserRatings(signal),
     enabled: Boolean(userId),
+    staleTime: 30_000,
     refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 
 export { getUserRatingsQueryOptions, getUserRatings };

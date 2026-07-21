@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { createFollowNotification as createFollowNotificationRecord } from './follow-notification.pg';
 import { createFollowNotification } from './notification.factory';
 

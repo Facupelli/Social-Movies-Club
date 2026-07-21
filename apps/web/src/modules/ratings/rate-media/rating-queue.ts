@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { PersistedRating } from './rating.pg';
 
 export async function dispatchRatingToQueue(

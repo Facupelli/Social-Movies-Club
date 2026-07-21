@@ -1,17 +1,14 @@
-import { headers } from 'next/headers';
 import { ZodError } from 'zod';
 import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
 import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
-import { auth } from '@/platform/auth/auth';
+import { getServerSession } from '@/platform/auth/get-server-session';
 import {
   authenticatedJson,
   unauthorizedJson,
 } from '@/shared/http/authenticated-response';
 
 export async function GET(request: Request) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   if (!session) {
     return unauthorizedJson();

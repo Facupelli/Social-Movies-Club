@@ -2,6 +2,7 @@
 
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import {
+  MAX_PROFILE_SEARCH_QUERY_LENGTH,
   MIN_PROFILE_SEARCH_QUERY_LENGTH,
   normalizeProfileSearchQuery,
 } from '@/modules/profiles/search-profiles/profile-search-query';
@@ -22,7 +23,10 @@ async function getUsersByQuery(
   signal?: AbortSignal
 ): Promise<ProfileSearchResult[]> {
   const normalizedQuery = normalizeProfileSearchQuery(query);
-  if (normalizedQuery.length < MIN_PROFILE_SEARCH_QUERY_LENGTH) {
+  if (
+    normalizedQuery.length < MIN_PROFILE_SEARCH_QUERY_LENGTH ||
+    normalizedQuery.length > MAX_PROFILE_SEARCH_QUERY_LENGTH
+  ) {
     return [];
   }
 
@@ -47,7 +51,9 @@ export function getProfileSearchQueryOptions(
   return queryOptions({
     queryKey: profileSearchQueryKeys.results(viewerUserId, normalizedQuery),
     queryFn: ({ signal }) => getUsersByQuery(normalizedQuery, signal),
-    enabled: normalizedQuery.length >= MIN_PROFILE_SEARCH_QUERY_LENGTH,
+    enabled:
+      normalizedQuery.length >= MIN_PROFILE_SEARCH_QUERY_LENGTH &&
+      normalizedQuery.length <= MAX_PROFILE_SEARCH_QUERY_LENGTH,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,

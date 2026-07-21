@@ -1,3 +1,4 @@
+import z from 'zod';
 import {
   parseProfileRatingsFilters,
   toProfileRatingsRepositoryFilters,
@@ -10,7 +11,6 @@ import {
   unauthorizedJson,
 } from '@/shared/http/authenticated-response';
 
-const VALID_PROFILE_ID = /^\S{1,255}$/;
 const VALID_PAGE = /^\d+$/;
 
 export async function GET(
@@ -22,8 +22,9 @@ export async function GET(
     return unauthorizedJson();
   }
 
-  const { id: profileUserId } = await params;
-  if (!VALID_PROFILE_ID.test(profileUserId)) {
+  const { id: rawProfileUserId } = await params;
+  const profileUserId = z.uuid().safeParse(rawProfileUserId);
+  if (!profileUserId.success) {
     return authenticatedJson({ error: 'Invalid profile ID' }, { status: 400 });
   }
 
@@ -42,7 +43,7 @@ export async function GET(
 
   try {
     const result = await loadProfileRatingsPage({
-      profileUserId,
+      profileUserId: profileUserId.data,
       viewerUserId: session.user.id,
       filters: toProfileRatingsRepositoryFilters(
         filters,

@@ -1,7 +1,7 @@
 import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 import type { UserRatings } from '@/modules/ratings/list-profile-ratings/profile-ratings.types';
-import type { UserWatchlist } from '@/modules/watchlist/view-watchlist/watchlist.pg';
+import type { WatchlistRow } from '@/modules/watchlist/watchlist.types';
 
 // From TMDb API call
 export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {
@@ -33,7 +33,7 @@ export function dbMovieToView(r: UserRatings): MovieView {
 }
 
 // From Watchlist local DB table
-export function dbWatchlistMovieToView(w: UserWatchlist): MovieView {
+export function dbWatchlistMovieToView(w: WatchlistRow): MovieView {
   return {
     tmdbId: w.movieTmdbId,
     title: w.movieTitle,

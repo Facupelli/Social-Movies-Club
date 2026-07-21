@@ -93,11 +93,3 @@ export function toProfileRatingsRepositoryFilters(
 ): ProfileRatingsRepositoryFilters {
   return { ...filters, limit, offset: page * limit };
 }
-
-// Kept as a small compatibility facade for existing imports.
-export const userMoviesFiltersUrlParser = {
-  parseSearchParams: parseProfileRatingsFilters,
-  parseUrl: (url: URL) => parseProfileRatingsFilters(url.searchParams),
-  toSearchParams: (filters: ProfileRatingsFilters) =>
-    serializeProfileRatingsFilters(filters),
-};

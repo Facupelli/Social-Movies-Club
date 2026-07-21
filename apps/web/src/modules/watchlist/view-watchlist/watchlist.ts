@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { dbWatchlistMovieToView } from '@/modules/media-catalog/get-media-details/media.adapters';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 import { getProfileWatchlist } from './watchlist.pg';

@@ -1,23 +1,11 @@
 import { sql } from 'drizzle-orm';
-import type { MediaType } from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, watchlist } from '@/platform/database/postgres/schema';
-
-export type UserWatchlist = {
-  movieId: string;
-  movieTmdbId: number;
-  movieTitle: string;
-  movieOverview: string;
-  moviePosterPath: string;
-  movieBackdropPath: string;
-  movieYear: string;
-  movieType: MediaType;
-  movieRuntime?: number;
-};
+import type { WatchlistRow } from '@/modules/watchlist/watchlist.types';
 
 export async function getProfileWatchlist(
   userId: string
-): Promise<UserWatchlist[]> {
+): Promise<WatchlistRow[]> {
   return await withDatabase(async (db) => {
     const query = sql`
       SELECT
@@ -36,7 +24,7 @@ export async function getProfileWatchlist(
       ORDER BY w.created_at DESC;
     `;
 
-    const { rows } = await db.execute<UserWatchlist>(query);
+    const { rows } = await db.execute<WatchlistRow>(query);
     return rows;
   });
 }
