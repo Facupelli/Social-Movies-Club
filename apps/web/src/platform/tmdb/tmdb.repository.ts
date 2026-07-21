@@ -1,27 +1,30 @@
+import type { z } from 'zod';
 import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
   MediaType,
   TMDbMediaMultiSearch,
   TMDbMovieSearch,
 } from '@/modules/media-catalog/media.type';
-import { cache } from '@/platform/cache/cache';
-import type { MovieDetailApiResponse } from '@/platform/tmdb/types/detail-movie';
-import type { SerieDetailApiResponse } from '@/platform/tmdb/types/detail-serie';
-import type {
-  MediaResult,
-  MultiSearchApiResponse,
-  TvResult,
-} from '@/platform/tmdb/types/multi-search';
-import type {
-  SearchMovieApiResponse,
-  SearchMovieQueryParams,
-  SearchMovieResult,
-} from '@/platform/tmdb/types/search-movie';
-import type {
-  TvShowSearchResponse,
-  TvShowSummary,
-} from '@/platform/tmdb/types/search-tv';
-import type { WatchProviderApiResponse } from '@/platform/tmdb/types/watch-provider';
+import { getCache } from '@/platform/cache/cache';
+import {
+  buildTmdbCacheKey,
+  normalizeTmdbSearchQuery,
+  TMDB_CACHE_TTL_SECONDS,
+} from '@/platform/tmdb/tmdb-cache-policy';
+import {
+  movieDetailResponseSchema,
+  movieSearchResponseSchema,
+  multiSearchResponseSchema,
+  tvDetailResponseSchema,
+  tvSearchResponseSchema,
+  watchProviderResponseSchema,
+} from '@/platform/tmdb/tmdb.schemas';
+import type { SearchMovieQueryParams } from '@/platform/tmdb/types/search-movie';
+
+const DEFAULT_LANGUAGE = 'es-AR';
+const DEFAULT_REGION = 'AR';
+const DEFAULT_PAGE = 1;
+const INCLUDE_ADULT = false;
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -41,16 +44,6 @@ export interface MultiSearchResult {
   page: number;
 }
 
-function isTvResult(result: MediaResult): result is TvResult {
-  return result.media_type === 'tv';
-}
-
-function isSupportedMediaResult(
-  result: MediaResult
-): result is MediaResult & { media_type: MediaType } {
-  return result.media_type === 'movie' || result.media_type === 'tv';
-}
-
 export class TmdbRepository implements ITmdbRepository {
   private readonly baseUrl = 'https://api.themoviedb.org/3';
 
@@ -59,47 +52,50 @@ export class TmdbRepository implements ITmdbRepository {
   async multiSearch(
     params: SearchMovieQueryParams
   ): Promise<MultiSearchResult> {
-    const {
-      query,
-      language = 'es-AR',
-      page = 1,
-      // region,
-      // year,
-    } = params;
-
-    const json: MultiSearchApiResponse =
-      await this.request<MultiSearchApiResponse>('/search/multi', {
-        query,
+    const query = normalizeTmdbSearchQuery(params.query);
+    const language = params.language ?? DEFAULT_LANGUAGE;
+    const page = params.page ?? DEFAULT_PAGE;
+    const json = await this.request({
+      endpoint: '/search/multi',
+      query: {
+        include_adult: String(INCLUDE_ADULT),
         language,
         page: String(page),
-      });
+        query,
+      },
+      cacheKey: buildTmdbCacheKey('search', {
+        includeAdult: INCLUDE_ADULT,
+        language,
+        page,
+        query,
+        searchType: 'multi',
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.search,
+      schema: multiSearchResponseSchema,
+    });
 
-    const data: TMDbMediaMultiSearch[] = json.results
-      .filter(isSupportedMediaResult)
-      .map((r: MediaResult) => {
-        if (isTvResult(r)) {
-          return {
-            id: r.id,
-            title: r.name,
-            posterPath: r.poster_path ?? null,
-            backdropPath: r.backdrop_path ?? null,
-            year: r.first_air_date?.split('-')[0],
-            overview: r.overview,
-            type: r.media_type as MediaType,
-          };
-        }
-
-        return {
-          id: r.id,
-          title: r.title,
-          posterPath: r.poster_path ?? null,
-          backdropPath: r.backdrop_path ?? null,
-          year: r.release_date?.split('-')[0],
-          overview: r.overview,
-          type: r.media_type as MediaType,
-          runtime: r.runtime ?? null,
-        };
-      });
+    const data: TMDbMediaMultiSearch[] = json.results.map((result) =>
+      result.media_type === 'tv'
+        ? {
+            id: result.id,
+            title: result.name,
+            posterPath: result.poster_path ?? '',
+            backdropPath: result.backdrop_path ?? '',
+            year: result.first_air_date.split('-')[0],
+            overview: result.overview,
+            type: 'tv',
+          }
+        : {
+            id: result.id,
+            title: result.title,
+            posterPath: result.poster_path ?? '',
+            backdropPath: result.backdrop_path ?? '',
+            year: result.release_date.split('-')[0],
+            overview: result.overview,
+            type: 'movie',
+            runtime: result.runtime ?? undefined,
+          }
+    );
 
     return {
       data,
@@ -112,223 +108,213 @@ export class TmdbRepository implements ITmdbRepository {
   async searchMovies(
     params: SearchMovieQueryParams
   ): Promise<SearchMoviesResult> {
-    const {
-      query,
-      language = 'es-AR',
-      page = 1,
-      // region,
-      // year,
-    } = params;
-
-    const json: SearchMovieApiResponse =
-      await this.request<SearchMovieApiResponse>('/search/movie', {
-        query,
-        language,
-        page: String(page),
-      });
-
-    const data: TMDbMovieSearch[] = json.results.map(
-      (r: SearchMovieResult) => ({
-        id: r.id,
-        title: r.title,
-        posterPath: r.poster_path ?? null,
-        backdropPath: r.backdrop_path ?? null,
-        year: r.release_date?.split('-')[0],
-        overview: r.overview,
-      })
-    );
-
-    return {
-      data,
-      totalCount: json.total_results,
-      totalPages: json.total_pages,
-      page: json.page,
-    };
+    return await this.searchByType('movie', params);
   }
 
   async searchTvs(params: SearchMovieQueryParams): Promise<SearchMoviesResult> {
-    const {
-      query,
-      language = 'es-AR',
-      page = 1,
-      // region,
-      // year,
-    } = params;
-
-    const json: TvShowSearchResponse = await this.request<TvShowSearchResponse>(
-      '/search/tv',
-      {
-        query,
-        language,
-        page: String(page),
-      }
-    );
-
-    const data: TMDbMovieSearch[] = json.results.map((r: TvShowSummary) => ({
-      id: r.id,
-      title: r.name,
-      posterPath: r.poster_path ?? null,
-      backdropPath: r.backdrop_path ?? null,
-      year: r.first_air_date?.split('-')[0],
-      overview: r.overview,
-    }));
-
-    return {
-      data,
-      totalCount: json.total_results,
-      totalPages: json.total_pages,
-      page: json.page,
-    };
+    return await this.searchByType('tv', params);
   }
 
   async getMovieDetail(
     movieId: number
   ): Promise<{ data: TMDbMediaMultiSearch }> {
-    const json: MovieDetailApiResponse =
-      await this.request<MovieDetailApiResponse>(`/movie/${movieId}`, {
-        language: 'es-AR',
-      });
-
-    const data: TMDbMediaMultiSearch = {
-      id: json.id,
-      title: json.title,
-      posterPath: json.poster_path ?? null,
-      backdropPath: json.backdrop_path ?? null,
-      year: json.release_date.split('-')[0],
-      overview: json.overview,
-      type: 'movie',
-      runtime: json.runtime,
-    };
-
-    // biome-ignore lint/suspicious/noConsole: preserve TMDB response diagnostics
-    console.log('GET MOVIE DETAIL', { data });
+    const json = await this.request({
+      endpoint: `/movie/${movieId}`,
+      query: { language: DEFAULT_LANGUAGE },
+      cacheKey: buildTmdbCacheKey('media-details', {
+        language: DEFAULT_LANGUAGE,
+        mediaId: movieId,
+        mediaType: 'movie',
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.mediaDetails,
+      schema: movieDetailResponseSchema,
+    });
 
     return {
-      data,
+      data: {
+        id: json.id,
+        title: json.title,
+        posterPath: json.poster_path ?? '',
+        backdropPath: json.backdrop_path ?? '',
+        year: json.release_date.split('-')[0],
+        overview: json.overview,
+        type: 'movie',
+        runtime: json.runtime ?? undefined,
+      },
     };
   }
 
   async getTvDetail(serieId: number): Promise<{ data: TMDbMediaMultiSearch }> {
-    const json: SerieDetailApiResponse =
-      await this.request<SerieDetailApiResponse>(`/tv/${serieId}`, {
-        language: 'es-AR',
-      });
-
-    const data: TMDbMediaMultiSearch = {
-      id: json.id,
-      title: json.name,
-      posterPath: json.poster_path ?? null,
-      backdropPath: json.backdrop_path ?? null,
-      year: json.first_air_date.split('-')[0],
-      overview: json.overview,
-      type: 'tv',
-    };
+    const json = await this.request({
+      endpoint: `/tv/${serieId}`,
+      query: { language: DEFAULT_LANGUAGE },
+      cacheKey: buildTmdbCacheKey('media-details', {
+        language: DEFAULT_LANGUAGE,
+        mediaId: serieId,
+        mediaType: 'tv',
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.mediaDetails,
+      schema: tvDetailResponseSchema,
+    });
 
     return {
-      data,
+      data: {
+        id: json.id,
+        title: json.name,
+        posterPath: json.poster_path ?? '',
+        backdropPath: json.backdrop_path ?? '',
+        year: json.first_air_date.split('-')[0],
+        overview: json.overview,
+        type: 'tv',
+      },
     };
   }
 
   async getMovieWatchProviders(
     movieId: number
   ): Promise<WatchProviderResponse> {
-    const json: WatchProviderApiResponse =
-      await this.request<WatchProviderApiResponse>(
-        `/movie/${movieId}/watch/providers`
-      );
-
-    return {
-      data: json.results.AR ?? null,
-    };
+    return await this.getWatchProviders(movieId, 'movie');
   }
 
   async getTvWatchProviders(tvId: number): Promise<WatchProviderResponse> {
-    const json: WatchProviderApiResponse =
-      await this.request<WatchProviderApiResponse>(
-        `/tv/${tvId}/watch/providers`
-      );
+    return await this.getWatchProviders(tvId, 'tv');
+  }
 
+  private async searchByType(
+    type: MediaType,
+    params: SearchMovieQueryParams
+  ): Promise<SearchMoviesResult> {
+    const query = normalizeTmdbSearchQuery(params.query);
+    const language = params.language ?? DEFAULT_LANGUAGE;
+    const page = params.page ?? DEFAULT_PAGE;
+    const requestOptions = {
+      endpoint: `/search/${type}`,
+      query: {
+        include_adult: String(INCLUDE_ADULT),
+        language,
+        page: String(page),
+        query,
+      },
+      cacheKey: buildTmdbCacheKey('search', {
+        includeAdult: INCLUDE_ADULT,
+        language,
+        page,
+        query,
+        searchType: type,
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.search,
+    };
+
+    if (type === 'movie') {
+      const json = await this.request({
+        ...requestOptions,
+        schema: movieSearchResponseSchema,
+      });
+      return {
+        data: json.results.map((result) => ({
+          id: result.id,
+          title: result.title,
+          posterPath: result.poster_path ?? '',
+          backdropPath: result.backdrop_path ?? '',
+          year: result.release_date.split('-')[0],
+          overview: result.overview,
+        })),
+        totalCount: json.total_results,
+        totalPages: json.total_pages,
+        page: json.page,
+      };
+    }
+
+    const json = await this.request({
+      ...requestOptions,
+      schema: tvSearchResponseSchema,
+    });
     return {
-      data: json.results.AR ?? null,
+      data: json.results.map((result) => ({
+        id: result.id,
+        title: result.name,
+        posterPath: result.poster_path ?? '',
+        backdropPath: result.backdrop_path ?? '',
+        year: result.first_air_date.split('-')[0],
+        overview: result.overview,
+      })),
+      totalCount: json.total_results,
+      totalPages: json.total_pages,
+      page: json.page,
     };
   }
 
-  async clearCache(endpoint?: string): Promise<void> {
-    const pattern = endpoint ? `tmdb_cache:${endpoint}:*` : 'tmdb_cache:*';
-    await cache.deleteByPattern(pattern);
+  private async getWatchProviders(
+    mediaId: number,
+    mediaType: MediaType
+  ): Promise<WatchProviderResponse> {
+    const json = await this.request({
+      endpoint: `/${mediaType}/${mediaId}/watch/providers`,
+      cacheKey: buildTmdbCacheKey('watch-providers', {
+        mediaId,
+        mediaType,
+        region: DEFAULT_REGION,
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.watchProviders,
+      schema: watchProviderResponseSchema,
+    });
+    return { data: json.results[DEFAULT_REGION] ?? null };
   }
 
-  private async request<T>(
-    endpoint: string,
-    qs?: Record<string, string>
-  ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(qs)}`;
-    const cacheKey = `tmdb_cache:${endpoint}:${new URLSearchParams(qs).toString()}`;
-
-    // Check cache first
-    const cached = await cache.get<T>(cacheKey);
-    if (cached) {
-      return cached;
+  private async request<TSchema extends z.ZodType>({
+    endpoint,
+    query,
+    cacheKey,
+    ttlSeconds,
+    schema,
+  }: {
+    endpoint: string;
+    query?: Record<string, string>;
+    cacheKey: string;
+    ttlSeconds: number;
+    schema: TSchema;
+  }): Promise<z.output<TSchema>> {
+    if (!this.bearer) {
+      throw new Error('TMDB_ACCESS_TOKEN is required');
     }
 
-    const isLocked = await cache.get('tmdb_rate_limit_lock');
-    if (isLocked) {
-      throw new Error(
-        'TMDB API is currently rate-limited. Please try again later.'
-      );
+    const sharedCache = getCache();
+    try {
+      const cached = await sharedCache.get<unknown>(cacheKey);
+      if (cached !== null) {
+        const parsedCached = schema.safeParse(cached);
+        if (parsedCached.success) {
+          return parsedCached.data;
+        }
+      }
+    } catch {
+      // Cache outages must not make the upstream resource unavailable.
     }
 
-    const res = await fetch(url, {
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    for (const [key, value] of Object.entries(query ?? {})) {
+      url.searchParams.set(key, value);
+    }
+
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.bearer}`,
         'Content-Type': 'application/json;charset=utf-8',
       },
     });
 
-    if (res.status === 429) {
-      const retryAfterHeader = res.headers.get('Retry-After');
-      const waitSeconds = retryAfterHeader
-        ? Number.parseInt(retryAfterHeader, 10)
-        : 50;
-
-      // biome-ignore lint:reason
-      console.warn(
-        `RATE LIMIT HIT. Setting external lock for ${waitSeconds} seconds.`
-      );
-
-      await cache.set('tmdb_rate_limit_lock', 'true', waitSeconds);
-
-      throw new Error('Rate limit exceeded.');
+    if (!response.ok) {
+      throw new Error(`TMDB error (${response.status})`);
     }
 
-    if (!res.ok) {
-      throw new Error(`TMDB error (${res.status})`);
-    }
+    const data = schema.parse(await response.json());
 
-    const data = await res.json();
-
-    // Cache the response with different TTL based on endpoint type
-    let cacheTTL = 300; // Default 5 minutes
-
-    if (endpoint.includes('/search/')) {
-      cacheTTL = 1800; // 30 minutes for search results
-    } else if (endpoint.includes('/movie/') || endpoint.includes('/tv/')) {
-      if (endpoint.includes('/watch/providers')) {
-        cacheTTL = 86_400; // 24 hours for watch providers
-      } else {
-        cacheTTL = 3600; // 1 hour for movie/tv details
-      }
-    }
-
-    // Store in cache
     try {
-      await cache.set(cacheKey, data, cacheTTL);
-    } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: cache failures are intentionally non-fatal
-      console.warn('Failed to cache data:', error);
-      // Continue without caching
+      await sharedCache.set(cacheKey, data, ttlSeconds);
+    } catch {
+      // Cache writes are best-effort and never replace a valid upstream result.
     }
 
-    return data as T;
+    return data;
   }
 }
