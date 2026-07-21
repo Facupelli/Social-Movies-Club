@@ -8,4 +8,6 @@ Before working on a task, consult:
 - `../../docs/architecture/overview.md` for architecture and data flows.
 - `../../docs/constitution/tech-stack.md` for technology choices.
 
+When building or modifying user interfaces, also read `design-system.md` and follow its visual and interaction guidance. Do not read it for tasks that do not affect the UI.
+
 Use nearby feature code and configuration for task-specific conventions. From this directory, prefer app-local commands such as `pnpm dev` and `pnpm build`.

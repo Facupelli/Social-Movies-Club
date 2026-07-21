@@ -7,7 +7,7 @@ import { listFollowingUsers } from '@/modules/social/list-following/list-followi
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
 
-const profileIdSchema = z.uuid();
+const profileIdSchema = z.string().nonempty();
 
 export function shouldShowFollowButton(
   viewerUserId: string,

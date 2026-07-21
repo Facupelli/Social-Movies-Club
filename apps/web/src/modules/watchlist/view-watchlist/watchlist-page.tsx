@@ -7,7 +7,7 @@ import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
 
-const profileIdSchema = z.uuid();
+const profileIdSchema = z.string().nonempty();
 
 export default async function WatchlistPage(
   props: Readonly<{
