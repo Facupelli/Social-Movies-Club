@@ -9,6 +9,7 @@
     "lint": "biome lint src",
     "check-types": "tsc --noEmit",
     "db:generate": "npx drizzle-kit generate --config=src/platform/database/postgres/drizzle.config.ts",
+    "db:check": "drizzle-kit check --config=src/platform/database/postgres/drizzle.config.ts",
     "db:migrate": "npx drizzle-kit migrate --config=src/platform/database/postgres/drizzle.config.ts",
     "db:push": "npx drizzle-kit push --config=src/platform/database/postgres/drizzle.config.ts"
   },
