@@ -37,7 +37,7 @@ export function Nav() {
   };
 
   return (
-    <nav className="fixed z-10 bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar p-4 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:p-8">
+    <nav className="fixed z-10 bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar px-4 py-2 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:px-4 md:py-8">
       <ul className="flex gap-6 md:gap-2 md:grid">
         <li>
           <Link className={getNavLinkClassName(isHomeActive)} href="/">
@@ -121,8 +121,8 @@ export function Nav() {
 
 function getNavLinkClassName(isActive: boolean) {
   return clsx(
-    'flex min-h-11 items-center justify-center gap-2 rounded-md px-3 py-2 text-sidebar-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground md:justify-start',
-    isActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
+    'flex md:min-h-11 items-center justify-center gap-2 rounded-xs px-3 py-2 text-sidebar-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground md:justify-start',
+    isActive && 'md:bg-sidebar-accent text-sidebar-accent-foreground'
   );
 }
 
