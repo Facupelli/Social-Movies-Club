@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
         {notifications.data.map((notification, index) => (
           <Link
             className={clsx(
-              'flex gap-2 md:gap-4 items-start py-4 px-2 md:px-10 first:border-t border-boder last:border-b'
+              'flex gap-2 md:gap-4 items-start py-4 px-2 md:px-10 first:border-t border-border last:border-b'
             )}
             href={notification.actionUrl ?? '#'}
             key={notification.id}

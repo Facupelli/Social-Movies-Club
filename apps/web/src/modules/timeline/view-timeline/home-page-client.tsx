@@ -196,7 +196,7 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
 
   return (
     <div>
-      <div className="divide-y divide-accent-foreground">
+      <div className="divide-y divide-border">
         {flatItems.map((item) => (
           <div className="px-2 md:px-10" key={item.feedItemId}>
             <FeedItemCard item={item} />

@@ -17,10 +17,10 @@ export default function ProfileNav({ userId }: Props) {
   const isFollowingTab = pathname.startsWith(`/profile/${userId}/following`);
 
   return (
-    <div className="flex items-center gap-6 border-neutral-500 border-b pt-2">
+    <div className="flex items-center gap-6 border-border border-b pt-2">
       <Link
         className={clsx(
-          isRatingsTab && 'border-accent-foreground border-b-3 font-bold',
+          isRatingsTab && 'border-primary border-b-3 font-bold',
           'pb-2'
         )}
         href={`/profile/${userId}`}
@@ -29,7 +29,7 @@ export default function ProfileNav({ userId }: Props) {
       </Link>
       <Link
         className={clsx(
-          isWatchlistTab && 'border-accent-foreground border-b-3 font-bold',
+          isWatchlistTab && 'border-primary border-b-3 font-bold',
           'pb-2'
         )}
         href={`/profile/${userId}/watchlist`}
@@ -38,7 +38,7 @@ export default function ProfileNav({ userId }: Props) {
       </Link>
       <Link
         className={clsx(
-          isFollowingTab && 'border-accent-foreground border-b-3 font-bold',
+          isFollowingTab && 'border-primary border-b-3 font-bold',
           'pb-2'
         )}
         href={`/profile/${userId}/following`}

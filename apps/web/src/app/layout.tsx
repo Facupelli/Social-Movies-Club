@@ -39,7 +39,7 @@ export default function RootLayout({
           <div className="dark bg-sidebar">
             <div className="relative mx-auto flex max-w-5xl flex-col text-card-foreground md:flex-row">
               <Nav />
-              <div className="flex-1 bg-background pb-[60px] md:pb-0 border-accent-foreground md:border-r md:border-l">
+              <div className="flex-1 border-border bg-background pb-[60px] md:border-r md:border-l md:pb-0">
                 {children}
               </div>
             </div>
