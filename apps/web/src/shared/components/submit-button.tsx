@@ -20,6 +20,7 @@ interface SubmitButtonProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   formAction?: (formData: FormData) => void;
+  'aria-label'?: string;
 }
 
 export function SubmitButton({
@@ -32,11 +33,13 @@ export function SubmitButton({
   hideLoadingText = false,
   className,
   formAction,
+  'aria-label': ariaLabel,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
 
   return (
     <Button
+      aria-label={ariaLabel}
       className={className}
       disabled={disabled || pending}
       formAction={formAction}

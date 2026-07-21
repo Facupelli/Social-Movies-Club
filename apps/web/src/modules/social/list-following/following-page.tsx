@@ -1,31 +1,19 @@
-import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import z from 'zod';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
-import { listFollowingUsers } from '@/modules/social/list-following/following.pg';
-import type { FollowingUser } from '@/modules/social/list-following/following.types';
-import { auth } from '@/platform/auth/auth';
+import { listFollowingUsers } from '@/modules/social/list-following/list-following';
+import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
 
-const fetchFollowingUsers = async (
-  profileUserId: string,
-  viewerUserId: string
-) => {
-  return await execute<FollowingUser[]>(async () => {
-    return await listFollowingUsers(profileUserId, viewerUserId);
-  });
-};
+const profileIdSchema = z.uuid();
 
-function showFollowButton(
-  sessionUserId: string,
-  profileUserId: string,
-  followeeId: string
-) {
-  const isSessionUserProfile = sessionUserId === profileUserId;
-  const isSameUser = sessionUserId === followeeId;
-
-  return !(isSessionUserProfile || isSameUser);
+export function shouldShowFollowButton(
+  viewerUserId: string,
+  rowUserId: string
+): boolean {
+  return viewerUserId !== rowUserId;
 }
 
 export default async function FollowingPage(
@@ -33,43 +21,55 @@ export default async function FollowingPage(
     params: Promise<{ id: string }>;
   }>
 ) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const [session, params] = await Promise.all([
+    getServerSession(),
+    props.params,
+  ]);
 
   if (!session) {
     redirect('/');
   }
 
-  const params = await props.params;
-  const profileUserId = params.id;
+  const profileUserId = profileIdSchema.safeParse(params.id);
+  if (!profileUserId.success) {
+    notFound();
+  }
 
-  const followingUsersResult = await fetchFollowingUsers(
-    profileUserId,
-    session.user.id
+  const viewerUserId = session.user.id;
+  const followingUsersResult = await execute(() =>
+    listFollowingUsers({
+      profileUserId: profileUserId.data,
+      viewerUserId,
+    })
   );
 
   if (!followingUsersResult.success) {
-    return <div>{followingUsersResult.error}</div>;
+    return <section className="py-10">{followingUsersResult.error}</section>;
   }
 
-  const followingUsers = followingUsersResult.data;
-
-  if (followingUsers.length === 0) {
+  if (followingUsersResult.data.length === 0) {
     return (
-      <div className="flex-1 pt-10 text-neutral-500">No sigue a nadie</div>
+      <div className="flex-1 pt-10 text-neutral-500">
+        {viewerUserId === profileUserId.data
+          ? 'No sigues a nadie'
+          : 'Esta persona no sigue a nadie'}
+      </div>
     );
   }
 
   return (
-    <section className="flex-1 pt-10 space-y-4">
-      {followingUsers.map((user) => (
+    <section className="flex-1 space-y-4 pt-10">
+      {followingUsersResult.data.map((user) => (
         <div className="flex justify-between" key={user.followeeId}>
-          <Link className="flex gap-4" href={`/profile/${user.followeeId}`}>
+          <Link
+            aria-label={`Ver el perfil de ${user.userName}`}
+            className="flex gap-4"
+            href={`/profile/${user.followeeId}`}
+          >
             <div className="flex size-[50px] items-center justify-center overflow-hidden rounded-full bg-secondary-foreground">
               {user.userImage ? (
                 <Image
-                  alt={user.userName}
+                  alt={`Foto de perfil de ${user.userName}`}
                   className="size-full object-cover"
                   height={50}
                   src={user.userImage}
@@ -84,17 +84,14 @@ export default async function FollowingPage(
             </div>
             <div>
               <div>{user.userName}</div>
-              <div>{user.userUsername}</div>
+              {user.userUsername && <div>{user.userUsername}</div>}
             </div>
           </Link>
-          {showFollowButton(
-            session.user.id,
-            profileUserId,
-            user.followeeId
-          ) && (
+          {shouldShowFollowButton(viewerUserId, user.followeeId) && (
             <FollowUserButton
               followedUserId={user.followeeId}
               isFollowing={user.isFollowing}
+              userName={user.userName}
             />
           )}
         </div>

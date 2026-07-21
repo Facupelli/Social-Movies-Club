@@ -2,27 +2,30 @@
 
 import { useActionState } from 'react';
 import { SubmitButton } from '@/shared/components/submit-button';
-import {
-  followUserAction,
-  unfollowUserAction,
-} from './follow-user.actions';
+import type { ApiResponse } from '@/shared/http/safe-execute';
+import { followUserAction, unfollowUserAction } from './follow-user.actions';
+
+const initialActionState: ApiResponse<void> = { success: false, error: '' };
 
 export function FollowUserButton({
   followedUserId,
   isFollowing,
+  userName,
 }: {
   isFollowing: boolean;
   followedUserId: string;
+  userName?: string;
 }) {
-  const [_, followAction, followIsPending] = useActionState(followUserAction, {
-    success: false,
-    error: '',
-  });
-
-  const [__, unfollowAction, unfollowIsPending] = useActionState(unfollowUserAction, {
-    success: false,
-    error: '',
-  });
+  const [followState, followAction, followIsPending] = useActionState(
+    followUserAction,
+    initialActionState
+  );
+  const [unfollowState, unfollowAction, unfollowIsPending] = useActionState(
+    unfollowUserAction,
+    initialActionState
+  );
+  const actionState = isFollowing ? unfollowState : followState;
+  const accessibleTarget = userName ? ` a ${userName}` : '';
 
   return (
     <form>
@@ -30,10 +33,9 @@ export function FollowUserButton({
 
       {isFollowing ? (
         <SubmitButton
+          aria-label={`Dejar de seguir${accessibleTarget}`}
           disabled={unfollowIsPending}
-          formAction={(formData) => {
-            unfollowAction(formData);
-          }}
+          formAction={unfollowAction}
           loadingText="Cargando"
           variant="secondary"
         >
@@ -41,14 +43,18 @@ export function FollowUserButton({
         </SubmitButton>
       ) : (
         <SubmitButton
+          aria-label={`Seguir${accessibleTarget}`}
           disabled={followIsPending}
-          formAction={(formData) => {
-            followAction(formData);
-          }}
+          formAction={followAction}
           loadingText="Siguiendo"
         >
           Seguir
         </SubmitButton>
+      )}
+      {!actionState.success && actionState.error && (
+        <p aria-live="polite" className="text-destructive text-sm">
+          {actionState.error}
+        </p>
       )}
     </form>
   );

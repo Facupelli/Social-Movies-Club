@@ -23,7 +23,8 @@ export async function listFollowingUsers(
         ) AS "isFollowing"
       FROM ${follows} AS f
       JOIN ${users} AS u ON f.followee_id = u.id
-      WHERE f.follower_id = ${userId};
+      WHERE f.follower_id = ${userId}
+      ORDER BY LOWER(u.name), u.id;
     `);
 
     return rows;
