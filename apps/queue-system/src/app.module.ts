@@ -5,7 +5,11 @@ import { ConfigModule } from '@nestjs/config';
 import { DrizzleModule } from './database/database.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), DrizzleModule, FeedItemModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DrizzleModule,
+    FeedItemModule,
+  ],
   controllers: [],
   providers: [
     {

@@ -1,40 +1,23 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { UserService } from "@/users/user.service";
-import type { GetUserRatingMovies } from "@/users/user.types";
-
-export type UseUserMoviesMap = Record<
-	number,
-	{ isRated: boolean; score: number }
->;
+import { getRatingStatusMap } from '@/modules/ratings/get-rating-status/get-rating-status';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import {
+  authenticatedJson,
+  unauthorizedJson,
+} from '@/shared/http/authenticated-response';
 
 export async function GET() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await getServerSession();
 
-	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
-	}
+  if (!session) {
+    return unauthorizedJson();
+  }
 
-	const userService = new UserService();
-
-	const res: GetUserRatingMovies = await userService.getUserRatingMovies(
-		session.user.id,
-	);
-
-	const statusMap: UseUserMoviesMap = {};
-
-	for (const result of res.data) {
-		if (statusMap[result.tmdbId]) {
-			continue;
-		}
-
-		statusMap[result.tmdbId] = {
-			isRated: true,
-			score: result.score,
-		};
-	}
-
-	return Response.json(statusMap);
+  try {
+    return authenticatedJson(await getRatingStatusMap(session.user.id));
+  } catch {
+    return authenticatedJson(
+      { success: false, error: 'Unable to load rating status' },
+      { status: 500 }
+    );
+  }
 }

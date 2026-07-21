@@ -1,2 +1,0 @@
--- Baseline migration: schema already exists after `push`
--- No-op

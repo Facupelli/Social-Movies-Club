@@ -1,29 +1,24 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { WatchlistService } from "@/watchlist/watchlist.service";
-
-export type UseUserWatchlistMap = Record<number, boolean>;
+import { getWatchlistStatusMap } from '@/modules/watchlist/get-watchlist-status/watchlist-status';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import {
+  authenticatedJson,
+  unauthorizedJson,
+} from '@/shared/http/authenticated-response';
 
 export async function GET() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await getServerSession();
 
-	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
-	}
+  if (!session) {
+    return unauthorizedJson();
+  }
 
-	const watchlistService = new WatchlistService();
-
-	const res = await watchlistService.getWatchlist(session.user.id);
-
-	const statusMap: UseUserWatchlistMap = {};
-
-	res.forEach((result) => {
-		if (!statusMap[result.tmdbId]) {
-			statusMap[result.tmdbId] = true;
-		}
-	});
-
-	return Response.json(statusMap);
+  try {
+    const statusMap = await getWatchlistStatusMap(session.user.id);
+    return authenticatedJson(statusMap);
+  } catch {
+    return authenticatedJson(
+      { success: false, error: 'Unable to load watchlist status' },
+      { status: 500 }
+    );
+  }
 }

@@ -1,20 +1,25 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { NotificationService } from "@/notifications/notifications.service";
+import { countUnreadNotifications } from '@/modules/notifications/count-unread/count-unread-notifications';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import {
+  authenticatedJson,
+  unauthorizedJson,
+} from '@/shared/http/authenticated-response';
+import { execute } from '@/shared/http/safe-execute';
 
 export async function GET() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await getServerSession();
+  if (!session) {
+    return unauthorizedJson();
+  }
 
-	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
-	}
+  const result = await execute(
+    () => countUnreadNotifications(session.user.id),
+    () => ({ success: false, error: 'Unable to load unread notifications' })
+  );
 
-	const notificationService = new NotificationService();
+  if (!result.success) {
+    return authenticatedJson(result, { status: 500 });
+  }
 
-	const res = await notificationService.getUnreadNotificationCount(
-		session.user.id,
-	);
-	return Response.json(res);
+  return authenticatedJson(result.data);
 }

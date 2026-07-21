@@ -11,7 +11,7 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**"]
     },
-    "web#build": {
+    "social-movies-club#build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "env": [
@@ -25,6 +25,7 @@
         "KV_REST_API_URL",
         "KV_REST_API_TOKEN",
         "KV_REST_API_READ_ONLY_TOKEN",
+        "CACHE_BACKEND",
         "REDIS_URL",
         "DATABASE_URL",
         "NEXT_PUBLIC_STACK_PROJECT_ID",
@@ -38,6 +39,9 @@
     },
     "format": {
       "dependsOn": ["^topo"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

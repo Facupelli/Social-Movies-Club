@@ -1,20 +1,23 @@
-import type { NextRequest } from "next/server";
-import type { MovieView } from "@/components/movies/movie-card";
-import type { MultiSearchResult } from "@/infra/TMDB/tmdb.repository";
-import { TmdbService } from "@/infra/TMDB/tmdb.service";
-import { apiMovieToView } from "@/media/media.adapters";
+import type { NextRequest } from 'next/server';
+import { apiMovieToView } from '@/modules/media-catalog/get-media-details/media.adapters';
+import { TmdbService } from '@/platform/tmdb/tmdb.service';
+
+const MIN_QUERY_LENGTH = 3;
+const MAX_QUERY_LENGTH = 200;
 
 export async function GET(request: NextRequest) {
-	const searchParams = request.nextUrl.searchParams;
-	const tmdbService = new TmdbService();
+  const query = request.nextUrl.searchParams.get('q')?.trim() ?? '';
+  if (query.length < MIN_QUERY_LENGTH) {
+    return Response.json([]);
+  }
+  if (query.length > MAX_QUERY_LENGTH) {
+    return Response.json({ error: 'Search query is too long' }, { status: 400 });
+  }
 
-	const query = searchParams.get("q");
-	if (!query) {
-		return Response.json({});
-	}
-
-	const res: MultiSearchResult = await tmdbService.multiSearch(query);
-	const movies: MovieView[] = res.data.map(apiMovieToView);
-
-	return Response.json(movies);
+  try {
+    const result = await new TmdbService().multiSearch(query);
+    return Response.json(result.data.map(apiMovieToView));
+  } catch {
+    return Response.json({ error: 'Unable to search media' }, { status: 502 });
+  }
 }

@@ -1,27 +1,39 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { UserService } from "@/users/user.service";
-import type { FeedItem } from "@/users/user.types";
-import { validateGetUserFeedQuery } from "@/users/user-validation.service";
+import { ZodError } from 'zod';
+import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
+import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import {
+  authenticatedJson,
+  unauthorizedJson,
+} from '@/shared/http/authenticated-response';
 
 export async function GET(request: Request) {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await getServerSession();
 
-	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
-	}
+  if (!session) {
+    return unauthorizedJson();
+  }
 
-	const { searchParams } = new URL(request.url);
-	const { cursor } = validateGetUserFeedQuery(searchParams);
+  try {
+    const { searchParams } = new URL(request.url);
+    const { cursor } = validateGetUserFeedQuery(searchParams);
+    const page = await loadUserFeedPage({
+      userId: session.user.id,
+      cursor,
+    });
 
-	const userService = new UserService();
+    return authenticatedJson(page);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return authenticatedJson(
+        { success: false, error: 'Invalid feed cursor' },
+        { status: 400 }
+      );
+    }
 
-	const res: { items: FeedItem[]; nextCursor: string | null } =
-		await userService.getFeed({
-			userId: session.user.id,
-			cursor,
-		});
-	return Response.json(res);
+    return authenticatedJson(
+      { success: false, error: 'Unable to load the timeline feed' },
+      { status: 500 }
+    );
+  }
 }

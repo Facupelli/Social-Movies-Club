@@ -1,47 +1,61 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { UserService } from "@/users/user.service";
-import type { GetUserRatingMovies } from "@/users/user.types";
-import { userMoviesFiltersUrlParser } from "@/users/utils/filter-user-movies-parser";
-import { userMoviesFiltersTransformer } from "@/users/utils/filter-user-movies-transformer";
+import z from 'zod';
+import {
+  parseProfileRatingsFilters,
+  toProfileRatingsRepositoryFilters,
+} from '@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser';
+import { loadProfileRatingsPage } from '@/modules/ratings/list-profile-ratings/profile-ratings-query-loader.server';
+import { PROFILE_RATINGS_PAGE_SIZE } from '@/modules/ratings/list-profile-ratings/use-user-movies';
+import { getServerSession } from '@/platform/auth/get-server-session';
+import {
+  authenticatedJson,
+  unauthorizedJson,
+} from '@/shared/http/authenticated-response';
 
-export type UseUserMoviesMap = Record<
-	number,
-	{ isRated: boolean; score: number }
->;
+const VALID_PAGE = /^\d+$/;
 
 export async function GET(
-	request: Request,
-	{ params }: { params: Promise<{ id: string }> },
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await getServerSession();
+  if (!session) {
+    return unauthorizedJson();
+  }
 
-	if (!session) {
-		return Response.json({ success: false, error: "Unauthorized" });
-	}
+  const { id: rawProfileUserId } = await params;
+  const profileUserId = z.uuid().safeParse(rawProfileUserId);
+  if (!profileUserId.success) {
+    return authenticatedJson({ error: 'Invalid profile ID' }, { status: 400 });
+  }
 
-	const routeParams = await params;
-	const url = new URL(request.url);
+  const url = new URL(request.url);
+  const rawPage = url.searchParams.get('page') ?? '0';
+  if (!VALID_PAGE.test(rawPage)) {
+    return authenticatedJson({ error: 'Invalid page' }, { status: 400 });
+  }
 
-	const clientFilters = userMoviesFiltersUrlParser.parseUrl(url);
-	const page = parseInt(url.searchParams.get("page") || "0", 10);
+  const page = Number(rawPage);
+  if (!Number.isSafeInteger(page)) {
+    return authenticatedJson({ error: 'Invalid page' }, { status: 400 });
+  }
 
-	const serverFilters = userMoviesFiltersTransformer.clientToServer(
-		clientFilters,
-		{
-			page,
-			limit: 20,
-		},
-	);
+  const filters = parseProfileRatingsFilters(url.searchParams);
 
-	const userService = new UserService();
-	const res: GetUserRatingMovies = await userService.getUserRatingMovies(
-		routeParams.id,
-		serverFilters,
-		session.user.id,
-	);
-
-	return Response.json(res);
+  try {
+    const result = await loadProfileRatingsPage({
+      profileUserId: profileUserId.data,
+      viewerUserId: session.user.id,
+      filters: toProfileRatingsRepositoryFilters(
+        filters,
+        page,
+        PROFILE_RATINGS_PAGE_SIZE
+      ),
+    });
+    return authenticatedJson(result);
+  } catch {
+    return authenticatedJson(
+      { error: 'Unable to load profile ratings' },
+      { status: 500 }
+    );
+  }
 }

@@ -1,0 +1,83 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1754865109942,
+      "tag": "0000_slimy_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754866885208,
+      "tag": "0002_blushing_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754867574712,
+      "tag": "0003_lush_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769359596259,
+      "tag": "0004_gifted_red_skull",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784507980308,
+      "tag": "0005_hard_ezekiel_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784508718727,
+      "tag": "0006_past_excalibur",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784582835297,
+      "tag": "0007_remove_self_follows",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784582851001,
+      "tag": "0008_prevent_self_follows",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784584181218,
+      "tag": "0009_wise_valeria_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784642454915,
+      "tag": "0010_dry_stryfe",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784650790020,
+      "tag": "0011_seed_notification_types",
+      "breakpoints": true
+    }
+  ]
+}

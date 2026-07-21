@@ -4,12 +4,12 @@ import { Job } from 'bullmq';
 import { DatabaseService } from 'src/database/database.service';
 import { AddRatingDto } from './dto/add-rating.dto';
 import { sql } from 'drizzle-orm';
-import { NeonDatabase } from 'drizzle-orm/neon-serverless';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Processor('feed-item')
 export class FeedItemWorker extends WorkerHost {
   private readonly logger = new Logger(FeedItemWorker.name);
-  protected readonly db: NeonDatabase;
+  protected readonly db: NodePgDatabase;
   private readonly MAX_FOLLOWERS_TO_FANOUT = 1000;
 
   constructor(protected readonly databaseService: DatabaseService) {
