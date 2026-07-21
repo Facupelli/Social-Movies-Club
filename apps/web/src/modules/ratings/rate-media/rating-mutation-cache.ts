@@ -1,20 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { MediaType } from '@/modules/media-catalog/media.type';
-import {
-  getMediaIdentityKey,
-  type MediaIdentityKey,
-} from '@/modules/media-catalog/media-identity';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
+import type { RatingStatusMap } from '@/modules/ratings/get-rating-status/rating-status.types';
 import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { profileRatingsQueryKeys } from '@/modules/ratings/list-profile-ratings/use-user-movies';
-
-type UserRatingsCache = Record<
-  MediaIdentityKey,
-  {
-    isRated: boolean;
-    score: number;
-    watchedDate: string;
-  }
->;
 
 export async function invalidateAfterRating(
   queryClient: QueryClient,
@@ -50,12 +39,12 @@ export async function optimisticallyRateMedia(
 
   await queryClient.cancelQueries({ queryKey: ratingsKey });
 
-  const ratings = queryClient.getQueryData<UserRatingsCache>(ratingsKey);
+  const ratings = queryClient.getQueryData<RatingStatusMap>(ratingsKey);
   const identityKey = getMediaIdentityKey(tmdbId, type);
   const previousRating = ratings?.[identityKey];
 
   if (ratings) {
-    queryClient.setQueryData<UserRatingsCache>(ratingsKey, {
+    queryClient.setQueryData<RatingStatusMap>(ratingsKey, {
       ...ratings,
       [identityKey]: {
         isRated: true,
@@ -67,7 +56,7 @@ export async function optimisticallyRateMedia(
 
   return () => {
     if (ratings) {
-      queryClient.setQueryData<UserRatingsCache>(ratingsKey, (current) => {
+      queryClient.setQueryData<RatingStatusMap>(ratingsKey, (current) => {
         const nextRatings = { ...current };
         if (previousRating) {
           nextRatings[identityKey] = previousRating;

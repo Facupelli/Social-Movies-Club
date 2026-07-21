@@ -1,4 +1,5 @@
 import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MovieView } from '@/modules/media-catalog/movie-view';
 
 export type UserRatings = {
   movieId: string;
@@ -20,26 +21,21 @@ export interface GetUserRatingMovies {
   nextCursor: number | null;
 }
 
-export type UserMoviesBothRatedFilter = 'true' | 'false';
-export type UserMoviesTypeFilter = 'all' | 'movie' | 'tv';
-export type UserMoviesSortBy = 'score' | 'createdAt';
-export type UserMoviesSortOrder = 'asc' | 'desc';
+export type ProfileRatingsSortBy = 'score' | 'createdAt';
+export type ProfileRatingsSortOrder = 'asc' | 'desc';
+export type ProfileRatingsTypeFilter = 'all' | MediaType;
 
-export interface UserMoviesClientFilters {
-  sortBy?: UserMoviesSortBy;
-  sortOrder?: UserMoviesSortOrder;
-  typeFilter?: UserMoviesTypeFilter;
-  bothRated?: boolean;
-}
+export type ProfileRatingsFilters = Readonly<{
+  sortBy: ProfileRatingsSortBy;
+  sortOrder: ProfileRatingsSortOrder;
+  typeFilter: ProfileRatingsTypeFilter;
+  bothRated: boolean;
+}>;
 
-export interface UserMoviesServerFilters extends UserMoviesClientFilters {
-  limit?: number;
-  offset?: number;
-}
+export type ProfileRatingsRepositoryFilters = ProfileRatingsFilters &
+  Readonly<{ limit: number; offset: number }>;
 
-export interface UserMoviesUrlParams {
-  sortBy?: string;
-  sortOrder?: string;
-  type?: string;
-  bothRatedFilter?: string;
-}
+export type ProfileRatingsPage = Readonly<{
+  data: MovieView[];
+  nextPage: number | null;
+}>;

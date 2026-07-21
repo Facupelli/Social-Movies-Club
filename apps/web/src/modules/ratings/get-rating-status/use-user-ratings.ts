@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import type { UseUserMoviesMap } from '@/app/api/user/ratings/route';
+import type { RatingStatusMap } from './rating-status.types';
 import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 
 export const ratingStatusQueryKeys = {
@@ -7,7 +7,7 @@ export const ratingStatusQueryKeys = {
     personalizedQueryKeys.resource(viewerUserId, 'rating-status'),
 } as const;
 
-async function getUserRatings(signal?: AbortSignal): Promise<UseUserMoviesMap> {
+async function getUserRatings(signal?: AbortSignal): Promise<RatingStatusMap> {
   const response = await fetch('/api/user/ratings', {
     cache: 'no-store',
     signal,

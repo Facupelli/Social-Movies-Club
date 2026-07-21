@@ -1,79 +1,103 @@
-import type { UserMoviesClientFilters } from '../profile-ratings.types';
-import {
-  FILTER_SERACH_PARAMS_KEYS,
-  userMoviesFiltersValidation,
-} from './filter-user-movies-validation';
+import type {
+  ProfileRatingsFilters,
+  ProfileRatingsRepositoryFilters,
+  ProfileRatingsSortBy,
+  ProfileRatingsSortOrder,
+  ProfileRatingsTypeFilter,
+} from '../profile-ratings.types';
 
-/**
- * Parse URL search params into validated client filters
- * "URL → App State"
- */
-function parseSearchParams(
-  searchParams: URLSearchParams
-): UserMoviesClientFilters {
-  const filters: UserMoviesClientFilters = {};
+export const PROFILE_RATINGS_SEARCH_PARAMS = {
+  sortBy: 'sortBy',
+  sortOrder: 'sortOrder',
+  typeFilter: 'type',
+  bothRated: 'bothRated',
+} as const;
 
-  const sortBy = searchParams.get('sortBy');
-  if (sortBy && userMoviesFiltersValidation.isValidSortBy(sortBy)) {
-    filters.sortBy = sortBy;
+export const DEFAULT_PROFILE_RATINGS_FILTERS: ProfileRatingsFilters = {
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+  typeFilter: 'all',
+  bothRated: false,
+};
+
+const SORT_FIELDS: readonly ProfileRatingsSortBy[] = ['score', 'createdAt'];
+const SORT_ORDERS: readonly ProfileRatingsSortOrder[] = ['asc', 'desc'];
+const MEDIA_TYPES: readonly ProfileRatingsTypeFilter[] = ['all', 'movie', 'tv'];
+
+function parseBothRated(value: string | null): boolean {
+  if (value === 'true') {
+    return true;
   }
-
-  const sortOrder = searchParams.get('sortOrder');
-  if (sortOrder && userMoviesFiltersValidation.isValidSortOrder(sortOrder)) {
-    filters.sortOrder = sortOrder;
+  if (value === 'false') {
+    return false;
   }
-
-  const typeFilter = searchParams.get('type');
-  if (typeFilter && userMoviesFiltersValidation.isValidTypeFilter(typeFilter)) {
-    filters.typeFilter = typeFilter;
-  }
-
-  const bothRatedFilter = searchParams.get('bothRated');
-  if (
-    bothRatedFilter &&
-    userMoviesFiltersValidation.isValidBothRated(bothRatedFilter)
-  ) {
-    filters.bothRated = bothRatedFilter === 'true';
-  }
-
-  return filters;
+  return DEFAULT_PROFILE_RATINGS_FILTERS.bothRated;
 }
 
-/**
- * Parse URL object (for server-side usage)
- */
-function parseUrl(url: URL): UserMoviesClientFilters {
-  return parseSearchParams(url.searchParams);
+export function parseProfileRatingsFilters(
+  params: Pick<URLSearchParams, 'get'>
+): ProfileRatingsFilters {
+  const sortBy = params.get(PROFILE_RATINGS_SEARCH_PARAMS.sortBy);
+  const sortOrder = params.get(PROFILE_RATINGS_SEARCH_PARAMS.sortOrder);
+  const typeFilter = params.get(PROFILE_RATINGS_SEARCH_PARAMS.typeFilter);
+  const bothRated = params.get(PROFILE_RATINGS_SEARCH_PARAMS.bothRated);
+
+  return {
+    sortBy: SORT_FIELDS.includes(sortBy as ProfileRatingsSortBy)
+      ? (sortBy as ProfileRatingsSortBy)
+      : DEFAULT_PROFILE_RATINGS_FILTERS.sortBy,
+    sortOrder: SORT_ORDERS.includes(sortOrder as ProfileRatingsSortOrder)
+      ? (sortOrder as ProfileRatingsSortOrder)
+      : DEFAULT_PROFILE_RATINGS_FILTERS.sortOrder,
+    typeFilter: MEDIA_TYPES.includes(typeFilter as ProfileRatingsTypeFilter)
+      ? (typeFilter as ProfileRatingsTypeFilter)
+      : DEFAULT_PROFILE_RATINGS_FILTERS.typeFilter,
+    bothRated: parseBothRated(bothRated),
+  };
 }
 
-/**
- * Convert client filters back to URL search params
- * "App State → URL"
- */
-function toSearchParams(filters: UserMoviesClientFilters): URLSearchParams {
-  const params = new URLSearchParams();
+/** Serializes filters canonically while preserving unrelated parameters. */
+export function serializeProfileRatingsFilters(
+  filters: ProfileRatingsFilters,
+  current: URLSearchParams = new URLSearchParams()
+): URLSearchParams {
+  const params = new URLSearchParams(current.toString());
 
-  if (filters.sortBy) {
-    params.set(FILTER_SERACH_PARAMS_KEYS.SORT_BY, filters.sortBy);
+  for (const key of Object.values(PROFILE_RATINGS_SEARCH_PARAMS)) {
+    params.delete(key);
   }
-  if (filters.sortOrder) {
-    params.set(FILTER_SERACH_PARAMS_KEYS.SORT_ORDER, filters.sortOrder);
+
+  if (filters.sortBy !== DEFAULT_PROFILE_RATINGS_FILTERS.sortBy) {
+    params.set(PROFILE_RATINGS_SEARCH_PARAMS.sortBy, filters.sortBy);
   }
-  if (filters.typeFilter) {
-    params.set(FILTER_SERACH_PARAMS_KEYS.TYPE, filters.typeFilter);
+  if (filters.sortOrder !== DEFAULT_PROFILE_RATINGS_FILTERS.sortOrder) {
+    params.set(PROFILE_RATINGS_SEARCH_PARAMS.sortOrder, filters.sortOrder);
   }
-  if (filters.bothRated !== undefined) {
+  if (filters.typeFilter !== DEFAULT_PROFILE_RATINGS_FILTERS.typeFilter) {
+    params.set(PROFILE_RATINGS_SEARCH_PARAMS.typeFilter, filters.typeFilter);
+  }
+  if (filters.bothRated !== DEFAULT_PROFILE_RATINGS_FILTERS.bothRated) {
     params.set(
-      FILTER_SERACH_PARAMS_KEYS.BOTH_RATED,
-      filters.bothRated.toString()
+      PROFILE_RATINGS_SEARCH_PARAMS.bothRated,
+      String(filters.bothRated)
     );
   }
 
   return params;
 }
 
+export function toProfileRatingsRepositoryFilters(
+  filters: ProfileRatingsFilters,
+  page: number,
+  limit: number
+): ProfileRatingsRepositoryFilters {
+  return { ...filters, limit, offset: page * limit };
+}
+
+// Kept as a small compatibility facade for existing imports.
 export const userMoviesFiltersUrlParser = {
-  parseSearchParams,
-  parseUrl,
-  toSearchParams,
+  parseSearchParams: parseProfileRatingsFilters,
+  parseUrl: (url: URL) => parseProfileRatingsFilters(url.searchParams),
+  toSearchParams: (filters: ProfileRatingsFilters) =>
+    serializeProfileRatingsFilters(filters),
 };

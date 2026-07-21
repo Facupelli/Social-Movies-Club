@@ -3,7 +3,7 @@ import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, ratings } from '@/platform/database/postgres/schema';
 import type {
   GetUserRatingMovies,
-  UserMoviesServerFilters,
+  ProfileRatingsRepositoryFilters,
   UserRatings,
 } from './profile-ratings.types';
 
@@ -16,7 +16,7 @@ export async function getUserRatingMovies(
     limit,
     offset,
     bothRated = false,
-  }: UserMoviesServerFilters = {},
+  }: Partial<ProfileRatingsRepositoryFilters> = {},
   sessionUserId?: string
 ): Promise<GetUserRatingMovies> {
   return await withDatabase(async (db) => {

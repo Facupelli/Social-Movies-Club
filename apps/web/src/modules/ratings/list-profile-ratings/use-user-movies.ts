@@ -1,94 +1,89 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
-import type { MovieView } from '@/modules/media-catalog/movie-view';
-import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
-import { userMoviesFiltersUrlParser } from './filters/filter-user-movies-parser';
-import { userMoviesFiltersTransformer } from './filters/filter-user-movies-transformer';
+import {
+  serializeProfileRatingsFilters,
+  toProfileRatingsRepositoryFilters,
+} from './filters/filter-user-movies-parser';
 import type {
-  UserMoviesClientFilters,
-  UserMoviesServerFilters,
+  ProfileRatingsFilters,
+  ProfileRatingsPage,
+  ProfileRatingsRepositoryFilters,
 } from './profile-ratings.types';
+
+export const PROFILE_RATINGS_PAGE_SIZE = 20;
+export const PROFILE_RATINGS_INITIAL_PAGE = 0;
+export const PROFILE_RATINGS_STALE_TIME = 45_000;
 
 export const profileRatingsQueryKeys = {
   viewerScope: (viewerUserId: string | undefined) =>
-    personalizedQueryKeys.resource(viewerUserId, 'profile-ratings'),
-  profileScope: (
-    viewerUserId: string | undefined,
-    profileUserId: string
-  ) => [
-    ...profileRatingsQueryKeys.viewerScope(viewerUserId),
-    { profileUserId },
-  ] as const,
+    ['viewer', viewerUserId, 'profile-ratings'] as const,
+  profileScope: (viewerUserId: string | undefined, profileUserId: string) =>
+    [
+      ...profileRatingsQueryKeys.viewerScope(viewerUserId),
+      profileUserId,
+    ] as const,
   infinite: (
     viewerUserId: string | undefined,
-    filters: UserMoviesClientFilters & { userId: string }
-  ) => [
-    ...profileRatingsQueryKeys.profileScope(viewerUserId, filters.userId),
-    'infinite',
-    {
-      sortBy: filters.sortBy,
-      sortOrder: filters.sortOrder,
-      typeFilter: filters.typeFilter,
-      bothRated: filters.bothRated,
-    },
-  ] as const,
+    profileUserId: string,
+    filters: ProfileRatingsFilters
+  ) =>
+    [
+      ...profileRatingsQueryKeys.profileScope(viewerUserId, profileUserId),
+      'infinite',
+      filters,
+    ] as const,
 } as const;
 
-type UserMoviesPage = {
-  nextCursor: number | null;
-  data: MovieView[];
-};
-
-type LoadUserMoviesPage = (
-  userId: string,
-  filters: UserMoviesServerFilters,
+type LoadProfileRatingsPage = (
+  profileUserId: string,
+  filters: ProfileRatingsRepositoryFilters,
   signal?: AbortSignal
-) => Promise<UserMoviesPage>;
+) => Promise<ProfileRatingsPage>;
 
-async function getUserMovies(
-  userId: string,
-  filters: UserMoviesServerFilters,
+export async function fetchProfileRatingsPage(
+  profileUserId: string,
+  filters: ProfileRatingsRepositoryFilters,
   signal?: AbortSignal
-): Promise<UserMoviesPage> {
-  const allParams = userMoviesFiltersUrlParser.toSearchParams(filters);
-  allParams.set(
-    'page',
-    ((filters.offset || 0) / (filters.limit || 20)).toString()
-  );
+): Promise<ProfileRatingsPage> {
+  const params = serializeProfileRatingsFilters(filters);
+  params.set('page', String(filters.offset / filters.limit));
 
   const response = await fetch(
-    `/api/user/${userId}/movies?${allParams.toString()}`,
+    `/api/user/${encodeURIComponent(profileUserId)}/movies?${params.toString()}`,
     { cache: 'no-store', signal }
   );
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    throw new Error('Unable to load profile ratings');
   }
-
   return response.json();
 }
 
-const getUserMoviesQueryOptions = (
+export function getProfileRatingsQueryOptions(
   viewerUserId: string | undefined,
-  filters: UserMoviesClientFilters & { userId: string },
-  loadPage: LoadUserMoviesPage = getUserMovies
-) =>
-  infiniteQueryOptions({
-    queryKey: profileRatingsQueryKeys.infinite(viewerUserId, filters),
-    queryFn: ({ pageParam = 0, signal }) => {
-      const serverFilters = userMoviesFiltersTransformer.clientToServer(
-        filters,
-        {
-          page: pageParam,
-          limit: 20,
-        }
-      );
-
-      return loadPage(filters.userId, serverFilters, signal);
-    },
-    initialPageParam: 0,
+  profileUserId: string,
+  filters: ProfileRatingsFilters,
+  loadPage: LoadProfileRatingsPage = fetchProfileRatingsPage
+) {
+  return infiniteQueryOptions({
+    queryKey: profileRatingsQueryKeys.infinite(
+      viewerUserId,
+      profileUserId,
+      filters
+    ),
+    queryFn: ({ pageParam, signal }) =>
+      loadPage(
+        profileUserId,
+        toProfileRatingsRepositoryFilters(
+          filters,
+          pageParam,
+          PROFILE_RATINGS_PAGE_SIZE
+        ),
+        signal
+      ),
+    initialPageParam: PROFILE_RATINGS_INITIAL_PAGE,
     enabled: Boolean(viewerUserId),
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    refetchOnWindowFocus: false,
-    refetchIntervalInBackground: false,
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    staleTime: PROFILE_RATINGS_STALE_TIME,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
-
-export { getUserMovies, getUserMoviesQueryOptions };
+}

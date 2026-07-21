@@ -25,8 +25,16 @@ import { MovieList } from '@/modules/media-catalog/components/movie-list';
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import { TYPE_FILTER_DICT } from '@/modules/media-catalog/media.constants';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import { getUserMoviesQueryOptions } from '@/modules/ratings/list-profile-ratings/use-user-movies';
-import { useUserMoviesFilters } from '@/modules/ratings/list-profile-ratings/use-user-movies-filter';
+import {
+  parseProfileRatingsFilters,
+  serializeProfileRatingsFilters,
+} from '@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser';
+import {
+  PROFILE_RATINGS_VIEWS,
+  PROFILE_RATINGS_VIEW_STORAGE_KEY,
+  type ProfileRatingsView,
+} from '@/modules/ratings/list-profile-ratings/profile-ratings.constants';
+import { getProfileRatingsQueryOptions } from '@/modules/ratings/list-profile-ratings/use-user-movies';
 import { Button } from '@/shared/ui/button';
 import { CardContent } from '@/shared/ui/card';
 import {
@@ -37,7 +45,6 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { LOCAL_STORAGE_KEYS } from '@/shared/utilities/app.constants';
 import { cn } from '@/shared/utilities/utils';
 
 export function ProfileRatingsClient({
@@ -47,30 +54,40 @@ export function ProfileRatingsClient({
   profileUserId: string;
   viewerUserId: string;
 }) {
-  const { filters } = useUserMoviesFilters();
+  const searchParams = useSearchParams();
+  const filters = parseProfileRatingsFilters(searchParams);
 
   const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery(
-      getUserMoviesQueryOptions(viewerUserId, {
-        userId: profileUserId,
-        ...filters,
-      })
+      getProfileRatingsQueryOptions(viewerUserId, profileUserId, filters)
     );
 
   const profileMovies = data?.pages.flatMap((page) => page.data);
 
-  const [tab, setTab] = useState<string>('grid');
+  const [tab, setTab] = useState<ProfileRatingsView>(
+    PROFILE_RATINGS_VIEWS.grid
+  );
 
   // biome-ignore lint: only need this to run on first render
   useEffect(() => {
-    const savedTab = localStorage.getItem(LOCAL_STORAGE_KEYS.PROFILE_TAB_VIEW);
-    if (savedTab && savedTab !== tab) {
+    const savedTab = localStorage.getItem(PROFILE_RATINGS_VIEW_STORAGE_KEY);
+    if (
+      (savedTab === PROFILE_RATINGS_VIEWS.grid ||
+        savedTab === PROFILE_RATINGS_VIEWS.list) &&
+      savedTab !== tab
+    ) {
       setTab(savedTab);
     }
   }, []);
 
   const onTabChange = (value: string) => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.PROFILE_TAB_VIEW, value);
+    if (
+      value !== PROFILE_RATINGS_VIEWS.grid &&
+      value !== PROFILE_RATINGS_VIEWS.list
+    ) {
+      return;
+    }
+    localStorage.setItem(PROFILE_RATINGS_VIEW_STORAGE_KEY, value);
     setTab(value);
   };
 
@@ -170,32 +187,42 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { filters } = useUserMoviesFilters();
+  const filters = parseProfileRatingsFilters(searchParams);
 
-  const updateSearchParams = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(key, value);
-
-    router.push(`${pathname}?${params.toString()}`);
+  const updateFilters = (
+    updates: Partial<ReturnType<typeof parseProfileRatingsFilters>>
+  ) => {
+    const params = serializeProfileRatingsFilters(
+      { ...filters, ...updates },
+      new URLSearchParams(searchParams.toString())
+    );
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   };
 
   const hideSharedRatings = !!filters.bothRated;
   const toggleSharedRatings = () => {
     const newBothRated = !filters.bothRated;
-    updateSearchParams('bothRated', newBothRated.toString());
+    updateFilters({ bothRated: newBothRated });
   };
 
   const toggleSortOrder = () => {
     const newOrder = filters.sortOrder === 'asc' ? 'desc' : 'asc';
-    updateSearchParams('sortOrder', newOrder);
+    updateFilters({ sortOrder: newOrder });
   };
 
   const handleSortByChange = (value: string) => {
-    updateSearchParams('sortBy', value);
+    if (value === 'score' || value === 'createdAt') {
+      updateFilters({ sortBy: value });
+    }
   };
 
   const handleFilterByChange = (value: string) => {
-    updateSearchParams('type', value);
+    if (value === 'all' || value === 'movie' || value === 'tv') {
+      updateFilters({ typeFilter: value });
+    }
   };
 
   const getSortLabel = () => {

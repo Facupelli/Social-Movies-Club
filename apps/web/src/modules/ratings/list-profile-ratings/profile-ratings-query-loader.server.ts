@@ -1,24 +1,22 @@
 import 'server-only';
 
 import { dbMovieToView } from '@/modules/media-catalog/get-media-details/media.adapters';
-import type { MovieView } from '@/modules/media-catalog/movie-view';
 import { getUserRatingMovies } from './profile-ratings.pg';
-import type { UserMoviesServerFilters } from './profile-ratings.types';
+import type {
+  ProfileRatingsPage,
+  ProfileRatingsRepositoryFilters,
+} from './profile-ratings.types';
 
-export type UserMoviesPage = {
-  data: MovieView[];
-  nextCursor: number | null;
-};
-
-export async function loadUserMoviesPage({
+/** Application service shared by the Server Component and Route Handler. */
+export async function loadProfileRatingsPage({
   profileUserId,
   viewerUserId,
   filters,
 }: {
   profileUserId: string;
   viewerUserId: string;
-  filters: UserMoviesServerFilters;
-}): Promise<UserMoviesPage> {
+  filters: ProfileRatingsRepositoryFilters;
+}): Promise<ProfileRatingsPage> {
   const result = await getUserRatingMovies(
     profileUserId,
     filters,
@@ -27,6 +25,6 @@ export async function loadUserMoviesPage({
 
   return {
     data: result.data.map(dbMovieToView),
-    nextCursor: result.nextCursor,
+    nextPage: result.nextCursor,
   };
 }
