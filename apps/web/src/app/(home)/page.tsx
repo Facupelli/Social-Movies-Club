@@ -24,8 +24,8 @@ export default async function HomePage({
 
   const queryClient = makeQueryClient();
   await queryClient.prefetchInfiniteQuery(
-    getUserFeedQueryOptions(viewerUserId, ({ cursor }) =>
-      loadUserFeedPage({ userId: viewerUserId, cursor })
+    getUserFeedQueryOptions(viewerUserId, () =>
+      loadUserFeedPage({ userId: viewerUserId, cursor: null })
     )
   );
 

@@ -3,10 +3,10 @@
 - [ ] Correct re-rating projection
   Update current followers while preserving former followers snapshots.
 
-- [ ] Make rating and fan-out atomic
+- [x] Make rating and fan-out atomic
   Remove the current failure window.
 
-- [ ] Add stable pagination
+- [x] Add stable pagination
   Use activity time and ID as the cursor.
 
 - [ ] Isolate future queue integration

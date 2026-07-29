@@ -1,9 +1,10 @@
 import type { MediaKind } from '@/modules/media-catalog/media.type';
+import type { FeedCursor } from './feed-cursor';
 
 export interface GetUserFeedParams {
   userId: string;
   limit?: number;
-  cursor?: string | null;
+  cursor?: FeedCursor | null;
   onlyUnseen?: boolean;
 }
 

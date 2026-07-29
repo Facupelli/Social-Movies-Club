@@ -1,5 +1,5 @@
 import { ZodError } from 'zod';
-import { validateGetUserFeedQuery } from '@/modules/account/user-validation';
+import { feedCursorFromSearchParams } from '@/modules/timeline/view-timeline/feed-cursor';
 import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import {
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const { cursor } = validateGetUserFeedQuery(searchParams);
+    const cursor = feedCursorFromSearchParams(searchParams);
     const page = await loadUserFeedPage({
       userId: session.user.id,
       cursor,
