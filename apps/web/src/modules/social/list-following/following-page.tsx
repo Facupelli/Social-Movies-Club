@@ -73,7 +73,6 @@ export default async function FollowingPage(
                   className="size-full object-cover"
                   height={50}
                   src={user.userImage}
-                  unoptimized
                   width={50}
                 />
               ) : (

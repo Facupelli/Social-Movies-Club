@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Clapperboard, Search, UserPlus } from 'lucide-react';
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useDeferredValue, useEffect, useState } from 'react';
@@ -225,9 +225,9 @@ function FeedItemCard({ item }: { item: FeedItem }) {
             href={`/profile/${item.actorId}`}
           >
             <Avatar className="size-7 md:size-10">
-              <AvatarImage
+              <FeedAvatarImage
                 alt={item.actorName}
-                src={item.actorImage || '/placeholder.svg'}
+                src={item.actorImage}
               />
               <AvatarFallback>
                 {item.actorName.charAt(0).toUpperCase()}
@@ -311,9 +311,9 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 href={`/profile/${item.actorId}`}
               >
                 <Avatar className="size-7 md:size-10">
-                  <AvatarImage
+                  <FeedAvatarImage
                     alt={item.actorName}
-                    src={item.actorImage || '/placeholder.svg'}
+                    src={item.actorImage}
                   />
                   <AvatarFallback>
                     {item.actorName.charAt(0).toUpperCase()}
@@ -341,6 +341,28 @@ function FeedItemCard({ item }: { item: FeedItem }) {
       </div>
     </MovieCard>
   );
+}
+
+function FeedAvatarImage({
+  alt,
+  src,
+}: {
+  alt: string;
+  src: string | null;
+}) {
+  if (!src) {
+    return null;
+  }
+
+  const { props } = getImageProps({
+    alt,
+    height: 40,
+    sizes: '(min-width: 768px) 40px, 28px',
+    src,
+    width: 40,
+  });
+
+  return <AvatarImage {...props} />;
 }
 
 function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
