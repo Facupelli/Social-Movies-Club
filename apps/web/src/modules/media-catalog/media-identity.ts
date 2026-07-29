@@ -1,10 +1,10 @@
-import type { MediaType } from './media.type';
+import type { MediaKind } from './media.type';
 
-export type MediaIdentityKey = `${MediaType}:${number}`;
+export type MediaIdentityKey = `${MediaKind}:${number}`;
 
 export function getMediaIdentityKey(
   tmdbId: number,
-  type: MediaType
+  kind: MediaKind
 ): MediaIdentityKey {
-  return `${type}:${tmdbId}`;
+  return `${kind}:${tmdbId}`;
 }

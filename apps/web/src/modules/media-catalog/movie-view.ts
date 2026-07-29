@@ -1,4 +1,4 @@
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 
 export interface MovieView {
   tmdbId: number;
@@ -8,6 +8,6 @@ export interface MovieView {
   backdropPath: string;
   score?: number;
   overview: string;
-  type: MediaType;
+  kind: MediaKind;
   runtime?: number;
 }

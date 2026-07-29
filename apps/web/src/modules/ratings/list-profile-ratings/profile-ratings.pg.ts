@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, ratings } from '@/platform/database/postgres/schema';
+import { tmdbNamespaceForKindSql } from '@/platform/tmdb/tmdb-media-kind';
 import type {
   GetUserRatingMovies,
   ProfileRatingsRepositoryFilters,
@@ -12,7 +13,7 @@ export async function getUserRatingMovies(
   {
     sortBy = 'createdAt',
     sortOrder = 'desc',
-    typeFilter = 'all',
+    kindFilter = 'all',
     limit,
     offset,
     bothRated = false,
@@ -25,10 +26,10 @@ export async function getUserRatingMovies(
         ? sql`r.score ${sql.raw(sortOrder)} , r.created_at DESC`
         : sql`r.created_at ${sql.raw(sortOrder)}`;
 
-    const typeFilterExpr =
-      typeFilter === 'all'
+    const kindFilterExpr =
+      kindFilter === 'all'
         ? sql``
-        : sql`AND m.kind = ${typeFilter === 'movie' ? 'movie' : 'tv_series'}`;
+        : sql`AND m.kind = ${kindFilter === 'movie' ? 'movie' : 'tv_series'}`;
 
     const bothRatedExpr =
       bothRated && sessionUserId && sessionUserId !== userId
@@ -54,17 +55,14 @@ export async function getUserRatingMovies(
         COALESCE(m.backdrop_path, '') AS "backdropPath",
         COALESCE(m.overview, '') AS overview,
         mei.external_id::integer AS "tmdbId",
-        CASE m.kind WHEN 'movie' THEN 'movie' ELSE 'tv' END AS type,
+        m.kind,
         m.runtime_minutes AS runtime
       FROM ${ratings} r
       JOIN ${media} m ON m.id = r.media_id
       JOIN media_external_ids mei
         ON mei.media_id = m.id
-        AND mei.namespace = CASE m.kind
-          WHEN 'movie' THEN 'tmdb:movie'
-          ELSE 'tmdb:tv'
-        END
-      WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}
+        AND mei.namespace = ${tmdbNamespaceForKindSql(sql.raw('m.kind'))}
+      WHERE r.user_id = ${userId} ${kindFilterExpr} ${bothRatedExpr}
       ORDER BY ${orderExpr}
     `;
 
@@ -72,7 +70,7 @@ export async function getUserRatingMovies(
       SELECT COUNT(*)::integer AS count
       FROM ${ratings} r
       JOIN ${media} m ON m.id = r.media_id
-      WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}
+      WHERE r.user_id = ${userId} ${kindFilterExpr} ${bothRatedExpr}
     `;
 
     if (limit !== undefined && offset !== undefined) {

@@ -3,16 +3,16 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useMediaWatchProviders } from '@/modules/media-catalog/get-watch-providers/use-media-watch-providers';
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 export function MovieWatchProviders({
   tmdbId,
-  type,
+  kind,
 }: {
   tmdbId: number;
-  type: MediaType;
+  kind: MediaKind;
 }) {
   const [requested, setRequested] = useState(false);
   const {
@@ -20,7 +20,7 @@ export function MovieWatchProviders({
     isLoading,
     error,
     isFetched,
-  } = useMediaWatchProviders(tmdbId, type, requested);
+  } = useMediaWatchProviders(tmdbId, kind, requested);
 
   if (error) {
     return (

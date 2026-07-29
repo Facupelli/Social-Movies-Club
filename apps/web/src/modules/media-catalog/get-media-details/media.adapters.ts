@@ -12,7 +12,7 @@ export function apiMovieToView(m: TMDbMediaMultiSearch): MovieView {
     posterPath: m.posterPath,
     backdropPath: m.backdropPath,
     overview: m.overview,
-    type: m.type,
+    kind: m.kind,
     runtime: m.runtime,
   };
 }
@@ -27,7 +27,7 @@ export function dbMovieToView(r: UserRatings): MovieView {
     backdropPath: r.backdropPath,
     score: r.score,
     overview: r.overview,
-    type: r.type,
+    kind: r.kind,
     runtime: r.runtime,
   };
 }
@@ -41,7 +41,7 @@ export function dbWatchlistMovieToView(w: WatchlistRow): MovieView {
     posterPath: w.moviePosterPath,
     backdropPath: w.movieBackdropPath,
     overview: w.movieOverview,
-    type: w.movieType,
+    kind: w.kind,
     runtime: w.movieRuntime,
   };
 }

@@ -26,19 +26,19 @@ export function GridMovieCard({
         <div className="flex items-center justify-between">
           <div className="flex w-full items-center justify-between gap-2">
             <MovieReleaseDate year={movie.year} />
-            <MovieRuntime runtime={movie.runtime} type={movie.type} />
+            <MovieRuntime kind={movie.kind} runtime={movie.runtime} />
           </div>
-          <AddToWatchlistButton tmdbId={movie.tmdbId} type={movie.type} />
+          <AddToWatchlistButton kind={movie.kind} tmdbId={movie.tmdbId} />
         </div>
-        <MovieWatchProviders tmdbId={movie.tmdbId} type={movie.type} />
+        <MovieWatchProviders kind={movie.kind} tmdbId={movie.tmdbId} />
 
         {isOwner && (
           <div>
             <RateDialog
+              kind={movie.kind}
               posterPath={movie.posterPath}
               title={movie.title}
               tmdbId={movie.tmdbId}
-              type={movie.type}
               year={movie.year}
             />
           </div>

@@ -1,8 +1,7 @@
 import { sql } from 'drizzle-orm';
-import {
-  type MediaType,
-  type PersistMediaInput,
-  mediaTypeToTmdbNamespace,
+import type {
+  MediaKind,
+  PersistMediaInput,
 } from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
@@ -10,14 +9,14 @@ import {
   media,
   mediaExternalIds,
 } from '@/platform/database/postgres/schema';
+import { toTmdbNamespace } from '@/platform/tmdb/tmdb-media-kind';
 
 export async function upsertMedia(
   mediaData: PersistMediaInput
 ): Promise<{ id: string }> {
   return await withDatabase((db) =>
     db.transaction(async (tx) => {
-      const namespace =
-        mediaData.kind === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
+      const namespace = mediaData.kind === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
       const externalId = String(mediaData.tmdbId);
 
       await tx.execute(
@@ -77,13 +76,13 @@ export async function upsertMedia(
 
 export async function getMediaByTmdbIdentity(
   tmdbId: number,
-  type: MediaType
+  kind: MediaKind
 ): Promise<{ id: string } | undefined> {
   return await withDatabase(async (db) => {
     const { rows } = await db.execute<{ id: string }>(sql`
       SELECT media_id AS id
       FROM ${mediaExternalIds}
-      WHERE namespace = ${mediaTypeToTmdbNamespace(type)}
+      WHERE namespace = ${toTmdbNamespace(kind)}
         AND external_id = ${String(tmdbId)}
     `);
 

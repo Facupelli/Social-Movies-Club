@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import {
-  type MediaType,
-  MediaTypeDict,
-  MediaTypeEnum,
+  type MediaKind,
+  MediaKindDict,
+  MediaKindEnum,
 } from '@/modules/media-catalog/media.type';
 import { Card } from '@/shared/ui/card';
 import { cn } from '@/shared/utilities/utils';
@@ -91,22 +91,22 @@ export function MovieScore({ score }: { score?: number }) {
   );
 }
 
-export function MovieMediaType({ type }: { type: MediaType }) {
+export function MovieMediaKind({ kind }: { kind: MediaKind }) {
   return (
     <div className="rounded-md border border-accent bg-secondary px-2 py-1 text-muted-foreground text-xs">
-      <span>{MediaTypeDict[type]}</span>
+      <span>{MediaKindDict[kind]}</span>
     </div>
   );
 }
 
 export function MovieRuntime({
   runtime,
-  type,
+  kind,
 }: {
   runtime?: number;
-  type: MediaType;
+  kind: MediaKind;
 }) {
-  if (!runtime || type !== MediaTypeEnum.movie) {
+  if (!runtime || kind !== MediaKindEnum.movie) {
     return null;
   }
 

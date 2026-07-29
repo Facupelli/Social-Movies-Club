@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
+import type { WatchlistRow } from '@/modules/watchlist/watchlist.types';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { media, watchlist } from '@/platform/database/postgres/schema';
-import type { WatchlistRow } from '@/modules/watchlist/watchlist.types';
+import { tmdbNamespaceForKindSql } from '@/platform/tmdb/tmdb-media-kind';
 
 export async function getProfileWatchlist(
   userId: string
@@ -16,16 +17,13 @@ export async function getProfileWatchlist(
         COALESCE(m.poster_path, '') AS "moviePosterPath",
         COALESCE(m.backdrop_path, '') AS "movieBackdropPath",
         COALESCE(EXTRACT(YEAR FROM m.release_date)::text, '') AS "movieYear",
-        CASE m.kind WHEN 'movie' THEN 'movie' ELSE 'tv' END AS "movieType",
+        m.kind,
         m.runtime_minutes AS "movieRuntime"
       FROM ${watchlist} w
       JOIN ${media} m ON m.id = w.media_id
       JOIN media_external_ids mei
         ON mei.media_id = m.id
-        AND mei.namespace = CASE m.kind
-          WHEN 'movie' THEN 'tmdb:movie'
-          ELSE 'tmdb:tv'
-        END
+        AND mei.namespace = ${tmdbNamespaceForKindSql(sql.raw('m.kind'))}
       WHERE user_id = ${userId}
       ORDER BY w.created_at DESC;
     `;

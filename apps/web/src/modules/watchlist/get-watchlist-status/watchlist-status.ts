@@ -11,7 +11,7 @@ export async function getWatchlistStatusMap(
   const statusMap: WatchlistStatusMap = {};
 
   for (const identity of identities) {
-    statusMap[getMediaIdentityKey(identity.tmdbId, identity.type)] = true;
+    statusMap[getMediaIdentityKey(identity.tmdbId, identity.kind)] = true;
   }
 
   return statusMap;

@@ -12,8 +12,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
-  type MediaType,
-  MediaTypeDict,
+  type MediaKind,
+  MediaKindDict,
 } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
@@ -75,7 +75,7 @@ type UserRating = {
 type RateDialogProps = {
   tmdbId: number;
   title: string;
-  type: MediaType;
+  kind: MediaKind;
   year: string;
   posterPath: string;
 };
@@ -83,7 +83,7 @@ type RateDialogProps = {
 export function RateDialog({
   tmdbId,
   title,
-  type,
+  kind,
   year,
   posterPath,
 }: RateDialogProps) {
@@ -94,7 +94,7 @@ export function RateDialog({
   );
   const [open, setOpen] = useState(false);
 
-  const userRating = userRatings?.[getMediaIdentityKey(tmdbId, type)];
+  const userRating = userRatings?.[getMediaIdentityKey(tmdbId, kind)];
 
   const trigger = (
     <Button className="w-full bg-transparent" size="sm" variant="outline">
@@ -108,11 +108,11 @@ export function RateDialog({
   const content = open ? (
     <RateDialogBody
       isMobile={isMobile}
+      kind={kind}
       onClose={() => setOpen(false)}
       posterPath={posterPath}
       title={title}
       tmdbId={tmdbId}
-      type={type}
       userId={session?.user.id}
       userRating={userRating}
       year={year}
@@ -157,7 +157,7 @@ export function RateDialog({
 type RateDialogBodyProps = {
   tmdbId: number;
   title: string;
-  type: MediaType;
+  kind: MediaKind;
   year: string;
   posterPath: string;
   isMobile: boolean;
@@ -169,7 +169,7 @@ type RateDialogBodyProps = {
 function RateDialogBody({
   tmdbId,
   title,
-  type,
+  kind,
   year,
   posterPath,
   isMobile,
@@ -199,7 +199,7 @@ function RateDialogBody({
   ) => {
     return await mutateRateMedia(formData, {
       tmdbId,
-      type,
+      kind,
       score: rating,
       watchedDate,
     });
@@ -250,7 +250,7 @@ function RateDialogBody({
             </h2>
 
             <p className="text-sm text-white/50">
-              {MediaTypeDict[type]} · {year}
+              {MediaKindDict[kind]} · {year}
             </p>
           </div>
 
@@ -275,7 +275,7 @@ function RateDialogBody({
 
       <form action={action} className={cn(isMobile ? 'mt-7' : 'mt-6')}>
         <input name="movieTMDBId" type="hidden" value={tmdbId} />
-        <input name="type" type="hidden" value={type} />
+        <input name="kind" type="hidden" value={kind} />
 
         <fieldset>
           <legend className="sr-only">Puntuación</legend>
@@ -351,7 +351,7 @@ function RateDialogBody({
                   ? 'text-base'
                   : 'flex shrink-0 items-center gap-3 text-sm'
               )}
-              htmlFor={`watched-date-${tmdbId}-${type}`}
+              htmlFor={`watched-date-${tmdbId}-${kind}`}
             >
               La viste el
             </label>
@@ -383,7 +383,7 @@ function RateDialogBody({
                   'absolute inset-0 size-full cursor-pointer opacity-0',
                   userRating?.isRated && 'cursor-default'
                 )}
-                id={`watched-date-${tmdbId}-${type}`}
+                id={`watched-date-${tmdbId}-${kind}`}
                 max={getLocalTodayDate()}
                 name="watchedDate"
                 onChange={(event) => {

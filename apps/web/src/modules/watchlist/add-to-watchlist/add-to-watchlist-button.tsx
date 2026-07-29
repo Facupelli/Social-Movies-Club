@@ -3,8 +3,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
 import { useActionState } from 'react';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import type { MediaType } from '@/modules/media-catalog/media.type';
 import { getWatchlistStatusQueryOptions } from '@/modules/watchlist/get-watchlist-status/use-user-watchlist';
 import { removeMovieFromWatchlist } from '@/modules/watchlist/remove-from-watchlist/remove-movie';
 import type {
@@ -24,12 +24,12 @@ const initialState: ApiResponse<WatchlistMutationResult> = {
 
 export function AddToWatchlistButton({
   tmdbId,
-  type,
+  kind,
   className,
   variant,
 }: {
   tmdbId: number;
-  type: MediaType;
+  kind: MediaKind;
   className?: string;
   variant?:
     | 'default'
@@ -49,16 +49,22 @@ export function AddToWatchlistButton({
       return;
     }
 
-    const identityKey = getMediaIdentityKey(result.data.tmdbId, result.data.type);
-    queryClient.setQueryData<WatchlistStatusMap>(statusOptions.queryKey, (current) => {
-      const next = { ...current };
-      if (result.data.inWatchlist) {
-        next[identityKey] = true;
-      } else {
-        delete next[identityKey];
+    const identityKey = getMediaIdentityKey(
+      result.data.tmdbId,
+      result.data.kind
+    );
+    queryClient.setQueryData<WatchlistStatusMap>(
+      statusOptions.queryKey,
+      (current) => {
+        const next = { ...current };
+        if (result.data.inWatchlist) {
+          next[identityKey] = true;
+        } else {
+          delete next[identityKey];
+        }
+        return next;
       }
-      return next;
-    });
+    );
   };
 
   const handleAdd = async (
@@ -80,18 +86,22 @@ export function AddToWatchlistButton({
   };
 
   const [addState, addAction] = useActionState(handleAdd, initialState);
-  const [removeState, removeAction] = useActionState(handleRemove, initialState);
+  const [removeState, removeAction] = useActionState(
+    handleRemove,
+    initialState
+  );
 
   const isInWatchlist = Boolean(
-    watchlistStatus?.[getMediaIdentityKey(tmdbId, type)]
+    watchlistStatus?.[getMediaIdentityKey(tmdbId, kind)]
   );
-  const error = addState.success ? undefined : addState.error ||
-    (removeState.success ? undefined : removeState.error);
+  const error = addState.success
+    ? undefined
+    : addState.error || (removeState.success ? undefined : removeState.error);
 
   return (
     <form>
       <input name="movieTMDBId" type="hidden" value={tmdbId} />
-      <input name="type" type="hidden" value={type} />
+      <input name="kind" type="hidden" value={kind} />
 
       {isInWatchlist ? (
         <SubmitButton

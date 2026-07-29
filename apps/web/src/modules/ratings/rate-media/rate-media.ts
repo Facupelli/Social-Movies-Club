@@ -1,18 +1,17 @@
 import 'server-only';
 
 import type {
-  MediaType,
+  MediaKind,
   PersistMediaInput,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
-import { mediaTypeToKind } from '@/modules/media-catalog/media.type';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import { projectRatingToFollowerTimelines } from './project-rating-to-timelines';
 import { persistRatingMutation } from './rating.pg';
 
 type RateMediaDependencies = {
-  tmdb: Pick<TmdbService, 'getMovieDetail' | 'getTvDetail'>;
+  tmdb: Pick<TmdbService, 'getMediaDetail'>;
   persistRatingMutation: typeof persistRatingMutation;
   projectRatingToFollowerTimelines: typeof projectRatingToFollowerTimelines;
 };
@@ -28,22 +27,22 @@ export async function rateMedia(
     userId,
     tmdbId,
     rating,
-    type,
+    kind,
     watchedDate,
   }: {
     userId: string;
     tmdbId: number;
     rating: number;
-    type: MediaType;
+    kind: MediaKind;
     watchedDate: string;
   },
   dependencies: RateMediaDependencies = defaultDependencies
 ): Promise<RateMediaResult> {
   // Keep the external lookup outside the database transaction.
-  const media = await getMediaDetail(tmdbId, type, dependencies.tmdb);
+  const media = await getMediaDetail(tmdbId, kind, dependencies.tmdb);
   const mediaData: PersistMediaInput = {
     tmdbId: media.id,
-    kind: mediaTypeToKind(type),
+    kind,
     title: media.title,
     originalTitle: media.originalTitle ?? null,
     releaseDate: media.releaseDate ?? null,
@@ -65,7 +64,7 @@ export async function rateMedia(
   await dependencies.projectRatingToFollowerTimelines(persisted.rating);
 
   return {
-    mediaIdentity: { tmdbId, type },
+    mediaIdentity: { tmdbId, kind },
     rating: {
       score: persisted.rating.score,
       watchedDate: persisted.rating.watched_date,
@@ -76,13 +75,10 @@ export async function rateMedia(
 
 async function getMediaDetail(
   tmdbId: number,
-  type: MediaType,
-  tmdb: Pick<TmdbService, 'getMovieDetail' | 'getTvDetail'>
+  kind: MediaKind,
+  tmdb: Pick<TmdbService, 'getMediaDetail'>
 ): Promise<TMDbMediaMultiSearch> {
-  const result =
-    type === 'movie'
-      ? await tmdb.getMovieDetail(tmdbId)
-      : await tmdb.getTvDetail(tmdbId);
+  const result = await tmdb.getMediaDetail(tmdbId, kind);
 
   if (!result.data) {
     throw new Error('Media not found');

@@ -23,15 +23,15 @@ import {
 import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { MovieList } from '@/modules/media-catalog/components/movie-list';
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
-import { TYPE_FILTER_DICT } from '@/modules/media-catalog/media.constants';
+import { KIND_FILTER_DICT } from '@/modules/media-catalog/media.constants';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import {
   parseProfileRatingsFilters,
   serializeProfileRatingsFilters,
 } from '@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser';
 import {
-  PROFILE_RATINGS_VIEWS,
   PROFILE_RATINGS_VIEW_STORAGE_KEY,
+  PROFILE_RATINGS_VIEWS,
   type ProfileRatingsView,
 } from '@/modules/ratings/list-profile-ratings/profile-ratings.constants';
 import { getProfileRatingsQueryOptions } from '@/modules/ratings/list-profile-ratings/use-user-movies';
@@ -109,7 +109,7 @@ export function ProfileRatingsClient({
           {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie) => (
-            <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
+            <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.kind)}>
               <MoviePoster posterPath={movie.posterPath} title={movie.title} />
               <CardContent className="flex flex-col gap-1 px-4 py-2">
                 <MovieTitle title={movie.title} />
@@ -135,7 +135,7 @@ export function ProfileRatingsClient({
           {isPending && <p>Cargando...</p>}
 
           {profileMovies?.map((movie, idx) => (
-            <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
+            <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.kind)}>
               <div className="flex gap-6">
                 <p className="hidden pl-2 font-bold md:block">{idx + 1}</p>
 
@@ -156,8 +156,8 @@ export function ProfileRatingsClient({
                     </div>
                     <div className="flex items-center gap-4 md:pr-4">
                       <MovieWatchProviders
+                        kind={movie.kind}
                         tmdbId={movie.tmdbId}
-                        type={movie.type}
                       />
                     </div>
                   </div>
@@ -220,8 +220,8 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
   };
 
   const handleFilterByChange = (value: string) => {
-    if (value === 'all' || value === 'movie' || value === 'tv') {
-      updateFilters({ typeFilter: value });
+    if (value === 'all' || value === 'movie' || value === 'tv_series') {
+      updateFilters({ kindFilter: value });
     }
   };
 
@@ -262,15 +262,15 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
               className="h-[calc(100%-1px)] gap-2 bg-transparent"
               variant="outline"
             >
-              {filters.typeFilter
-                ? TYPE_FILTER_DICT[filters.typeFilter]
-                : TYPE_FILTER_DICT.all}
+              {filters.kindFilter
+                ? KIND_FILTER_DICT[filters.kindFilter]
+                : KIND_FILTER_DICT.all}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuRadioGroup
               onValueChange={handleFilterByChange}
-              value={filters.typeFilter}
+              value={filters.kindFilter}
             >
               <DropdownMenuRadioItem className="gap-2" value="all">
                 Todo
@@ -278,7 +278,7 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
               <DropdownMenuRadioItem className="gap-2" value="movie">
                 Películas
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem className="gap-2" value="tv">
+              <DropdownMenuRadioItem className="gap-2" value="tv_series">
                 Series
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>

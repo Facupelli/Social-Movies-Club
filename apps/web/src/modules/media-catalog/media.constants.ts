@@ -1,10 +1,12 @@
-export const TYPE_FILTER_DICT = {
+import type { MediaKind } from './media.type';
+
+export const KIND_FILTER_DICT: Record<'all' | MediaKind, string> = {
   all: 'Filtrar',
   movie: 'Películas',
-  tv: 'Series',
-} as const;
+  tv_series: 'Series',
+};
 
-export const TYPE_DICT = {
+export const KIND_DICT: Record<MediaKind, string> = {
   movie: 'Película',
-  tv: 'Serie',
-} as const;
+  tv_series: 'Serie',
+};

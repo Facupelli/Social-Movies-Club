@@ -117,7 +117,7 @@ export const verifications = pgTable('verifications', {
  *  Media                                                             *
  * ------------------------------------------------------------------ */
 
-export const mediaKindEnum = pgEnum('media_type', ['movie', 'tv_series']);
+export const mediaKindEnum = pgEnum('media_kind', ['movie', 'tv_series']);
 
 export const media = pgTable(
   'media',

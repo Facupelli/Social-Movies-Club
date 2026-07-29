@@ -1,3 +1,5 @@
+export type MediaKind = 'movie' | 'tv_series';
+
 export interface TMDbMovieSearch {
   id: number;
   posterPath: string;
@@ -16,12 +18,9 @@ export interface TMDbMediaMultiSearch {
   originalTitle?: string;
   releaseDate?: string;
   overview: string;
-  type: MediaType;
+  kind: MediaKind;
   runtime?: number;
 }
-
-export type MediaKind = 'movie' | 'tv_series';
-export type TmdbNamespace = 'tmdb:movie' | 'tmdb:tv';
 
 export type PersistMediaInput = {
   tmdbId: number;
@@ -36,22 +35,12 @@ export type PersistMediaInput = {
   sourceSyncedAt: Date;
 };
 
-export function mediaTypeToKind(type: MediaType): MediaKind {
-  return type === 'movie' ? 'movie' : 'tv_series';
-}
-
-export function mediaTypeToTmdbNamespace(type: MediaType): TmdbNamespace {
-  return type === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
-}
-
-export const MediaTypeEnum = {
+export const MediaKindEnum = {
   movie: 'movie',
-  tv: 'tv',
-} as const;
+  tvSeries: 'tv_series',
+} as const satisfies Record<string, MediaKind>;
 
-export const MediaTypeDict = {
-  [MediaTypeEnum.movie]: 'Película',
-  [MediaTypeEnum.tv]: 'Serie',
+export const MediaKindDict: Record<MediaKind, string> = {
+  movie: 'Película',
+  tv_series: 'Serie',
 };
-
-export type MediaType = (typeof MediaTypeEnum)[keyof typeof MediaTypeEnum];

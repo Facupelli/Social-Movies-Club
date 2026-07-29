@@ -8,7 +8,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useDeferredValue, useEffect, useState } from 'react';
 import {
   MovieCard,
-  MovieMediaType,
+  MovieMediaKind,
   MoviePoster,
   MovieReleaseDate,
   MovieScore,
@@ -16,7 +16,7 @@ import {
 } from '@/modules/media-catalog/components/movie-card';
 import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
-import { TYPE_DICT } from '@/modules/media-catalog/media.constants';
+import { KIND_DICT } from '@/modules/media-catalog/media.constants';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
 import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
@@ -259,7 +259,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 className="absolute top-2 right-2 text-xs font-medium bg-black/60 text-white border-0"
                 variant="secondary"
               >
-                {TYPE_DICT[item.movieType]}
+                {KIND_DICT[item.kind]}
               </Badge>
               <div className="absolute bottom-3 left-3 right-3 text-white">
                 <p className="text-xs font-medium opacity-90">
@@ -270,8 +270,8 @@ function FeedItemCard({ item }: { item: FeedItem }) {
               <div className="absolute right-2 bottom-2">
                 <AddToWatchlistButton
                   className="bg-secondary/50"
+                  kind={item.kind}
                   tmdbId={item.movieTmdbId}
-                  type={item.movieType}
                   variant="secondary"
                 />
               </div>
@@ -300,10 +300,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                   <AccordionContent>{item.movieOverview}</AccordionContent>
                 </AccordionItem>
               </Accordion>
-              <MovieWatchProviders
-                tmdbId={item.movieTmdbId}
-                type={item.movieType}
-              />
+              <MovieWatchProviders kind={item.kind} tmdbId={item.movieTmdbId} />
             </div>
           </div>
 
@@ -380,25 +377,25 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
     <div className="px-2 pt-2 md:px-10">
       <MovieGrid>
         {movies?.map((movie) => (
-          <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.type)}>
+          <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.kind)}>
             <MoviePoster posterPath={movie.posterPath} title={movie.title} />
             <CardContent className="flex flex-col gap-1 px-4 pt-2">
               <MovieTitle title={movie.title} />
               <div className="flex items-center justify-between">
                 <MovieReleaseDate year={movie.year} />
-                <MovieMediaType type={movie.type} />
+                <MovieMediaKind kind={movie.kind} />
               </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-2 px-4 pb-4">
               <div className="flex-1 md:flex-initial">
-                <AddToWatchlistButton tmdbId={movie.tmdbId} type={movie.type} />
+                <AddToWatchlistButton kind={movie.kind} tmdbId={movie.tmdbId} />
               </div>
               <div className="flex-1 md:flex-initial">
                 <RateDialog
+                  kind={movie.kind}
                   posterPath={movie.posterPath}
                   title={movie.title}
                   tmdbId={movie.tmdbId}
-                  type={movie.type}
                   year={movie.year}
                 />
               </div>

@@ -8,6 +8,7 @@ import {
   ratings,
   userProfiles,
 } from '@/platform/database/postgres/schema';
+import { tmdbNamespaceForKindSql } from '@/platform/tmdb/tmdb-media-kind';
 import type { FeedItem, GetUserFeedParams, UserFeedPage } from './feed.types';
 
 const actorProfile = alias(userProfiles, 'actor_profile');
@@ -33,7 +34,7 @@ export async function getUserFeed({
         movieYear: sql<string>`COALESCE(EXTRACT(YEAR FROM ${media.releaseDate})::text, '')`,
         moviePoster: sql<string>`COALESCE(${media.posterPath}, '')`,
         movieBackdrop: sql<string>`COALESCE(${media.backdropPath}, '')`,
-        movieType: sql<'movie' | 'tv'>`CASE ${media.kind} WHEN 'movie' THEN 'movie' ELSE 'tv' END`,
+        kind: media.kind,
         movieOverview: sql<string>`COALESCE(${media.overview}, '')`,
         score: ratings.score,
         ratedAt: ratings.createdAt,
@@ -46,10 +47,7 @@ export async function getUserFeed({
         mediaExternalIds,
         and(
           eq(mediaExternalIds.mediaId, media.id),
-          sql`${mediaExternalIds.namespace} = CASE ${media.kind}
-            WHEN 'movie' THEN 'tmdb:movie'
-            ELSE 'tmdb:tv'
-          END`
+          eq(mediaExternalIds.namespace, tmdbNamespaceForKindSql(media.kind))
         )
       )
       .where(
@@ -74,7 +72,7 @@ export async function getUserFeed({
       movieYear: row.movieYear,
       moviePoster: row.moviePoster,
       movieBackdrop: row.movieBackdrop,
-      movieType: row.movieType,
+      kind: row.kind,
       score: row.score,
       ratedAt: row.ratedAt.toISOString(),
       seenAt: row.seenAt?.toISOString() ?? null,

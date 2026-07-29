@@ -1,16 +1,10 @@
 import type { z } from 'zod';
 import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
-  MediaType,
   TMDbMediaMultiSearch,
   TMDbMovieSearch,
 } from '@/modules/media-catalog/media.type';
 import { getCache } from '@/platform/cache/cache';
-import {
-  buildTmdbCacheKey,
-  normalizeTmdbSearchQuery,
-  TMDB_CACHE_TTL_SECONDS,
-} from '@/platform/tmdb/tmdb-cache-policy';
 import {
   movieDetailResponseSchema,
   movieSearchResponseSchema,
@@ -19,6 +13,15 @@ import {
   tvSearchResponseSchema,
   watchProviderResponseSchema,
 } from '@/platform/tmdb/tmdb.schemas';
+import {
+  buildTmdbCacheKey,
+  normalizeTmdbSearchQuery,
+  TMDB_CACHE_TTL_SECONDS,
+} from '@/platform/tmdb/tmdb-cache-policy';
+import {
+  fromTmdbMediaType,
+  type TmdbMediaType,
+} from '@/platform/tmdb/tmdb-media-kind';
 import type { SearchMovieQueryParams } from '@/platform/tmdb/types/search-movie';
 
 const DEFAULT_LANGUAGE = 'es-AR';
@@ -83,7 +86,7 @@ export class TmdbRepository implements ITmdbRepository {
             backdropPath: result.backdrop_path ?? '',
             year: result.first_air_date.split('-')[0],
             overview: result.overview,
-            type: 'tv',
+            kind: fromTmdbMediaType('tv'),
           }
         : {
             id: result.id,
@@ -92,7 +95,7 @@ export class TmdbRepository implements ITmdbRepository {
             backdropPath: result.backdrop_path ?? '',
             year: result.release_date.split('-')[0],
             overview: result.overview,
-            type: 'movie',
+            kind: fromTmdbMediaType('movie'),
             runtime: result.runtime ?? undefined,
           }
     );
@@ -140,7 +143,7 @@ export class TmdbRepository implements ITmdbRepository {
         backdropPath: json.backdrop_path ?? '',
         year: json.release_date.split('-')[0],
         overview: json.overview,
-        type: 'movie',
+        kind: fromTmdbMediaType('movie'),
         runtime: json.runtime ?? undefined,
       },
     };
@@ -169,7 +172,7 @@ export class TmdbRepository implements ITmdbRepository {
         backdropPath: json.backdrop_path ?? '',
         year: json.first_air_date.split('-')[0],
         overview: json.overview,
-        type: 'tv',
+        kind: fromTmdbMediaType('tv'),
       },
     };
   }
@@ -185,7 +188,7 @@ export class TmdbRepository implements ITmdbRepository {
   }
 
   private async searchByType(
-    type: MediaType,
+    type: TmdbMediaType,
     params: SearchMovieQueryParams
   ): Promise<SearchMoviesResult> {
     const query = normalizeTmdbSearchQuery(params.query);
@@ -250,7 +253,7 @@ export class TmdbRepository implements ITmdbRepository {
 
   private async getWatchProviders(
     mediaId: number,
-    mediaType: MediaType
+    mediaType: TmdbMediaType
   ): Promise<WatchProviderResponse> {
     const json = await this.request({
       endpoint: `/${mediaType}/${mediaId}/watch/providers`,

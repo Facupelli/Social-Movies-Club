@@ -1,9 +1,9 @@
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import type { MediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import type { MediaType } from '@/modules/media-catalog/media.type';
 
 export type WatchlistMediaIdentity = {
   tmdbId: number;
-  type: MediaType;
+  kind: MediaKind;
 };
 
 export type WatchlistStatusMap = Record<MediaIdentityKey, boolean>;
@@ -21,6 +21,6 @@ export type WatchlistRow = {
   moviePosterPath: string;
   movieBackdropPath: string;
   movieYear: string;
-  movieType: MediaType;
+  kind: MediaKind;
   movieRuntime?: number;
 };

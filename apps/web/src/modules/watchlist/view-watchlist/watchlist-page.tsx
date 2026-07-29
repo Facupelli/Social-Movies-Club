@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation';
 import z from 'zod';
 import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import { GridMovieCard } from '@/modules/watchlist/view-watchlist/watchlist-movie-card';
 import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
+import { GridMovieCard } from '@/modules/watchlist/view-watchlist/watchlist-movie-card';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
 
@@ -14,7 +14,10 @@ export default async function WatchlistPage(
     params: Promise<{ id: string }>;
   }>
 ) {
-  const [session, params] = await Promise.all([getServerSession(), props.params]);
+  const [session, params] = await Promise.all([
+    getServerSession(),
+    props.params,
+  ]);
 
   if (!session) {
     redirect('/');
@@ -38,7 +41,7 @@ export default async function WatchlistPage(
         {watchlistResult.data.map((movie) => (
           <GridMovieCard
             isOwner={isOwner}
-            key={getMediaIdentityKey(movie.tmdbId, movie.type)}
+            key={getMediaIdentityKey(movie.tmdbId, movie.kind)}
             movie={movie}
           />
         ))}

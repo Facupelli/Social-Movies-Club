@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { RatingStatusMap } from '@/modules/ratings/get-rating-status/rating-status.types';
 import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
@@ -15,7 +15,7 @@ import type { ApiResponse } from '@/shared/http/safe-execute';
 
 type OptimisticRating = {
   tmdbId: number;
-  type: MediaType;
+  kind: MediaKind;
   score: number;
   watchedDate: string;
 };
@@ -31,7 +31,7 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
   ): Promise<ApiResponse<RateMediaResult>> {
     const mutationId = ++latestMutation.current;
     const ratingsKey = ratingStatusQueryKeys.map(viewerUserId);
-    const identityKey = getMediaIdentityKey(optimistic.tmdbId, optimistic.type);
+    const identityKey = getMediaIdentityKey(optimistic.tmdbId, optimistic.kind);
 
     await queryClient.cancelQueries({ queryKey: ratingsKey, exact: true });
     const previousRatings =
@@ -72,7 +72,7 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
 
       const resultIdentityKey = getMediaIdentityKey(
         result.data.mediaIdentity.tmdbId,
-        result.data.mediaIdentity.type
+        result.data.mediaIdentity.kind
       );
       queryClient.setQueryData<RatingStatusMap>(ratingsKey, (current) => ({
         ...(current ?? {}),

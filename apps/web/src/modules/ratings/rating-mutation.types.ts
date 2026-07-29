@@ -1,10 +1,10 @@
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 
 /** Browser-safe authoritative result of rating media. */
 export type RateMediaResult = {
   mediaIdentity: {
     tmdbId: number;
-    type: MediaType;
+    kind: MediaKind;
   };
   rating: {
     score: number;

@@ -1,4 +1,4 @@
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 
 export interface GetUserFeedParams {
   userId: string;
@@ -20,7 +20,7 @@ export type FeedItem = {
   movieBackdrop: string;
   movieTmdbId: number;
   movieOverview: string;
-  movieType: MediaType;
+  kind: MediaKind;
   score: number;
   ratedAt: string;
   seenAt: string | null;

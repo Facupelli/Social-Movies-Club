@@ -1,28 +1,32 @@
 import type {
   ProfileRatingsFilters,
+  ProfileRatingsKindFilter,
   ProfileRatingsRepositoryFilters,
   ProfileRatingsSortBy,
   ProfileRatingsSortOrder,
-  ProfileRatingsTypeFilter,
 } from '../profile-ratings.types';
 
 export const PROFILE_RATINGS_SEARCH_PARAMS = {
   sortBy: 'sortBy',
   sortOrder: 'sortOrder',
-  typeFilter: 'type',
+  kindFilter: 'kind',
   bothRated: 'bothRated',
 } as const;
 
 export const DEFAULT_PROFILE_RATINGS_FILTERS: ProfileRatingsFilters = {
   sortBy: 'createdAt',
   sortOrder: 'desc',
-  typeFilter: 'all',
+  kindFilter: 'all',
   bothRated: false,
 };
 
 const SORT_FIELDS: readonly ProfileRatingsSortBy[] = ['score', 'createdAt'];
 const SORT_ORDERS: readonly ProfileRatingsSortOrder[] = ['asc', 'desc'];
-const MEDIA_TYPES: readonly ProfileRatingsTypeFilter[] = ['all', 'movie', 'tv'];
+const MEDIA_KINDS: readonly ProfileRatingsKindFilter[] = [
+  'all',
+  'movie',
+  'tv_series',
+];
 
 function parseBothRated(value: string | null): boolean {
   if (value === 'true') {
@@ -39,7 +43,7 @@ export function parseProfileRatingsFilters(
 ): ProfileRatingsFilters {
   const sortBy = params.get(PROFILE_RATINGS_SEARCH_PARAMS.sortBy);
   const sortOrder = params.get(PROFILE_RATINGS_SEARCH_PARAMS.sortOrder);
-  const typeFilter = params.get(PROFILE_RATINGS_SEARCH_PARAMS.typeFilter);
+  const kindFilter = params.get(PROFILE_RATINGS_SEARCH_PARAMS.kindFilter);
   const bothRated = params.get(PROFILE_RATINGS_SEARCH_PARAMS.bothRated);
 
   return {
@@ -49,9 +53,9 @@ export function parseProfileRatingsFilters(
     sortOrder: SORT_ORDERS.includes(sortOrder as ProfileRatingsSortOrder)
       ? (sortOrder as ProfileRatingsSortOrder)
       : DEFAULT_PROFILE_RATINGS_FILTERS.sortOrder,
-    typeFilter: MEDIA_TYPES.includes(typeFilter as ProfileRatingsTypeFilter)
-      ? (typeFilter as ProfileRatingsTypeFilter)
-      : DEFAULT_PROFILE_RATINGS_FILTERS.typeFilter,
+    kindFilter: MEDIA_KINDS.includes(kindFilter as ProfileRatingsKindFilter)
+      ? (kindFilter as ProfileRatingsKindFilter)
+      : DEFAULT_PROFILE_RATINGS_FILTERS.kindFilter,
     bothRated: parseBothRated(bothRated),
   };
 }
@@ -73,8 +77,8 @@ export function serializeProfileRatingsFilters(
   if (filters.sortOrder !== DEFAULT_PROFILE_RATINGS_FILTERS.sortOrder) {
     params.set(PROFILE_RATINGS_SEARCH_PARAMS.sortOrder, filters.sortOrder);
   }
-  if (filters.typeFilter !== DEFAULT_PROFILE_RATINGS_FILTERS.typeFilter) {
-    params.set(PROFILE_RATINGS_SEARCH_PARAMS.typeFilter, filters.typeFilter);
+  if (filters.kindFilter !== DEFAULT_PROFILE_RATINGS_FILTERS.kindFilter) {
+    params.set(PROFILE_RATINGS_SEARCH_PARAMS.kindFilter, filters.kindFilter);
   }
   if (filters.bothRated !== DEFAULT_PROFILE_RATINGS_FILTERS.bothRated) {
     params.set(

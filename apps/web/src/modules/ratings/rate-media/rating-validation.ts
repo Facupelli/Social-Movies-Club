@@ -23,7 +23,7 @@ const MovieRatingSchema = z.object({
     .refine((value) => value >= 1 && value <= 10, {
       message: 'Rating must be between 1 and 10',
     }),
-  type: z.enum(['movie', 'tv']),
+  kind: z.enum(['movie', 'tv_series']),
   watchedDate: z.iso
     .date('Watched date must be a valid date')
     .refine((value) => value <= getTodayDate(), {

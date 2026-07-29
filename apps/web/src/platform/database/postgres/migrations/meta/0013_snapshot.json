@@ -385,7 +385,7 @@
         },
         "kind": {
           "name": "kind",
-          "type": "media_type",
+          "type": "media_kind",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -1549,8 +1549,8 @@
     }
   },
   "enums": {
-    "public.media_type": {
-      "name": "media_type",
+    "public.media_kind": {
+      "name": "media_kind",
       "schema": "public",
       "values": [
         "movie",

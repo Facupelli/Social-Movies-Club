@@ -1,6 +1,6 @@
 import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
-  MediaType,
+  MediaKind,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
 import {
@@ -8,6 +8,7 @@ import {
   type SearchMoviesResult,
   TmdbRepository,
 } from '@/platform/tmdb/tmdb.repository';
+import { toTmdbMediaType } from '@/platform/tmdb/tmdb-media-kind';
 
 export class TmdbService {
   constructor(
@@ -38,14 +39,21 @@ export class TmdbService {
     return await this.repo.getTvDetail(movieId);
   }
 
+  async getMediaDetail(
+    mediaId: number,
+    kind: MediaKind
+  ): Promise<{ data: TMDbMediaMultiSearch }> {
+    return toTmdbMediaType(kind) === 'movie'
+      ? await this.repo.getMovieDetail(mediaId)
+      : await this.repo.getTvDetail(mediaId);
+  }
+
   async getWatchProvider(
     mediaId: number,
-    type: MediaType
+    kind: MediaKind
   ): Promise<WatchProviderResponse> {
-    if (type === 'movie') {
-      return await this.repo.getMovieWatchProviders(mediaId);
-    }
-
-    return await this.repo.getTvWatchProviders(mediaId);
+    return toTmdbMediaType(kind) === 'movie'
+      ? await this.repo.getMovieWatchProviders(mediaId)
+      : await this.repo.getTvWatchProviders(mediaId);
   }
 }

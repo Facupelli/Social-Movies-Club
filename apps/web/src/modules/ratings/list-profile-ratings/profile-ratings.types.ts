@@ -1,4 +1,4 @@
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 
 export type UserRatings = {
@@ -12,7 +12,7 @@ export type UserRatings = {
   backdropPath: string;
   overview: string;
   tmdbId: number;
-  type: MediaType;
+  kind: MediaKind;
   runtime?: number;
 };
 
@@ -23,12 +23,12 @@ export interface GetUserRatingMovies {
 
 export type ProfileRatingsSortBy = 'score' | 'createdAt';
 export type ProfileRatingsSortOrder = 'asc' | 'desc';
-export type ProfileRatingsTypeFilter = 'all' | MediaType;
+export type ProfileRatingsKindFilter = 'all' | MediaKind;
 
 export type ProfileRatingsFilters = Readonly<{
   sortBy: ProfileRatingsSortBy;
   sortOrder: ProfileRatingsSortOrder;
-  typeFilter: ProfileRatingsTypeFilter;
+  kindFilter: ProfileRatingsKindFilter;
   bothRated: boolean;
 }>;
 

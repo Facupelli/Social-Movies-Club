@@ -8,12 +8,10 @@ const watchlistMutationSchema = z.object({
     .refine((value) => Number.isSafeInteger(value) && value > 0, {
       message: 'Movie ID must be a positive integer',
     }),
-  type: z.enum(['movie', 'tv']),
+  kind: z.enum(['movie', 'tv_series']),
 });
 
-export type WatchlistMutationInput = z.infer<
-  typeof watchlistMutationSchema
->;
+export type WatchlistMutationInput = z.infer<typeof watchlistMutationSchema>;
 
 export function validateWatchlistMutation(
   formData: FormData

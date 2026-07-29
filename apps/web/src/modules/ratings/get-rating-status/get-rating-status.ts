@@ -11,7 +11,7 @@ export async function getRatingStatusMap(
   const statusMap: RatingStatusMap = {};
 
   for (const rating of ratings.data) {
-    const identityKey = getMediaIdentityKey(rating.tmdbId, rating.type);
+    const identityKey = getMediaIdentityKey(rating.tmdbId, rating.kind);
     statusMap[identityKey] ??= {
       isRated: true,
       score: rating.score,

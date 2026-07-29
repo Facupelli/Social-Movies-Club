@@ -1,4 +1,6 @@
-ALTER TYPE "public"."media_type" RENAME VALUE 'tv' TO 'tv_series';
+ALTER TYPE "public"."media_type" RENAME TO "media_kind";
+--> statement-breakpoint
+ALTER TYPE "public"."media_kind" RENAME VALUE 'tv' TO 'tv_series';
 --> statement-breakpoint
 CREATE TABLE "media_external_ids" (
 	"media_id" uuid NOT NULL,
@@ -8,7 +10,7 @@ CREATE TABLE "media_external_ids" (
 	CONSTRAINT "media_external_ids_namespace_external_id_unique" UNIQUE("namespace","external_id")
 );
 --> statement-breakpoint
-ALTER TABLE "media" ADD COLUMN "kind" "media_type";
+ALTER TABLE "media" ADD COLUMN "kind" "media_kind";
 --> statement-breakpoint
 ALTER TABLE "media" ADD COLUMN "original_title" text;
 --> statement-breakpoint
