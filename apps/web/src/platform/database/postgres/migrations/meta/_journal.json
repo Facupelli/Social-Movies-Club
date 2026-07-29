@@ -106,6 +106,13 @@
       "when": 1785348490438,
       "tag": "0015_lush_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1785351104896,
+      "tag": "0016_pink_malice",
+      "breakpoints": true
     }
   ]
 }

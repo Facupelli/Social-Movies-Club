@@ -185,6 +185,9 @@ export const ratings = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     unique('ratings_user_media_unique').on(table.userId, table.mediaId),
@@ -209,6 +212,85 @@ export const ratings = pgTable(
 );
 
 export type Rating = typeof ratings.$inferSelect;
+
+/* ------------------------------------------------------------------ *
+ *  activities                                                         *
+ * ------------------------------------------------------------------ */
+
+export const activities = pgTable(
+  'activities',
+  {
+    id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+    typeCode: text('type_code').notNull(),
+    actorId: text('actor_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
+    payload: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    deduplicationKey: text('deduplication_key').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique('activities_deduplication_key_unique').on(
+      table.deduplicationKey
+    ),
+    index('activities_occurred_at_idx').on(
+      table.occurredAt.desc(),
+      table.id.desc()
+    ),
+  ]
+);
+
+export type Activity = typeof activities.$inferSelect;
+
+export const ratingActivities = pgTable(
+  'rating_activities',
+  {
+    activityId: uuid('activity_id')
+      .primaryKey()
+      .references(() => activities.id, { onDelete: 'cascade' }),
+    ratingId: uuid('rating_id')
+      .notNull()
+      .references(() => ratings.id, { onDelete: 'restrict' }),
+  },
+  (table) => [
+    unique('rating_activities_rating_id_unique').on(table.ratingId),
+  ]
+);
+
+export const feedDeliveries = pgTable(
+  'feed_deliveries',
+  {
+    id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+    feedOwnerId: text('feed_owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    activityId: uuid('activity_id')
+      .notNull()
+      .references(() => activities.id, { onDelete: 'cascade' }),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    seenAt: timestamp('seen_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('feed_deliveries_owner_activity_unique').on(
+      table.feedOwnerId,
+      table.activityId
+    ),
+    index('feed_deliveries_activity_idx').on(table.activityId),
+    index('feed_deliveries_owner_timeline_idx').on(
+      table.feedOwnerId,
+      table.occurredAt.desc(),
+      table.id.desc()
+    ),
+  ]
+);
+
+export type FeedDelivery = typeof feedDeliveries.$inferSelect;
 
 /* ------------------------------------------------------------------ *
  *  follows (directed edge)                                            *
