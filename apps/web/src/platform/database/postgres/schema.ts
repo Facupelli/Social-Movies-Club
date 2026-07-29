@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -35,20 +36,38 @@ export const users = pgTable(
     updatedAt: timestamp('updated_at')
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
-
-    /* Your domain-specific columns */
-    username: text('username').unique(),
   },
-  (table) => [
-    // Performance optimization indexes
-    index('users_username_idx')
-      .on(table.username)
-      .where(sql`username IS NOT NULL`),
-    index('users_email_idx').on(table.email),
-  ]
+  (table) => [index('users_email_idx').on(table.email)]
 );
 
 export type User = typeof users.$inferSelect;
+
+export const userProfiles = pgTable(
+  'user_profiles',
+  {
+    userId: text('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    username: text('username'),
+    displayName: text('display_name').notNull(),
+    avatarUrl: text('avatar_url'),
+    bio: text('bio'),
+    countryCode: text('country_code'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('user_profiles_username_lower_unique')
+      .on(sql`lower(${table.username})`)
+      .where(sql`${table.username} IS NOT NULL`),
+    check(
+      'user_profiles_country_code_check',
+      sql`${table.countryCode} IS NULL OR ${table.countryCode} ~ '^[A-Z]{2}$'`
+    ),
+  ]
+);
+
+export type UserProfile = typeof userProfiles.$inferSelect;
 
 export const sessions = pgTable('sessions', {
   id: text('id').primaryKey(),

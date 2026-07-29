@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
-import { users } from '@/platform/database/postgres/schema';
+import { userProfiles } from '@/platform/database/postgres/schema';
 import type { ProfileSearchResult } from './profile-search.types';
 
 export async function searchProfiles(
@@ -10,10 +10,14 @@ export async function searchProfiles(
     const usernameQuery = `%${query}%`;
     const { rows } =
       await db.execute<ProfileSearchResult>(sql<ProfileSearchResult>`
-      SELECT id, name, image, username
-      FROM users
-      WHERE ${users.username} ILIKE ${usernameQuery}
-    `);
+        SELECT
+          ${userProfiles.userId} AS id,
+          ${userProfiles.displayName} AS name,
+          ${userProfiles.avatarUrl} AS image,
+          ${userProfiles.username} AS username
+        FROM ${userProfiles}
+        WHERE ${userProfiles.username} ILIKE ${usernameQuery}
+      `);
 
     return rows;
   });

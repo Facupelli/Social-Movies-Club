@@ -4,18 +4,18 @@ import {
   notifyUserFollowed,
   type UserFollowedEvent,
 } from '@/modules/notifications/notify-user-followed/notify-user-followed';
-import { getProfileById } from '@/modules/profiles/profile.pg';
+import { getPublicProfileById } from '@/modules/profiles/profile.pg';
 import { createFollow, removeFollow } from './follow-user.pg';
 
 type FollowUserDependencies = {
   createFollow: typeof createFollow;
-  getUser: typeof getProfileById;
+  getUser: typeof getPublicProfileById;
   notifyUserFollowed: (event: UserFollowedEvent) => Promise<boolean>;
 };
 
 const followUserDependencies: FollowUserDependencies = {
   createFollow,
-  getUser: getProfileById,
+  getUser: getPublicProfileById,
   notifyUserFollowed,
 };
 

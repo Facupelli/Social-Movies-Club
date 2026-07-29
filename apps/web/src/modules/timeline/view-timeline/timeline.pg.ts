@@ -5,11 +5,11 @@ import {
   feedItems,
   media,
   ratings,
-  users,
+  userProfiles,
 } from '@/platform/database/postgres/schema';
 import type { FeedItem, GetUserFeedParams, UserFeedPage } from './feed.types';
 
-const actor = alias(users, 'actor');
+const actorProfile = alias(userProfiles, 'actor_profile');
 
 export async function getUserFeed({
   userId,
@@ -23,9 +23,9 @@ export async function getUserFeed({
         actorId: feedItems.actorId,
         feedCreatedAt: feedItems.createdAt,
         seenAt: feedItems.seenAt,
-        actorName: actor.name,
-        actorUsername: actor.username,
-        actorImage: actor.image,
+        actorName: actorProfile.displayName,
+        actorUsername: actorProfile.username,
+        actorImage: actorProfile.avatarUrl,
         mediaId: media.id,
         movieTmdbId: media.tmdbId,
         movieTitle: media.title,
@@ -38,7 +38,7 @@ export async function getUserFeed({
         ratedAt: ratings.createdAt,
       })
       .from(feedItems)
-      .innerJoin(actor, eq(feedItems.actorId, actor.id))
+      .innerJoin(actorProfile, eq(feedItems.actorId, actorProfile.userId))
       .innerJoin(ratings, eq(feedItems.ratingId, ratings.id))
       .innerJoin(media, eq(ratings.mediaId, media.id))
       .where(
