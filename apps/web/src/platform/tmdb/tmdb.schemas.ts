@@ -78,6 +78,7 @@ export const movieDetailResponseSchema = z
   .object({
     id: z.number().int(),
     title: z.string(),
+    original_title: z.string(),
     poster_path: z.string().nullable(),
     backdrop_path: z.string().nullable(),
     release_date: z.string(),
@@ -90,6 +91,7 @@ export const tvDetailResponseSchema = z
   .object({
     id: z.number().int(),
     name: z.string(),
+    original_name: z.string(),
     poster_path: z.string().nullable(),
     backdrop_path: z.string().nullable(),
     first_air_date: z.string(),

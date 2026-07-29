@@ -134,6 +134,8 @@ export class TmdbRepository implements ITmdbRepository {
       data: {
         id: json.id,
         title: json.title,
+        originalTitle: json.original_title,
+        releaseDate: json.release_date || undefined,
         posterPath: json.poster_path ?? '',
         backdropPath: json.backdrop_path ?? '',
         year: json.release_date.split('-')[0],
@@ -161,6 +163,8 @@ export class TmdbRepository implements ITmdbRepository {
       data: {
         id: json.id,
         title: json.name,
+        originalTitle: json.original_name,
+        releaseDate: json.first_air_date || undefined,
         posterPath: json.poster_path ?? '',
         backdropPath: json.backdrop_path ?? '',
         year: json.first_air_date.split('-')[0],

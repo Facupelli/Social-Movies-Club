@@ -2,10 +2,11 @@ import 'server-only';
 
 import type {
   MediaType,
+  PersistMediaInput,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
+import { mediaTypeToKind } from '@/modules/media-catalog/media.type';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
-import type { Media } from '@/platform/database/postgres/schema';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import { projectRatingToFollowerTimelines } from './project-rating-to-timelines';
 import { persistRatingMutation } from './rating.pg';
@@ -40,15 +41,17 @@ export async function rateMedia(
 ): Promise<RateMediaResult> {
   // Keep the external lookup outside the database transaction.
   const media = await getMediaDetail(tmdbId, type, dependencies.tmdb);
-  const mediaData: Omit<Media, 'id'> = {
-    posterPath: media.posterPath,
-    backdropPath: media.backdropPath,
-    title: media.title,
-    year: media.year,
+  const mediaData: PersistMediaInput = {
     tmdbId: media.id,
-    overview: media.overview,
-    type,
-    runtime: media.runtime ?? null,
+    kind: mediaTypeToKind(type),
+    title: media.title,
+    originalTitle: media.originalTitle ?? null,
+    releaseDate: media.releaseDate ?? null,
+    runtimeMinutes: media.runtime ?? null,
+    overview: media.overview || null,
+    posterPath: media.posterPath || null,
+    backdropPath: media.backdropPath || null,
+    sourceSyncedAt: new Date(),
   };
 
   const persisted = await dependencies.persistRatingMutation(

@@ -10,16 +10,22 @@ export async function getProfileWatchlist(
     const query = sql`
       SELECT
         m.id AS "movieId",
-        m.tmdb_id AS "movieTmdbId",
+        mei.external_id::integer AS "movieTmdbId",
         m.title AS "movieTitle",
-        m.overview AS "movieOverview",
-        m.poster_path AS "moviePosterPath",
-        m.backdrop_path AS "movieBackdropPath",
-        m.year AS "movieYear",
-        m.type AS "movieType",
-        m.runtime AS "movieRuntime"
+        COALESCE(m.overview, '') AS "movieOverview",
+        COALESCE(m.poster_path, '') AS "moviePosterPath",
+        COALESCE(m.backdrop_path, '') AS "movieBackdropPath",
+        COALESCE(EXTRACT(YEAR FROM m.release_date)::text, '') AS "movieYear",
+        CASE m.kind WHEN 'movie' THEN 'movie' ELSE 'tv' END AS "movieType",
+        m.runtime_minutes AS "movieRuntime"
       FROM ${watchlist} w
       JOIN ${media} m ON m.id = w.media_id
+      JOIN media_external_ids mei
+        ON mei.media_id = m.id
+        AND mei.namespace = CASE m.kind
+          WHEN 'movie' THEN 'tmdb:movie'
+          ELSE 'tmdb:tv'
+        END
       WHERE user_id = ${userId}
       ORDER BY w.created_at DESC;
     `;

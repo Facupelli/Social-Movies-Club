@@ -1,9 +1,10 @@
-import { and, desc, eq, lt } from 'drizzle-orm';
+import { and, desc, eq, lt, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   feedItems,
   media,
+  mediaExternalIds,
   ratings,
   userProfiles,
 } from '@/platform/database/postgres/schema';
@@ -27,13 +28,13 @@ export async function getUserFeed({
         actorUsername: actorProfile.username,
         actorImage: actorProfile.avatarUrl,
         mediaId: media.id,
-        movieTmdbId: media.tmdbId,
+        movieTmdbId: sql<number>`${mediaExternalIds.externalId}::integer`,
         movieTitle: media.title,
-        movieYear: media.year,
-        moviePoster: media.posterPath,
-        movieBackdrop: media.backdropPath,
-        movieType: media.type,
-        movieOverview: media.overview,
+        movieYear: sql<string>`COALESCE(EXTRACT(YEAR FROM ${media.releaseDate})::text, '')`,
+        moviePoster: sql<string>`COALESCE(${media.posterPath}, '')`,
+        movieBackdrop: sql<string>`COALESCE(${media.backdropPath}, '')`,
+        movieType: sql<'movie' | 'tv'>`CASE ${media.kind} WHEN 'movie' THEN 'movie' ELSE 'tv' END`,
+        movieOverview: sql<string>`COALESCE(${media.overview}, '')`,
         score: ratings.score,
         ratedAt: ratings.createdAt,
       })
@@ -41,6 +42,16 @@ export async function getUserFeed({
       .innerJoin(actorProfile, eq(feedItems.actorId, actorProfile.userId))
       .innerJoin(ratings, eq(feedItems.ratingId, ratings.id))
       .innerJoin(media, eq(ratings.mediaId, media.id))
+      .innerJoin(
+        mediaExternalIds,
+        and(
+          eq(mediaExternalIds.mediaId, media.id),
+          sql`${mediaExternalIds.namespace} = CASE ${media.kind}
+            WHEN 'movie' THEN 'tmdb:movie'
+            ELSE 'tmdb:tv'
+          END`
+        )
+      )
       .where(
         and(
           eq(feedItems.userId, userId),

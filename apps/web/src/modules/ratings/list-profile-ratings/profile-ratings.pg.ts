@@ -26,7 +26,9 @@ export async function getUserRatingMovies(
         : sql`r.created_at ${sql.raw(sortOrder)}`;
 
     const typeFilterExpr =
-      typeFilter === 'all' ? sql`` : sql`AND m.type = ${typeFilter}`;
+      typeFilter === 'all'
+        ? sql``
+        : sql`AND m.kind = ${typeFilter === 'movie' ? 'movie' : 'tv_series'}`;
 
     const bothRatedExpr =
       bothRated && sessionUserId && sessionUserId !== userId
@@ -47,15 +49,21 @@ export async function getUserRatingMovies(
         r.watched_date   AS "watchedDate",
         r.created_at     AS "createdAt",
         m.title,
-        m.year,
-        m.poster_path    AS "posterPath",
-        m.backdrop_path  AS "backdropPath",
-        m.overview,
-        m.tmdb_id        AS "tmdbId",
-        m.type,
-        m.runtime
+        COALESCE(EXTRACT(YEAR FROM m.release_date)::text, '') AS year,
+        COALESCE(m.poster_path, '') AS "posterPath",
+        COALESCE(m.backdrop_path, '') AS "backdropPath",
+        COALESCE(m.overview, '') AS overview,
+        mei.external_id::integer AS "tmdbId",
+        CASE m.kind WHEN 'movie' THEN 'movie' ELSE 'tv' END AS type,
+        m.runtime_minutes AS runtime
       FROM ${ratings} r
       JOIN ${media} m ON m.id = r.media_id
+      JOIN media_external_ids mei
+        ON mei.media_id = m.id
+        AND mei.namespace = CASE m.kind
+          WHEN 'movie' THEN 'tmdb:movie'
+          ELSE 'tmdb:tv'
+        END
       WHERE r.user_id = ${userId} ${typeFilterExpr} ${bothRatedExpr}
       ORDER BY ${orderExpr}
     `;

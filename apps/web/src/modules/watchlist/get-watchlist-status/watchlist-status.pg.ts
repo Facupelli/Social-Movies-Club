@@ -9,10 +9,16 @@ export async function listWatchlistMediaIdentities(
   return await withDatabase(async (db) => {
     const { rows } = await db.execute<WatchlistMediaIdentity>(sql`
       SELECT
-        m.tmdb_id AS "tmdbId",
-        m.type
+        mei.external_id::integer AS "tmdbId",
+        CASE m.kind WHEN 'movie' THEN 'movie' ELSE 'tv' END AS type
       FROM ${watchlist} AS w
       JOIN ${media} AS m ON m.id = w.media_id
+      JOIN media_external_ids AS mei
+        ON mei.media_id = m.id
+        AND mei.namespace = CASE m.kind
+          WHEN 'movie' THEN 'tmdb:movie'
+          ELSE 'tmdb:tv'
+        END
       WHERE w.user_id = ${userId}
     `);
 

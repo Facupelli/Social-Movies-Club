@@ -117,30 +117,52 @@ export const verifications = pgTable('verifications', {
  *  Media                                                             *
  * ------------------------------------------------------------------ */
 
-export const mediaTypeEnum = pgEnum('media_type', ['movie', 'tv']);
+export const mediaKindEnum = pgEnum('media_type', ['movie', 'tv_series']);
 
 export const media = pgTable(
   'media',
   {
     id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
-    tmdbId: integer('tmdb_id').notNull(),
-    type: mediaTypeEnum('type').notNull(),
+    kind: mediaKindEnum('kind').notNull(),
     title: text('title').notNull(),
-    year: text('year').notNull(),
-    posterPath: text('poster_path').notNull(),
-    backdropPath: text('backdrop_path').notNull(),
-    overview: text('overview').default('Defecto para no borrar datos'),
-    runtime: integer('runtime'),
+    originalTitle: text('original_title'),
+    releaseDate: date('release_date'),
+    runtimeMinutes: integer('runtime_minutes'),
+    overview: text('overview'),
+    posterPath: text('poster_path'),
+    backdropPath: text('backdrop_path'),
+    sourceSyncedAt: timestamp('source_synced_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
-  (table) => [
-    unique('media_tmdb_id_type_unique').on(table.tmdbId, table.type),
-    // Performance optimization indexes
-    index('media_tmdb_idx').on(table.tmdbId, table.type),
-    index('media_type_title_idx').on(table.type, table.title),
-  ]
+  (table) => [index('media_kind_title_idx').on(table.kind, table.title)]
 );
 
 export type Media = typeof media.$inferSelect;
+
+export const mediaExternalIds = pgTable(
+  'media_external_ids',
+  {
+    mediaId: uuid('media_id')
+      .notNull()
+      .references(() => media.id, { onDelete: 'cascade' }),
+    namespace: text('namespace').notNull(),
+    externalId: text('external_id').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.mediaId, table.namespace] }),
+    unique('media_external_ids_namespace_external_id_unique').on(
+      table.namespace,
+      table.externalId
+    ),
+  ]
+);
+
+export type MediaExternalId = typeof mediaExternalIds.$inferSelect;
 
 /* ------------------------------------------------------------------ *
  *  ratings                                                            *

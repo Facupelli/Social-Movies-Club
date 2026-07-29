@@ -1,7 +1,13 @@
 import { sql } from 'drizzle-orm';
-import type { MediaType } from '@/modules/media-catalog/media.type';
+import {
+  mediaTypeToTmdbNamespace,
+  type MediaType,
+} from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
-import { media, watchlist } from '@/platform/database/postgres/schema';
+import {
+  mediaExternalIds,
+  watchlist,
+} from '@/platform/database/postgres/schema';
 
 export async function removeFromWatchlistByIdentity(
   userId: string,
@@ -11,11 +17,11 @@ export async function removeFromWatchlistByIdentity(
   await withDatabase(async (db) => {
     await db.execute(sql`
       DELETE FROM ${watchlist} AS w
-      USING ${media} AS m
+      USING ${mediaExternalIds} AS mei
       WHERE w.user_id = ${userId}
-        AND w.media_id = m.id
-        AND m.tmdb_id = ${tmdbId}
-        AND m.type = ${type}
+        AND w.media_id = mei.media_id
+        AND mei.namespace = ${mediaTypeToTmdbNamespace(type)}
+        AND mei.external_id = ${String(tmdbId)}
     `);
   });
 }

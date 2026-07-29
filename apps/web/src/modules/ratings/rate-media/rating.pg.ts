@@ -1,7 +1,12 @@
 import { sql } from 'drizzle-orm';
+import type { PersistMediaInput } from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
-import type { Media } from '@/platform/database/postgres/schema';
-import { media, ratings, watchlist } from '@/platform/database/postgres/schema';
+import {
+  media,
+  mediaExternalIds,
+  ratings,
+  watchlist,
+} from '@/platform/database/postgres/schema';
 
 export type PersistedRating = {
   id: string;
@@ -20,28 +25,58 @@ export type PersistRatingMutationResult = {
 /** Atomically persists media and rating, then removes any matching watchlist item. */
 export async function persistRatingMutation(
   userId: string,
-  mediaData: Omit<Media, 'id'>,
+  mediaData: PersistMediaInput,
   score: number,
   watchedDate: string
 ): Promise<PersistRatingMutationResult> {
   return await withDatabase((db) =>
     db.transaction(async (tx) => {
-      const { rows: mediaRows } = await tx.execute<{ id: string }>(sql`
-        WITH ins AS (
-          INSERT INTO ${media} (title, year, overview, poster_path, backdrop_path, tmdb_id, type, runtime)
-          VALUES (${mediaData.title}, ${mediaData.year}, ${mediaData.overview}, ${mediaData.posterPath}, ${mediaData.backdropPath}, ${mediaData.tmdbId}, ${mediaData.type}, ${mediaData.runtime})
-          ON CONFLICT (tmdb_id, type) DO NOTHING
-          RETURNING id
-        )
-        SELECT id FROM ins
-        UNION ALL
-        SELECT id FROM ${media}
-        WHERE tmdb_id = ${mediaData.tmdbId} AND type = ${mediaData.type}
-        LIMIT 1
+      const namespace =
+        mediaData.kind === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
+      const externalId = String(mediaData.tmdbId);
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${namespace}:${externalId}`}, 0))`
+      );
+
+      const existing = await tx.execute<{ id: string }>(sql`
+        SELECT media_id AS id
+        FROM ${mediaExternalIds}
+        WHERE namespace = ${namespace} AND external_id = ${externalId}
       `);
-      const mediaId = mediaRows[0]?.id;
-      if (!mediaId) {
-        throw new Error('Unable to persist media');
+      let mediaId = existing.rows[0]?.id;
+
+      if (mediaId) {
+        await tx.execute(sql`
+          UPDATE ${media}
+          SET
+            kind = ${mediaData.kind}, title = ${mediaData.title},
+            original_title = ${mediaData.originalTitle},
+            release_date = ${mediaData.releaseDate},
+            runtime_minutes = ${mediaData.runtimeMinutes},
+            overview = ${mediaData.overview}, poster_path = ${mediaData.posterPath},
+            backdrop_path = ${mediaData.backdropPath},
+            source_synced_at = ${mediaData.sourceSyncedAt}, updated_at = now()
+          WHERE id = ${mediaId}
+        `);
+      } else {
+        const inserted = await tx.execute<{ id: string }>(sql`
+          INSERT INTO ${media}
+            (kind, title, original_title, release_date, runtime_minutes, overview,
+             poster_path, backdrop_path, source_synced_at)
+          VALUES
+            (${mediaData.kind}, ${mediaData.title}, ${mediaData.originalTitle},
+             ${mediaData.releaseDate}, ${mediaData.runtimeMinutes}, ${mediaData.overview},
+             ${mediaData.posterPath}, ${mediaData.backdropPath}, ${mediaData.sourceSyncedAt})
+          RETURNING id
+        `);
+        mediaId = inserted.rows[0]?.id;
+        if (!mediaId) {
+          throw new Error('Unable to persist media');
+        }
+        await tx.execute(sql`
+          INSERT INTO ${mediaExternalIds} (media_id, namespace, external_id)
+          VALUES (${mediaId}, ${namespace}, ${externalId})
+        `);
       }
 
       const { rows: ratingRows } = await tx.execute<PersistedRating>(sql`
