@@ -7,19 +7,16 @@ import type {
 } from '@/modules/media-catalog/media.type';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
-import { projectRatingToFollowerTimelines } from './project-rating-to-timelines';
 import { persistRatingMutation } from './rating.pg';
 
 type RateMediaDependencies = {
   tmdb: Pick<TmdbService, 'getMediaDetail'>;
   persistRatingMutation: typeof persistRatingMutation;
-  projectRatingToFollowerTimelines: typeof projectRatingToFollowerTimelines;
 };
 
 const defaultDependencies: RateMediaDependencies = {
   tmdb: new TmdbService(),
   persistRatingMutation,
-  projectRatingToFollowerTimelines,
 };
 
 export async function rateMedia(
@@ -59,9 +56,6 @@ export async function rateMedia(
     rating,
     watchedDate
   );
-
-  // Feed fan-out is intentionally post-commit and does not delay persistence.
-  await dependencies.projectRatingToFollowerTimelines(persisted.rating);
 
   return {
     mediaIdentity: { tmdbId, kind },

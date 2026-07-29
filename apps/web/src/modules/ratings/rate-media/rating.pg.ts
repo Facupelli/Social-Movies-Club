@@ -2,8 +2,13 @@ import { sql } from 'drizzle-orm';
 import type { PersistMediaInput } from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
+  activities,
+  feedDeliveries,
+  feedItems,
+  follows,
   media,
   mediaExternalIds,
+  ratingActivities,
   ratings,
   watchlist,
 } from '@/platform/database/postgres/schema';
@@ -14,7 +19,8 @@ export type PersistedRating = {
   media_id: string;
   score: number;
   watched_date: string;
-  created_at: Date;
+  created_at: Date | string;
+  updated_at: Date | string;
 };
 
 export type PersistRatingMutationResult = {
@@ -79,17 +85,32 @@ export async function persistRatingMutation(
         `);
       }
 
-      const { rows: ratingRows } = await tx.execute<PersistedRating>(sql`
-        INSERT INTO ${ratings}
-          (user_id, media_id, score, watched_date, created_at)
-        VALUES (${userId}, ${mediaId}, ${score}, ${watchedDate}, now())
-        ON CONFLICT (user_id, media_id)
-        DO UPDATE SET
-          score = EXCLUDED.score,
-          watched_date = EXCLUDED.watched_date,
-          created_at = now()
-        RETURNING id, user_id, media_id, score, watched_date, created_at
+      const existingRating = await tx.execute<{ id: string }>(sql`
+        SELECT id
+        FROM ${ratings}
+        WHERE user_id = ${userId} AND media_id = ${mediaId}
+        FOR UPDATE
       `);
+      const existingRatingId = existingRating.rows[0]?.id;
+
+      const { rows: ratingRows } = existingRatingId
+        ? await tx.execute<PersistedRating>(sql`
+            UPDATE ${ratings}
+            SET
+              score = ${score},
+              watched_date = ${watchedDate},
+              updated_at = now()
+            WHERE id = ${existingRatingId}
+            RETURNING
+              id, user_id, media_id, score, watched_date, created_at, updated_at
+          `)
+        : await tx.execute<PersistedRating>(sql`
+            INSERT INTO ${ratings}
+              (user_id, media_id, score, watched_date)
+            VALUES (${userId}, ${mediaId}, ${score}, ${watchedDate})
+            RETURNING
+              id, user_id, media_id, score, watched_date, created_at, updated_at
+          `);
       const rating = ratingRows[0];
       if (!rating) {
         throw new Error('Unable to persist rating');
@@ -100,6 +121,54 @@ export async function persistRatingMutation(
         WHERE user_id = ${userId} AND media_id = ${mediaId}
         RETURNING media_id
       `);
+
+      if (!existingRatingId) {
+        const { rows: activityRows } = await tx.execute<{ id: string }>(sql`
+          INSERT INTO ${activities}
+            (type_code, actor_id, occurred_at, payload, deduplication_key)
+          VALUES (
+            'rating.created',
+            ${userId},
+            ${rating.created_at},
+            '{}'::jsonb,
+            ${`rating.created:${rating.id}`}
+          )
+          RETURNING id
+        `);
+        const activityId = activityRows[0]?.id;
+        if (!activityId) {
+          throw new Error('Unable to create rating activity');
+        }
+
+        await tx.execute(sql`
+          INSERT INTO ${ratingActivities} (activity_id, rating_id)
+          VALUES (${activityId}, ${rating.id})
+        `);
+
+        await tx.execute(sql`
+          WITH inserted_deliveries AS (
+            INSERT INTO ${feedDeliveries}
+              (feed_owner_id, activity_id, occurred_at, delivered_at)
+            SELECT
+              f.follower_id,
+              ${activityId},
+              ${rating.created_at},
+              now()
+            FROM ${follows} f
+            WHERE f.followee_id = ${userId}
+            ON CONFLICT (feed_owner_id, activity_id) DO NOTHING
+            RETURNING feed_owner_id, delivered_at
+          )
+          INSERT INTO ${feedItems}
+            (user_id, actor_id, rating_id, created_at)
+          SELECT
+            d.feed_owner_id,
+            ${userId},
+            ${rating.id},
+            d.delivered_at
+          FROM inserted_deliveries d
+        `);
+      }
 
       return {
         rating,
