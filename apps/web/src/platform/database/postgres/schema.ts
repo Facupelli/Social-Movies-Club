@@ -222,6 +222,9 @@ export const follows = pgTable(
     followeeId: text('followee_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.followerId, table.followeeId] }),
