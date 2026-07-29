@@ -4,7 +4,6 @@ import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   activities,
   feedDeliveries,
-  feedItems,
   follows,
   media,
   mediaExternalIds,
@@ -146,27 +145,16 @@ export async function persistRatingMutation(
         `);
 
         await tx.execute(sql`
-          WITH inserted_deliveries AS (
-            INSERT INTO ${feedDeliveries}
-              (feed_owner_id, activity_id, occurred_at, delivered_at)
-            SELECT
-              f.follower_id,
-              ${activityId},
-              ${rating.created_at},
-              now()
-            FROM ${follows} f
-            WHERE f.followee_id = ${userId}
-            ON CONFLICT (feed_owner_id, activity_id) DO NOTHING
-            RETURNING feed_owner_id, delivered_at
-          )
-          INSERT INTO ${feedItems}
-            (user_id, actor_id, rating_id, created_at)
+          INSERT INTO ${feedDeliveries}
+            (feed_owner_id, activity_id, occurred_at, delivered_at)
           SELECT
-            d.feed_owner_id,
-            ${userId},
-            ${rating.id},
-            d.delivered_at
-          FROM inserted_deliveries d
+            f.follower_id,
+            ${activityId},
+            ${rating.created_at},
+            now()
+          FROM ${follows} f
+          WHERE f.followee_id = ${userId}
+          ON CONFLICT (feed_owner_id, activity_id) DO NOTHING
         `);
       }
 

@@ -324,42 +324,6 @@ export const follows = pgTable(
 export type Follow = typeof follows.$inferSelect;
 
 /* ------------------------------------------------------------------ *
- *  feed
- *
- *  PUSH MODEL (Fan-out on Write)
- * ------------------------------------------------------------------ */
-
-export const feedItems = pgTable(
-  'feed_items',
-  {
-    id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
-    userId: text('user_id') // owner of the feed
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    actorId: text('actor_id') // who performed the action
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    ratingId: uuid('rating_id')
-      .notNull()
-      .references(() => ratings.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    seenAt: timestamp('seen_at', { withTimezone: true }), // null = unseen
-  },
-  (table) => [
-    index('feed_items_user_time_idx').on(table.userId, table.createdAt),
-    index('feed_items_unseen_idx').on(table.userId, table.seenAt),
-    // Performance optimization indexes
-    index('feed_items_user_unseen_idx').on(
-      table.userId,
-      sql`seen_at NULLS FIRST`,
-      table.createdAt
-    ),
-  ]
-);
-
-/* ------------------------------------------------------------------ *
  *  watchlist
  *
  * ------------------------------------------------------------------ */
