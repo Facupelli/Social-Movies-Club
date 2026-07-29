@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
   type MediaKind,
@@ -454,6 +455,13 @@ function RatingSuccessView({
   onClose,
   userId,
 }: RatingSuccessViewProps) {
+  const router = useRouter();
+
+  const handleAccept = () => {
+    onClose();
+    router.refresh();
+  };
+
   return (
     <div className="grid gap-y-6 py-7 sm:py-9">
       <div className="grid place-items-center gap-y-3">
@@ -477,11 +485,11 @@ function RatingSuccessView({
       <div className="mx-auto grid w-full max-w-xs gap-y-3">
         <Button
           className="rounded-full"
-          onClick={onClose}
+          onClick={handleAccept}
           type="button"
           variant="secondary"
         >
-          Listo
+          Aceptar
         </Button>
 
         {userId && (
