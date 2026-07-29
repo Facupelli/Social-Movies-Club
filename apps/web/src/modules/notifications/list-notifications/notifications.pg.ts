@@ -1,13 +1,15 @@
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
+import {
+  NOTIFICATION_TEMPLATES,
+  type NotificationTypeCode,
+} from '@/modules/notifications/notification.constants';
 import type {
+  NotificationData,
   NotificationListFilters,
   PaginatedNotifications,
 } from '@/modules/notifications/notification.types';
-import {
-  notifications,
-  notificationTypes,
-} from '@/platform/database/postgres/schema';
+import { notifications } from '@/platform/database/postgres/schema';
 
 export async function getNotifications(
   filters: NotificationListFilters
@@ -15,22 +17,19 @@ export async function getNotifications(
   const {
     recipientId,
     includeRead = true,
-    typeId,
+    typeCode,
     limit = 20,
     cursor,
   } = filters;
 
   return await withDatabase(async (db) => {
-    const conditions = [
-      eq(notifications.recipientId, recipientId),
-      eq(notifications.isDeleted, false),
-    ];
+    const conditions = [eq(notifications.recipientId, recipientId)];
 
     if (!includeRead) {
       conditions.push(isNull(notifications.readAt));
     }
-    if (typeId) {
-      conditions.push(eq(notifications.typeId, typeId));
+    if (typeCode) {
+      conditions.push(eq(notifications.typeCode, typeCode));
     }
     if (cursor) {
       conditions.push(sql`
@@ -43,26 +42,43 @@ export async function getNotifications(
     }
 
     const results = await db
-      .select({ notification: notifications, type: notificationTypes })
+      .select()
       .from(notifications)
-      .innerJoin(
-        notificationTypes,
-        eq(notifications.typeId, notificationTypes.id)
-      )
       .where(and(...conditions))
       .orderBy(desc(notifications.createdAt), desc(notifications.id))
       .limit(limit + 1);
 
     const hasMore = results.length > limit;
-    const data = results.slice(0, limit).map((row) => ({
-      id: row.notification.id,
-      actorImage: row.notification.actorImage,
-      actorUsername: row.notification.actorUsername,
-      actionUrl: row.notification.actionUrl,
-      createdAt: row.notification.createdAt,
-      readAt: row.notification.readAt,
-      title: row.notification.title,
-    }));
+    const data = results.slice(0, limit).map((notification) => {
+      const renderingData = notification.data as NotificationData;
+      const template =
+        NOTIFICATION_TEMPLATES[
+          notification.typeCode as NotificationTypeCode
+        ];
+
+      return {
+        id: notification.id,
+        actorImage:
+          typeof renderingData.actorImage === 'string'
+            ? renderingData.actorImage
+            : null,
+        actorUsername:
+          typeof renderingData.actorUsername === 'string'
+            ? renderingData.actorUsername
+            : null,
+        actionUrl:
+          typeof renderingData.actionUrl === 'string'
+            ? renderingData.actionUrl
+            : null,
+        createdAt: notification.createdAt,
+        readAt: notification.readAt,
+        title:
+          template ??
+          (typeof renderingData.legacyTitle === 'string'
+            ? renderingData.legacyTitle
+            : notification.typeCode),
+      };
+    });
     const lastNotification = data.at(-1);
     const nextCursor =
       hasMore && lastNotification

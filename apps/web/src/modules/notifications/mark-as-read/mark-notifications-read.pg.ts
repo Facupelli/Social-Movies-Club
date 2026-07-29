@@ -8,12 +8,11 @@ export async function markNotificationsRead(
   return await withDatabase(async (db) => {
     const updated = await db
       .update(notifications)
-      .set({ readAt: new Date(), updatedAt: new Date() })
+      .set({ readAt: new Date() })
       .where(
         and(
           eq(notifications.recipientId, recipientId),
-          isNull(notifications.readAt),
-          eq(notifications.isDeleted, false)
+          isNull(notifications.readAt)
         )
       )
       .returning({ id: notifications.id });

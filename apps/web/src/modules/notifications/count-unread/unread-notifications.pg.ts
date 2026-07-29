@@ -12,7 +12,6 @@ export async function countUnreadNotifications(
       .where(
         and(
           eq(notifications.recipientId, recipientId),
-          eq(notifications.isDeleted, false),
           isNull(notifications.readAt)
         )
       );

@@ -5,6 +5,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -307,88 +308,44 @@ export const watchlist = pgTable(
  *
  * ------------------------------------------------------------------ */
 
-export const notificationTypes = pgTable(
-  'notification_types',
-  {
-    id: text('id').primaryKey(), // e.g., 'user_follow', 'user_like', etc.
-    name: text('name').notNull(), // Human readable name
-    template: text('template').notNull(), // Template with placeholders: "{actor} followed you"
-    isActive: boolean('is_active').notNull().default(true),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-  },
-  (table) => [index('active_types_idx').on(table.isActive)]
-);
-
-export type NotificationType = typeof notificationTypes.$inferSelect;
-export type NewNotificationType = typeof notificationTypes.$inferInsert;
-
 export const notifications = pgTable(
   'notifications',
   {
     id: uuid('id').defaultRandom().primaryKey(),
 
-    recipientId: text('recipient_id').notNull(),
-    typeId: text('type_id')
+    recipientId: text('recipient_id')
       .notNull()
-      .references(() => notificationTypes.id),
-
-    // Who triggered this notification (can be null for system notifications)
-    actorId: text('actor_id'),
-
-    // Notification content and metadata
-    title: text('title').notNull(), // Rendered title
-    message: text('message'), // Optional detailed message
-    actorUsername: text('actor_username').notNull(),
-    actorImage: text('actor_image'),
-    metadata: text('metadata'), // JSON string for additional data (user names, ids, etc.)
-
-    // Navigation
-    actionUrl: text('action_url'), // Where to go when clicked
-
-    readAt: timestamp('read_at'), // null = unread, timestamp = when read
-    isDeleted: boolean('is_deleted').notNull().default(false), // Soft delete
-
+      .references(() => users.id, { onDelete: 'cascade' }),
+    actorId: text('actor_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    typeCode: text('type_code').notNull(),
+    data: jsonb('data')
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    readAt: timestamp('read_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => [
-    index('recipient_unread_idx').on(
+    index('notifications_list_idx').on(
       table.recipientId,
-      table.isDeleted,
-      table.readAt,
-      table.createdAt
+      table.createdAt,
+      table.id
     ),
-    index('recipient_created_at_idx').on(table.recipientId, table.createdAt),
-    index('type_created_at_idx').on(table.typeId, table.createdAt),
-    index('actor_created_at_idx').on(table.actorId, table.createdAt),
-    // Performance optimization indexes
     index('notifications_unread_count_idx')
       .on(table.recipientId, table.readAt)
-      .where(sql`is_deleted = false`),
-    index('notifications_list_idx')
-      .on(table.recipientId, table.createdAt, table.id)
-      .where(sql`is_deleted = false`),
-    // Partial index for unseen notifications (most common case)
-    index('notifications_unseen_partial_idx')
-      .on(table.recipientId, table.createdAt)
-      .where(sql`read_at IS NULL AND is_deleted = false`),
+      .where(sql`read_at IS NULL`),
+    index('notifications_actor_created_idx').on(
+      table.actorId,
+      table.createdAt
+    ),
+    index('notifications_type_created_idx').on(
+      table.typeCode,
+      table.createdAt
+    ),
   ]
 );
 
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
-
-// Relations for easier querying
-// export const notificationsRelations = relations(notifications, ({ one }) => ({
-// 	type: one(notificationTypes, {
-// 		fields: [notifications.typeId],
-// 		references: [notificationTypes.id],
-// 	}),
-// }));
-
-// export const notificationTypesRelations = relations(
-// 	notificationTypes,
-// 	({ many }) => ({
-// 		notifications: many(notifications),
-// 	}),
-// );

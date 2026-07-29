@@ -3,10 +3,20 @@ export interface NotificationCursor {
   id: string;
 }
 
+export interface NotificationData {
+  actorImage?: string | null;
+  actorUsername?: string;
+  actionUrl?: string | null;
+  legacyMessage?: string | null;
+  legacyMetadata?: unknown;
+  legacyTitle?: string;
+  legacyUpdatedAt?: string;
+}
+
 export interface NotificationListItem {
   id: string;
   actorImage: string | null;
-  actorUsername: string;
+  actorUsername: string | null;
   actionUrl: string | null;
   createdAt: Date;
   readAt: Date | null;
@@ -16,7 +26,7 @@ export interface NotificationListItem {
 export interface NotificationListFilters {
   recipientId: string;
   includeRead?: boolean;
-  typeId?: string;
+  typeCode?: string;
   limit?: number;
   cursor?: NotificationCursor;
 }

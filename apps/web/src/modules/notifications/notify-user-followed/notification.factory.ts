@@ -1,13 +1,8 @@
 import type { NewNotification } from '@/platform/database/postgres/schema';
-import { NOTIFICATION_TYPE_IDS } from '../notification.constants';
+import { NOTIFICATION_TYPE_CODES } from '../notification.constants';
 
-export interface NotificationData {
+export interface FollowNotificationData {
   recipientId: string;
-  actorId?: string | null;
-  metadata?: Record<string, unknown>;
-}
-
-export interface FollowNotificationData extends NotificationData {
   actorId: string;
   actorUsername: string;
   actorImage: string | null;
@@ -20,16 +15,12 @@ export function createFollowNotification(
 
   return {
     recipientId,
-    typeId: NOTIFICATION_TYPE_IDS.USER_FOLLOW,
+    typeCode: NOTIFICATION_TYPE_CODES.USER_FOLLOW,
     actorId,
-    actorUsername,
-    actorImage,
-    title: 'ahora te sigue',
-    message: 'ahora te sigue',
-    metadata: JSON.stringify({
-      actionType: 'follow',
-      timestamp: new Date().toISOString(),
-    }),
-    actionUrl: `/profile/${actorId}`,
+    data: {
+      actorUsername,
+      actorImage,
+      actionUrl: `/profile/${actorId}`,
+    },
   };
 }

@@ -8,7 +8,7 @@ import { getNotifications } from './notifications.pg';
 
 export interface ListNotificationsOptions {
   includeRead?: boolean;
-  typeId?: string;
+  typeCode?: string;
   limit?: number;
   cursor?: { createdAt: Date; id: string };
 }
@@ -24,7 +24,7 @@ export async function listNotifications(
   return await list({
     recipientId: userId,
     includeRead: options.includeRead ?? false,
-    typeId: options.typeId,
+    typeCode: options.typeCode,
     limit: options.limit ?? defaultPageSize,
     cursor: options.cursor,
   });

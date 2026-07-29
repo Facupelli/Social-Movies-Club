@@ -99,6 +99,13 @@
       "when": 1785347619949,
       "tag": "0014_busy_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1785348490438,
+      "tag": "0015_lush_serpent_society",
+      "breakpoints": true
     }
   ]
 }
