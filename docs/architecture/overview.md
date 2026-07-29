@@ -211,8 +211,18 @@ Browser query functions must forward TanStack Query abort signals.
 
 ## Feed processing
 
-When a user rates media, the web app stores the rating and projects feed entries to followers.
+The web app is the sole active owner of feed writes and reads. The queue service remains in the monorepo but does not participate in the live feed path.
 
-The chronological feed is the canonical feed. It is server-prefetched for the first render and browser-owned afterward.
+Creating a rating transactionally writes the authoritative `ratings` row, one `rating.created` row in `activities`, its `rating_activities` reference, and one `feed_deliveries` row for every current follower. A rating update preserves the original rating creation time and creates no additional activity or delivery.
 
-The queue service provides an alternative feed fan-out path but is not currently the active owner of feed reads.
+Deliveries snapshot feed membership when the activity occurs. Following someone later does not backfill their earlier activity, and unfollowing does not remove deliveries already received.
+
+The chronological feed reads through:
+
+```text
+feed_deliveries -> activities -> rating_activities -> ratings
+```
+
+It orders deliveries by `(occurred_at DESC, id DESC)` and uses both values in its keyset pagination cursor. The legacy `feed_items` projection has been removed.
+
+The chronological feed is server-prefetched for the first render and browser-owned afterward.
