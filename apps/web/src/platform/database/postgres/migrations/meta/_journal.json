@@ -120,6 +120,13 @@
       "when": 1785351399829,
       "tag": "0017_backfill_activity_feed",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1785352405897,
+      "tag": "0018_catch_up_activity_feed",
+      "breakpoints": true
     }
   ]
 }
