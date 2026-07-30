@@ -14,7 +14,12 @@ export function WatchlistItemsGrid({
   isOwner: boolean;
   controls: ReactNode;
 }) {
-  const [items, setItems] = useState(initialItems);
+  const [removedMediaIds, setRemovedMediaIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const items = initialItems.filter(
+    ({ mediaId }) => !removedMediaIds.has(mediaId)
+  );
 
   if (items.length === 0) {
     return (
@@ -40,9 +45,11 @@ export function WatchlistItemsGrid({
             onRatingSaved={
               isOwner
                 ? () => {
-                    setItems((current) =>
-                      current.filter((item) => item.mediaId !== mediaId)
-                    );
+                    setRemovedMediaIds((current) => {
+                      const next = new Set(current);
+                      next.add(mediaId);
+                      return next;
+                    });
                   }
                 : undefined
             }

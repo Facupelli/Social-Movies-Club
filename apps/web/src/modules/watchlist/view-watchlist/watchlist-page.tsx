@@ -80,7 +80,7 @@ export default async function WatchlistPage(props: WatchlistPageProps) {
   );
 
   return (
-    <section className="space-y-4 py-10">
+    <section className="space-y-4 py-6 md:py-10">
       {socialSortingAvailable ? null : (
         <output className="block text-muted-foreground text-sm">
           Las calificaciones de personas que seguís no están disponibles ahora.
