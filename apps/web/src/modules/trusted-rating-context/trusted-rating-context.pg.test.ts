@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { closeDatabase, db } from '@/platform/database/postgres/db';
-import { getTrustedRatingDetails } from './get-trusted-rating-details';
-import { getSearchTrustedRatingSummaries } from './get-search-trusted-rating-summaries';
-import { getTrustedRatingSummaries } from './get-trusted-rating-summaries';
+import { getSearchTrustedRatingSummaries } from './get-search-trusted-rating-summaries/get-search-trusted-rating-summaries';
+import { getTrustedRatingDetails } from './get-trusted-rating-details/get-trusted-rating-details';
+import { getTrustedRatingSummaries } from './get-trusted-rating-summaries/get-trusted-rating-summaries';
 
 const viewerId = 'viewer';
 const aliceId = 'alice';

@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useActionState, useCallback } from 'react';
-import { invalidateTrustedRatingContext } from '@/modules/trusted-rating-context/invalidate-trusted-rating-context';
+import { invalidateTrustedRatingContext } from '@/modules/trusted-rating-context/invalidate-trusted-rating-context/invalidate-trusted-rating-context';
 import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import type { ApiResponse } from '@/shared/http/safe-execute';

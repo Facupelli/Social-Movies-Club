@@ -1,12 +1,12 @@
 import { Film } from 'lucide-react';
 import Image from 'next/image';
+import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
 import { MediaKindDict } from '@/modules/media-catalog/media.type';
-import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
-import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
-import { ViewerRatingSection } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-section';
 import type { ViewerMediaRating } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-for-media.types';
-import { TrustedRatingDetailsSection } from '@/modules/trusted-rating-context/trusted-rating-details';
+import { ViewerRatingSection } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-section';
+import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
+import { TrustedRatingDetailsSection } from '@/modules/trusted-rating-context/components/trusted-rating-details';
 import type { TrustedRatingDetails } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
 import { Badge } from '@/shared/ui/badge';
@@ -102,8 +102,8 @@ export function MediaDetailPage({
           <>
             {trustedContextFailed ? (
               <section
-                className="space-y-2"
                 aria-labelledby="trusted-error-heading"
+                className="space-y-2"
               >
                 <h2
                   className="text-xl font-semibold"

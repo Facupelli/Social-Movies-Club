@@ -3,9 +3,9 @@ import 'server-only';
 import {
   getTimelineTrustedRatingContexts,
   timelineTrustedRatingContextKey,
-} from '@/modules/trusted-rating-context/get-timeline-trusted-rating-contexts';
-import type { FeedCursor } from './feed-cursor';
+} from '@/modules/trusted-rating-context/get-timeline-trusted-rating-contexts/get-timeline-trusted-rating-contexts';
 import type { UserFeedPage } from './feed.types';
+import type { FeedCursor } from './feed-cursor';
 import { getUserFeed } from './timeline.pg';
 
 export async function loadUserFeedPage({

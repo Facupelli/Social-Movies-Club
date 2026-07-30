@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
-import type { TrustedRatingSummary } from './trusted-rating-context.types';
+import type { TrustedRatingSummary } from '../trusted-rating-context.types';
 
 export function TrustedRatingSummaryView({
   summary,

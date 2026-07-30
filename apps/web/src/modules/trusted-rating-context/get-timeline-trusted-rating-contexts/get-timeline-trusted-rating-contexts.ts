@@ -1,12 +1,12 @@
-import { toTrustedRater } from './get-trusted-rating-summaries';
-import {
-  findTimelineTrustedRatingContexts,
-  type TimelineTrustedRatingEntry,
-} from './trusted-rating-context.pg';
+import { toTrustedRater } from '../get-trusted-rating-summaries/get-trusted-rating-summaries';
 import type {
   TimelineTrustedRatingContextMap,
   TimelineTrustedRatingContextRow,
-} from './trusted-rating-context.types';
+} from '../trusted-rating-context.types';
+import {
+  findTimelineTrustedRatingContexts,
+  type TimelineTrustedRatingEntry,
+} from './get-timeline-trusted-rating-contexts.pg';
 
 export function timelineTrustedRatingContextKey({
   mediaId,

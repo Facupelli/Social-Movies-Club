@@ -3,9 +3,9 @@
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import type { TrustedRatingDetails } from './trusted-rating-context.types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
+import type { TrustedRatingDetails } from '../trusted-rating-context.types';
 
 const INITIAL_RATER_COUNT = 3;
 

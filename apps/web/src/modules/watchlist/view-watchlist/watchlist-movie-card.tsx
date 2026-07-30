@@ -8,8 +8,8 @@ import {
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import type { MovieView } from '@/modules/media-catalog/movie-view';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
+import { TrustedRatingSummaryView } from '@/modules/trusted-rating-context/components/trusted-rating-summary';
 import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trusted-rating-context.types';
-import { TrustedRatingSummaryView } from '@/modules/trusted-rating-context/trusted-rating-summary';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
 import { CardContent } from '@/shared/ui/card';
 

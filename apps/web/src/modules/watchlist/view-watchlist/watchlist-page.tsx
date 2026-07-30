@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import z from 'zod';
-import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries';
+import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries/get-trusted-rating-summaries';
 import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
 import { WatchlistItemsGrid } from '@/modules/watchlist/view-watchlist/watchlist-items-grid';

@@ -1,11 +1,11 @@
-import { findTrustedRatingSummaries } from './trusted-rating-context.pg';
 import type {
   TrustedRater,
   TrustedRaterRow,
   TrustedRatingRow,
   TrustedRatingSummary,
   TrustedRatingSummaryMap,
-} from './trusted-rating-context.types';
+} from '../trusted-rating-context.types';
+import { findTrustedRatingSummaries } from './get-trusted-rating-summaries.pg';
 
 type SummaryRepository = (
   viewerUserId: string,

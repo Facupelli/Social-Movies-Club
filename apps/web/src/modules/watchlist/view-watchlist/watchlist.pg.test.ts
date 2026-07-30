@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { dbWatchlistMovieToView } from '@/modules/media-catalog/get-media-details/media.adapters';
-import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries';
+import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries/get-trusted-rating-summaries';
 import { closeDatabase, db } from '@/platform/database/postgres/db';
 import { getProfileWatchlist } from './watchlist.pg';
 import { sortWatchlistItems } from './watchlist-sort';

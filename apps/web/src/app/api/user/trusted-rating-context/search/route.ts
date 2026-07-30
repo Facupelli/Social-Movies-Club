@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   getSearchTrustedRatingSummaries,
   MAX_SEARCH_TRUSTED_RATING_IDENTITIES,
-} from '@/modules/trusted-rating-context/get-search-trusted-rating-summaries';
+} from '@/modules/trusted-rating-context/get-search-trusted-rating-summaries/get-search-trusted-rating-summaries';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import {
   authenticatedJson,

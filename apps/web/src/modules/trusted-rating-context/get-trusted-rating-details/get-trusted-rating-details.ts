@@ -1,10 +1,10 @@
-import { toTrustedRater } from './get-trusted-rating-summaries';
-import { TRUSTED_RATER_PREVIEW_LIMIT } from './trusted-rating-context.constants';
-import { findTrustedRatingDetails } from './trusted-rating-context.pg';
+import { toTrustedRater } from '../get-trusted-rating-summaries/get-trusted-rating-summaries';
+import { TRUSTED_RATER_PREVIEW_LIMIT } from '../trusted-rating-context.constants';
 import type {
   TrustedRatingDetailRow,
   TrustedRatingDetails,
-} from './trusted-rating-context.types';
+} from '../trusted-rating-context.types';
+import { findTrustedRatingDetails } from './get-trusted-rating-details.pg';
 
 type DetailsRepository = (
   viewerUserId: string,

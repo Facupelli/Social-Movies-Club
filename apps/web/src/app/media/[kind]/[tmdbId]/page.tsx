@@ -5,7 +5,7 @@ import { getMediaByTmdbIdentity } from '@/modules/media-catalog/get-media-detail
 import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { MediaDetailPage } from '@/modules/media-catalog/view-media-detail/media-detail-page';
 import { getViewerRatingForMedia } from '@/modules/ratings/get-viewer-rating-for-media/get-viewer-rating-for-media';
-import { getTrustedRatingDetails } from '@/modules/trusted-rating-context/get-trusted-rating-details';
+import { getTrustedRatingDetails } from '@/modules/trusted-rating-context/get-trusted-rating-details/get-trusted-rating-details';
 import { getServerSession } from '@/platform/auth/get-server-session';
 
 type PageProps = {
