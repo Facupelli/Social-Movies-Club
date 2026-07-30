@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, Bookmark, Home, Users2Icon } from 'lucide-react';
+import { Bell, Bookmark, Home, Search, Users2Icon } from 'lucide-react';
 import Image from 'next/image';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -19,6 +19,7 @@ export function Nav() {
   const { data: session } = authClient.useSession();
 
   const isHomeActive = pathname === '/';
+  const isSearchActive = pathname.startsWith('/search');
   const isWatchlistActive = session?.user.id
     ? pathname.startsWith(`/profile/${session.user.id}/watchlist`)
     : false;
@@ -43,6 +44,13 @@ export function Nav() {
           <Link className={getNavLinkClassName(isHomeActive)} href="/">
             <Home className={getNavIconClassName(isHomeActive)} />
             <span className="hidden md:block">Inicio</span>
+          </Link>
+        </li>
+
+        <li>
+          <Link className={getNavLinkClassName(isSearchActive)} href="/search">
+            <Search className={getNavIconClassName(isSearchActive)} />
+            <span className="hidden md:block">Buscar</span>
           </Link>
         </li>
 

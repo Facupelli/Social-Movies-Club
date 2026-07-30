@@ -1,4 +1,3 @@
-import { Search } from 'lucide-react';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 const FEED_PLACEHOLDERS = ['first', 'second', 'third', 'fourth'];
@@ -10,12 +9,6 @@ export function HomePageSkeleton() {
       aria-label="Cargando inicio"
       className="relative block min-h-svh flex-1 py-6 md:min-h-auto"
     >
-      <div className="relative z-20 px-2 pb-2 md:px-10 md:pb-6">
-        <div className="relative h-9 rounded-md border border-input bg-input/30">
-          <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-primary" />
-          <Skeleton className="absolute top-1/2 left-10 h-4 w-44 -translate-y-1/2" />
-        </div>
-      </div>
       <FeedSkeleton />
     </output>
   );

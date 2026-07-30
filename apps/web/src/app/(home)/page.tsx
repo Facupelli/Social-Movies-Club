@@ -5,21 +5,12 @@ import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-us
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { makeQueryClient } from '@/platform/react-query/query-client';
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [session, resolvedSearchParams] = await Promise.all([
-    getServerSession(),
-    searchParams,
-  ]);
+export default async function HomePage() {
+  const session = await getServerSession();
   const viewerUserId = session?.user.id;
-  const rawQuery = resolvedSearchParams.q;
-  const initialQuery = Array.isArray(rawQuery) ? (rawQuery[0] ?? '') : rawQuery;
 
   if (!viewerUserId) {
-    return <HomePageClient initialQuery={initialQuery} />;
+    return <HomePageClient />;
   }
 
   const queryClient = makeQueryClient();
@@ -31,7 +22,7 @@ export default async function HomePage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HomePageClient initialQuery={initialQuery} viewerUserId={viewerUserId} />
+      <HomePageClient viewerUserId={viewerUserId} />
     </HydrationBoundary>
   );
 }

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Trusted Rating Context is the current opinion of a viewer's trusted network about local media. It is a reusable projection for later Search, Detail, Watchlist, and Timeline integrations.
+Trusted Rating Context is the current opinion of a viewer's trusted network about local media. It is a reusable projection consumed by Search, Detail, and Watchlist, with Timeline integration remaining separate.
 
 ## Source of truth
 
@@ -31,3 +31,5 @@ A summary contains the rating count, arithmetic average, and at most the three m
 Details contain the same summary and the complete ordered list of current followed raters for one media item.
 
 Trusted Rating Context is derived and is not persistently cached or materialized.
+
+Search results are matched to existing local media in one batch through TMDB external identities. Unmatched results remain external-only and are never persisted merely because they appeared in Search.

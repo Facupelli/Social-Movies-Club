@@ -1,6 +1,9 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useActionState, useCallback } from 'react';
+import { trustedRatingQueryKeys } from '@/modules/trusted-rating-context/use-search-trusted-rating-summaries';
+import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import type { ApiResponse } from '@/shared/http/safe-execute';
 import { followUserAction, unfollowUserAction } from './follow-user.actions';
@@ -16,12 +19,43 @@ export function FollowUserButton({
   followedUserId: string;
   userName?: string;
 }) {
+  const queryClient = useQueryClient();
+  const { data: session } = authClient.useSession();
+  const invalidateTrustedRatings = useCallback(async () => {
+    if (!session?.user.id) {
+      return;
+    }
+
+    await queryClient.invalidateQueries({
+      queryKey: trustedRatingQueryKeys.viewerScope(session.user.id),
+    });
+  }, [queryClient, session?.user.id]);
+  const followWithInvalidation = useCallback(
+    async (previousState: ApiResponse<void>, formData: FormData) => {
+      const result = await followUserAction(previousState, formData);
+      if (result.success) {
+        await invalidateTrustedRatings();
+      }
+      return result;
+    },
+    [invalidateTrustedRatings]
+  );
+  const unfollowWithInvalidation = useCallback(
+    async (previousState: ApiResponse<void>, formData: FormData) => {
+      const result = await unfollowUserAction(previousState, formData);
+      if (result.success) {
+        await invalidateTrustedRatings();
+      }
+      return result;
+    },
+    [invalidateTrustedRatings]
+  );
   const [followState, followAction, followIsPending] = useActionState(
-    followUserAction,
+    followWithInvalidation,
     initialActionState
   );
   const [unfollowState, unfollowAction, unfollowIsPending] = useActionState(
-    unfollowUserAction,
+    unfollowWithInvalidation,
     initialActionState
   );
   const actionState = isFollowing ? unfollowState : followState;

@@ -1,26 +1,17 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Clapperboard, Search, UserPlus } from 'lucide-react';
+import { Clapperboard, UserPlus } from 'lucide-react';
 import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useDeferredValue, useEffect, useState } from 'react';
+
 import {
   MovieCard,
-  MovieMediaKind,
-  MoviePoster,
-  MovieReleaseDate,
   MovieScore,
   MovieTitle,
 } from '@/modules/media-catalog/components/movie-card';
-import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import { KIND_DICT } from '@/modules/media-catalog/media.constants';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
-import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
-import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
 import type { FeedItem } from '@/modules/timeline/view-timeline/feed.types';
 import { FeedSkeleton } from '@/modules/timeline/view-timeline/home-page-skeleton';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
@@ -36,96 +27,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
-import { CardContent, CardFooter } from '@/shared/ui/card';
-import { Input } from '@/shared/ui/input';
-import { Skeleton } from '@/shared/ui/skeleton';
 import { formatFeedItemTime } from '@/shared/utilities/utils';
 
-export function HomePageClient({
-  initialQuery = '',
-  viewerUserId,
-}: {
-  initialQuery?: string;
-  viewerUserId?: string;
-}) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [query, setQuery] = useState(initialQuery);
-  const deferredQuery = useDeferredValue(query.trim());
-  const debouncedQuery = useDebounce(deferredQuery, 500);
-  const debouncedSearchTerm = debouncedQuery.length >= 3 ? debouncedQuery : '';
-
-  useEffect(() => {
-    setQuery(searchParams.get('q') ?? '');
-  }, [searchParams]);
-
-  const handleSearch = (value: string) => {
-    setQuery(value);
-
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set('q', value);
-    } else {
-      params.delete('q');
-    }
-
-    const queryString = params.toString();
-    const url = queryString ? `${pathname}?${queryString}` : pathname;
-    window.history.replaceState(window.history.state, '', url);
-  };
-
+export function HomePageClient({ viewerUserId }: { viewerUserId?: string }) {
   return (
     <div className="relative min-h-svh flex-1 py-6 md:min-h-auto">
-      <div className="relative z-20 px-2 pb-2 md:px-10 md:pb-6">
-        <SearchInput onChange={handleSearch} value={query} />
-      </div>
-
-      <HomeContent
-        debouncedSearchTerm={debouncedSearchTerm}
-        viewerUserId={viewerUserId}
-      />
-    </div>
-  );
-}
-
-function HomeContent({
-  debouncedSearchTerm,
-  viewerUserId,
-}: {
-  debouncedSearchTerm: string;
-  viewerUserId?: string;
-}) {
-  const hasQuery = !!debouncedSearchTerm;
-
-  if (hasQuery) {
-    return <MoviesList debouncedSearchTerm={debouncedSearchTerm} />;
-  }
-
-  return (
-    <>
       <SessionMessage isAuthenticated={Boolean(viewerUserId)} />
       <Feed viewerUserId={viewerUserId} />
-    </>
-  );
-}
-
-function SearchInput({
-  onChange,
-  value,
-}: {
-  onChange: (values: string) => void;
-  value: string;
-}) {
-  return (
-    <div className="relative">
-      <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-primary" />
-      <Input
-        className="w-full px-10"
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Buscar película o serie"
-        type="search"
-        value={value}
-      />
     </div>
   );
 }
@@ -358,75 +266,4 @@ function FeedAvatarImage({ alt, src }: { alt: string; src: string | null }) {
   });
 
   return <AvatarImage {...props} />;
-}
-
-function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
-  const {
-    data: movies,
-    isLoading,
-    error,
-  } = useSearchMedia(debouncedSearchTerm);
-
-  if (isLoading) {
-    return (
-      <div className="px-2 pt-2 md:px-10">
-        <MovieGrid>
-          {[...Array(10)].map((_, i) => (
-            // biome-ignore lint: reason
-            <div key={i}>
-              <Skeleton className="aspect-[2/3] w-full rounded-xs bg-muted" />
-              <div className="grid gap-1 pt-2">
-                <Skeleton className="h-5 w-[120px]" />
-                <Skeleton className="h-5 w-[70px]" />
-              </div>
-            </div>
-          ))}
-        </MovieGrid>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <p>Error {JSON.stringify(error)}</p>;
-  }
-
-  return (
-    <div className="px-2 pt-2 md:px-10">
-      <MovieGrid>
-        {movies?.map((movie) => (
-          <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.kind)}>
-            <Link href={`/media/${movie.kind}/${movie.tmdbId}`}>
-              <MoviePoster posterPath={movie.posterPath} title={movie.title} />
-            </Link>
-            <CardContent className="flex flex-col gap-1 px-4 pt-2">
-              <Link
-                className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                href={`/media/${movie.kind}/${movie.tmdbId}`}
-              >
-                <MovieTitle title={movie.title} />
-              </Link>
-              <div className="flex items-center justify-between">
-                <MovieReleaseDate year={movie.year} />
-                <MovieMediaKind kind={movie.kind} />
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end gap-2 px-4 pb-4">
-              <div className="flex-1 md:flex-initial">
-                <AddToWatchlistButton kind={movie.kind} tmdbId={movie.tmdbId} />
-              </div>
-              <div className="flex-1 md:flex-initial">
-                <RateDialog
-                  kind={movie.kind}
-                  posterPath={movie.posterPath}
-                  title={movie.title}
-                  tmdbId={movie.tmdbId}
-                  year={movie.year}
-                />
-              </div>
-            </CardFooter>
-          </MovieCard>
-        ))}
-      </MovieGrid>
-    </div>
-  );
 }

@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { closeDatabase, db } from '@/platform/database/postgres/db';
 import { getTrustedRatingDetails } from './get-trusted-rating-details';
+import { getSearchTrustedRatingSummaries } from './get-search-trusted-rating-summaries';
 import { getTrustedRatingSummaries } from './get-trusted-rating-summaries';
 
 const viewerId = 'viewer';
@@ -157,6 +158,59 @@ describe('trusted rating context PostgreSQL queries', () => {
     `);
     details = await getTrustedRatingDetails(viewerId, mediaA);
     expect(details.summary.ratingCount).toBe(2);
+  });
+
+  it('batch matches external identities without persisting unknown search results', async () => {
+    await db.execute(sql`
+      INSERT INTO media_external_ids (media_id, namespace, external_id)
+      VALUES
+        (${mediaA}::uuid, 'tmdb:movie', '101'),
+        (${mediaB}::uuid, 'tmdb:tv', '101')
+    `);
+    await db.execute(sql`
+      INSERT INTO follows (follower_id, followee_id)
+      VALUES (${viewerId}, ${aliceId}), (${viewerId}, ${bobId})
+    `);
+    await insertRating({
+      id: '35000000-0000-4000-8000-000000000001',
+      userId: aliceId,
+      mediaId: mediaA,
+      score: 8,
+      createdAt: '2025-01-01T00:00:00Z',
+    });
+    await insertRating({
+      id: '35000000-0000-4000-8000-000000000002',
+      userId: bobId,
+      mediaId: mediaB,
+      score: 10,
+      createdAt: '2025-01-02T00:00:00Z',
+    });
+
+    const before = await db.execute<{ count: string }>(
+      sql`SELECT COUNT(*)::text AS count FROM media`
+    );
+    const result = await getSearchTrustedRatingSummaries(viewerId, [
+      { kind: 'movie', tmdbId: 101 },
+      { kind: 'tv_series', tmdbId: 101 },
+      { kind: 'movie', tmdbId: 999 },
+      { kind: 'movie', tmdbId: 101 },
+    ]);
+    const after = await db.execute<{ count: string }>(
+      sql`SELECT COUNT(*)::text AS count FROM media`
+    );
+
+    expect(result['movie:101']).toMatchObject({
+      mediaId: mediaA,
+      ratingCount: 1,
+      averageScore: 8,
+    });
+    expect(result['tv_series:101']).toMatchObject({
+      mediaId: mediaB,
+      ratingCount: 1,
+      averageScore: 10,
+    });
+    expect(result['movie:999']).toBeUndefined();
+    expect(after.rows[0]?.count).toBe(before.rows[0]?.count);
   });
 
   it('limits previews deterministically while all ratings contribute and falls back to users.name', async () => {
