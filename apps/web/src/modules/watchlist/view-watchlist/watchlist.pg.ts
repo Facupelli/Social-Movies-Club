@@ -11,6 +11,7 @@ export async function getProfileWatchlist(
     const query = sql`
       SELECT
         m.id AS "movieId",
+        w.created_at AS "addedAt",
         mei.external_id::integer AS "movieTmdbId",
         m.title AS "movieTitle",
         COALESCE(m.overview, '') AS "movieOverview",
@@ -24,8 +25,8 @@ export async function getProfileWatchlist(
       JOIN media_external_ids mei
         ON mei.media_id = m.id
         AND mei.namespace = ${tmdbNamespaceForKindSql(sql.raw('m.kind'))}
-      WHERE user_id = ${userId}
-      ORDER BY w.created_at DESC;
+      WHERE w.user_id = ${userId}
+      ORDER BY w.created_at DESC, m.id DESC;
     `;
 
     const { rows } = await db.execute<WatchlistRow>(query);
