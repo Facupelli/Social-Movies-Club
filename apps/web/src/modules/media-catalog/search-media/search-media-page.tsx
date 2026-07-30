@@ -8,7 +8,7 @@ import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { useSearchTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-search-trusted-rating-summaries/use-search-trusted-rating-summaries';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
-import { Skeleton } from '@/shared/ui/skeleton';
+import { SearchResultsSkeleton } from './search-results-skeleton';
 import useDebounce from './use-debounce';
 import { useSearchMedia } from './use-search-media';
 
@@ -142,35 +142,5 @@ function SearchResults({
         ))}
       </div>
     </section>
-  );
-}
-
-const SEARCH_SKELETON_KEYS = ['one', 'two', 'three', 'four'] as const;
-
-function SearchResultsSkeleton() {
-  return (
-    <output className="block space-y-3">
-      <Skeleton className="mb-4 h-5 w-48" />
-      {SEARCH_SKELETON_KEYS.map((key) => (
-        <div
-          className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 rounded-md border border-border p-2 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-4 sm:p-3"
-          key={key}
-        >
-          <Skeleton className="aspect-[2/3] w-full rounded-sm" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-6 w-4/5" />
-            <Skeleton className="h-4 w-3/5" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-4/5" />
-            <div className="mt-auto flex gap-2 border-border border-t pt-3">
-              <Skeleton className="size-8 rounded-full" />
-              <Skeleton className="h-8 flex-1" />
-              <Skeleton className="h-8 w-10" />
-            </div>
-          </div>
-        </div>
-      ))}
-      <span className="sr-only">Cargando resultados</span>
-    </output>
   );
 }
