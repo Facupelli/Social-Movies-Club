@@ -32,7 +32,7 @@ export function FeedSkeleton() {
               <Skeleton className="size-8 rounded-md" />
             </div>
             <div className="mt-3 flex gap-3 md:gap-4">
-              <Skeleton className="aspect-[2/3] w-[84px] shrink-0 rounded-xs md:w-[104px]" />
+              <Skeleton className="aspect-[2/3] w-24 shrink-0 rounded-xs md:w-28" />
               <div className="flex-1 space-y-3 py-1">
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-3 w-24" />

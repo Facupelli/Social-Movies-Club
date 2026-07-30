@@ -194,7 +194,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 
         <div className="mt-3 flex min-w-0 gap-3 md:gap-4">
           <Link
-            className="relative aspect-[2/3] w-[84px] shrink-0 overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-[104px]"
+            className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-28"
             href={`/media/${item.kind}/${item.movieTmdbId}`}
           >
             {item.moviePoster ? (
@@ -202,7 +202,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 alt={item.movieTitle}
                 className="object-cover"
                 fill
-                sizes="(min-width: 768px) 104px, 84px"
+                sizes="(min-width: 768px) 112px, 96px"
                 src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
                 unoptimized
               />
