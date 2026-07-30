@@ -14,6 +14,7 @@ import type {
 import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import type { ApiResponse } from '@/shared/http/safe-execute';
+import { DropdownMenuItem } from '@/shared/ui/dropdown-menu';
 import { cn } from '@/shared/utilities/utils';
 import { addMovieToWatchlist } from './add-movie';
 
@@ -27,10 +28,12 @@ export function AddToWatchlistButton({
   kind,
   className,
   variant,
+  presentation = 'button',
 }: {
   tmdbId: number;
   kind: MediaKind;
   className?: string;
+  presentation?: 'button' | 'menu-item';
   variant?:
     | 'default'
     | 'destructive'
@@ -98,33 +101,41 @@ export function AddToWatchlistButton({
     ? undefined
     : addState.error || (removeState.success ? undefined : removeState.error);
 
+  const actionButton = isInWatchlist ? (
+    <SubmitButton
+      aria-label="Quitar de tu lista"
+      className={cn('w-full', className)}
+      formAction={removeAction}
+      hideLoadingText={presentation === 'button'}
+      size="sm"
+      variant={presentation === 'menu-item' ? 'ghost' : variant}
+    >
+      <EyeOff className="size-4" />
+      {presentation === 'menu-item' ? 'Quitar de tu lista' : null}
+    </SubmitButton>
+  ) : (
+    <SubmitButton
+      aria-label="Agregar a tu lista"
+      className={cn('w-full', className)}
+      formAction={addAction}
+      hideLoadingText={presentation === 'button'}
+      size="sm"
+      variant={presentation === 'menu-item' ? 'ghost' : variant}
+    >
+      <Eye className="size-4" />
+      {presentation === 'menu-item' ? 'Agregar a tu lista' : null}
+    </SubmitButton>
+  );
+
   return (
     <form>
       <input name="movieTMDBId" type="hidden" value={tmdbId} />
       <input name="kind" type="hidden" value={kind} />
 
-      {isInWatchlist ? (
-        <SubmitButton
-          aria-label="Quitar de tu lista"
-          className={cn('w-full', className)}
-          formAction={removeAction}
-          hideLoadingText
-          size="sm"
-          variant={variant}
-        >
-          <EyeOff className="size-4 fill-secondary-foreground" />
-        </SubmitButton>
+      {presentation === 'menu-item' ? (
+        <DropdownMenuItem asChild>{actionButton}</DropdownMenuItem>
       ) : (
-        <SubmitButton
-          aria-label="Agregar a tu lista"
-          className={cn('w-full', className)}
-          formAction={addAction}
-          hideLoadingText
-          size="sm"
-          variant={variant}
-        >
-          <Eye className="size-4" />
-        </SubmitButton>
+        actionButton
       )}
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}

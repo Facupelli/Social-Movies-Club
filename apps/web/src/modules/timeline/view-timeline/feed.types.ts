@@ -20,6 +20,7 @@ export type FeedItem = {
   movieYear: string;
   moviePoster: string;
   movieBackdrop: string;
+  movieRuntimeMinutes: number | null;
   movieTmdbId: number;
   movieOverview: string;
   kind: MediaKind;

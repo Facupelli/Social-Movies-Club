@@ -16,34 +16,32 @@ export function HomePageSkeleton() {
 
 export function FeedSkeleton() {
   return (
-    <div className="divide-y divide-border" aria-hidden="true">
+    <div aria-hidden="true" className="divide-y divide-border">
       {FEED_PLACEHOLDERS.map((placeholder) => (
-        <div className="px-2 md:px-10" key={placeholder}>
-          <div className="w-full overflow-hidden px-2 py-4 md:px-0">
-            <div className="flex flex-col gap-2 md:flex-row md:gap-6">
-              <Skeleton className="hidden size-10 shrink-0 rounded-full md:block" />
-              <Skeleton className="h-[250px] w-full shrink-0 rounded-xs md:h-[264px] md:w-44" />
-              <div className="flex min-w-0 flex-1 flex-col">
-                <div className="flex items-center justify-between gap-4">
-                  <Skeleton className="h-6 w-2/3" />
-                  <Skeleton className="h-4 w-16 shrink-0" />
-                </div>
-                <div className="space-y-3 pt-4">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-4/5" />
-                </div>
-                <div className="mt-auto pt-4 md:pt-2">
-                  <div className="flex h-[68px] items-center gap-3 rounded-sm bg-muted/50 p-3">
-                    <Skeleton className="size-7 shrink-0 rounded-full md:hidden" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
-                    <Skeleton className="size-10 rounded-full" />
-                  </div>
-                </div>
+        <div
+          className="flex gap-3 px-4 py-4 md:gap-4 md:px-10 md:py-5"
+          key={placeholder}
+        >
+          <Skeleton className="size-9 shrink-0 rounded-full md:size-10" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-44 max-w-[55vw]" />
+                <Skeleton className="h-3 w-16" />
               </div>
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+            <div className="mt-3 flex gap-3 md:gap-4">
+              <Skeleton className="aspect-[2/3] w-[84px] shrink-0 rounded-xs md:w-[104px]" />
+              <div className="flex-1 space-y-3 py-1">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="mt-4 h-8 w-16" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <Skeleton className="size-7 rounded-full" />
+              <Skeleton className="h-3 w-48 max-w-[60vw]" />
             </div>
           </div>
         </div>

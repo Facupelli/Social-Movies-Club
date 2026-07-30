@@ -9,6 +9,7 @@ import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trus
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { formatRuntime } from '@/shared/utilities/format-runtime';
 
 export function MediaListCard({
   isTrustedRatingLoading = false,
@@ -128,7 +129,9 @@ function TrustedRating({
             className="size-7 border-2 border-card sm:size-8"
             key={rater.userId}
           >
-            {rater.avatarUrl ? <AvatarImage alt="" src={rater.avatarUrl} /> : null}
+            {rater.avatarUrl ? (
+              <AvatarImage alt="" src={rater.avatarUrl} />
+            ) : null}
             <AvatarFallback className="text-[10px]">
               {rater.displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -150,15 +153,4 @@ function TrustedRating({
       </div>
     </div>
   );
-}
-
-function formatRuntime(runtime: number) {
-  const hours = Math.floor(runtime / 60);
-  const minutes = runtime % 60;
-
-  if (hours === 0) {
-    return `${minutes} min`;
-  }
-
-  return `${hours} h ${minutes} min`;
 }
