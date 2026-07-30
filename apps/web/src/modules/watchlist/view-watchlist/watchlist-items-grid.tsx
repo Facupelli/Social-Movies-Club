@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
+import { MediaListCard } from '@/modules/media-catalog/components/media-list-card';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { EnrichedWatchlistItem } from '@/modules/watchlist/watchlist.types';
-import { GridMovieCard } from './watchlist-movie-card';
 
 export function WatchlistItemsGrid({
   initialItems,
@@ -33,21 +32,24 @@ export function WatchlistItemsGrid({
         </p>
         {controls}
       </div>
-      <MovieGrid>
+      <div className="space-y-3">
         {items.map(({ mediaId, movie, trustedRating }) => (
-          <GridMovieCard
-            isOwner={isOwner}
+          <MediaListCard
             key={`${getMediaIdentityKey(movie.tmdbId, movie.kind)}-${mediaId}`}
             movie={movie}
-            onRatingSaved={() => {
-              setItems((current) =>
-                current.filter((item) => item.mediaId !== mediaId)
-              );
-            }}
+            onRatingSaved={
+              isOwner
+                ? () => {
+                    setItems((current) =>
+                      current.filter((item) => item.mediaId !== mediaId)
+                    );
+                  }
+                : undefined
+            }
             trustedRating={trustedRating}
           />
         ))}
-      </MovieGrid>
+      </div>
     </>
   );
 }
