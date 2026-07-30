@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Star } from 'lucide-react';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { MediaKind } from '@/modules/media-catalog/media.type';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import type { ViewerMediaRating } from './viewer-rating-for-media.types';
 
@@ -27,8 +27,11 @@ export function ViewerRatingSection({
   const failed = !rating && initialRatingFailed && ratingQuery.isError;
 
   return (
-    <section aria-labelledby="viewer-rating-heading" className="space-y-3">
-      <h2 className="text-xl font-semibold" id="viewer-rating-heading">
+    <section
+      aria-labelledby="viewer-rating-heading"
+      className="space-y-2 rounded-md border border-border p-3"
+    >
+      <h2 className="text-sm font-semibold" id="viewer-rating-heading">
         Tu calificación
       </h2>
       {failed ? (
@@ -37,14 +40,14 @@ export function ViewerRatingSection({
         </p>
       ) : null}
       {!failed && rating ? (
-        <div className="flex items-center justify-between rounded-md bg-muted/50 px-4 py-3">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 py-1">
+          <div className="flex items-center gap-1.5 text-primary">
+            <Star aria-hidden="true" className="size-6" />
+            <strong className="text-2xl tabular-nums">{rating.score}/10</strong>
+          </div>
+          <p className="text-right text-xs text-muted-foreground">
             Vista el {formatDate(rating.watchedDate)}
           </p>
-          <div className="flex items-center gap-2">
-            <Star className="size-5 fill-primary text-primary" />
-            <strong className="text-xl tabular-nums">{rating.score}/10</strong>
-          </div>
         </div>
       ) : null}
       {failed || rating ? null : (

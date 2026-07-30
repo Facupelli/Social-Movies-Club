@@ -9,7 +9,6 @@ import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
 import { TrustedRatingDetailsSection } from '@/modules/trusted-rating-context/components/trusted-rating-details';
 import type { TrustedRatingDetails } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-to-watchlist-button';
-import { Badge } from '@/shared/ui/badge';
 
 export function MediaDetailPage({
   media,
@@ -66,15 +65,16 @@ export function MediaDetailPage({
           </div>
 
           <div className="flex min-w-0 flex-col justify-end gap-3">
-            <Badge className="w-fit" variant="secondary">
-              {MediaKindDict[media.kind]}
-            </Badge>
             <div>
               <h1 className="text-pretty text-2xl font-bold leading-tight sm:text-3xl">
                 {media.title}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                {[media.year, media.runtime ? `${media.runtime} min` : null]
+                {[
+                  media.year,
+                  MediaKindDict[media.kind],
+                  media.runtime ? `${media.runtime} min` : null,
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </p>
@@ -97,16 +97,16 @@ export function MediaDetailPage({
         </div>
       </header>
 
-      <div className="space-y-8 px-4 py-8 md:px-8">
+      <div className="space-y-4 px-4 py-4 md:px-8">
         {isAuthenticated ? (
           <>
             {trustedContextFailed ? (
               <section
                 aria-labelledby="trusted-error-heading"
-                className="space-y-2"
+                className="space-y-2 rounded-md border border-border p-3"
               >
                 <h2
-                  className="text-xl font-semibold"
+                  className="text-sm font-semibold"
                   id="trusted-error-heading"
                 >
                   De personas que seguís
