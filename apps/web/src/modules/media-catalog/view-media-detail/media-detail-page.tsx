@@ -1,9 +1,10 @@
-import { Film, Star } from 'lucide-react';
+import { Film } from 'lucide-react';
 import Image from 'next/image';
 import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
 import { MediaKindDict } from '@/modules/media-catalog/media.type';
 import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
+import { ViewerRatingSection } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-section';
 import type { ViewerMediaRating } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-for-media.types';
 import { TrustedRatingDetailsSection } from '@/modules/trusted-rating-context/trusted-rating-details';
 import type { TrustedRatingDetails } from '@/modules/trusted-rating-context/trusted-rating-context.types';
@@ -17,6 +18,7 @@ export function MediaDetailPage({
   viewerRating,
   viewerRatingFailed,
   isAuthenticated,
+  viewerUserId,
 }: {
   media: TMDbMediaMultiSearch;
   trustedDetails: TrustedRatingDetails | null;
@@ -24,6 +26,7 @@ export function MediaDetailPage({
   viewerRating: ViewerMediaRating | null;
   viewerRatingFailed: boolean;
   isAuthenticated: boolean;
+  viewerUserId: string | null;
 }) {
   return (
     <main className="pb-10">
@@ -118,39 +121,15 @@ export function MediaDetailPage({
               <TrustedRatingDetailsSection details={trustedDetails} />
             ) : null}
 
-            <section
-              aria-labelledby="viewer-rating-heading"
-              className="space-y-3"
-            >
-              <h2 className="text-xl font-semibold" id="viewer-rating-heading">
-                Tu calificación
-              </h2>
-              {viewerRatingFailed ? (
-                <p className="text-sm text-muted-foreground">
-                  No pudimos cargar tu calificación.
-                </p>
-              ) : null}
-              {!viewerRatingFailed && viewerRating ? (
-                <div className="flex items-center justify-between rounded-md bg-muted/50 px-4 py-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Vista el {formatDate(viewerRating.watchedDate)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="size-5 fill-primary text-primary" />
-                    <strong className="text-xl tabular-nums">
-                      {viewerRating.score}/10
-                    </strong>
-                  </div>
-                </div>
-              ) : null}
-              {viewerRatingFailed || viewerRating ? null : (
-                <p className="text-sm text-muted-foreground">
-                  Todavía no calificaste este título.
-                </p>
-              )}
-            </section>
+            {viewerUserId ? (
+              <ViewerRatingSection
+                initialRating={viewerRating}
+                initialRatingFailed={viewerRatingFailed}
+                kind={media.kind}
+                tmdbId={media.id}
+                viewerUserId={viewerUserId}
+              />
+            ) : null}
           </>
         ) : null}
 
@@ -167,15 +146,4 @@ export function MediaDetailPage({
       </div>
     </main>
   );
-}
-
-function formatDate(date: string): string {
-  return new Intl.DateTimeFormat('es-AR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
-    .format(new Date(`${date}T00:00:00Z`))
-    .replaceAll('.', '');
 }

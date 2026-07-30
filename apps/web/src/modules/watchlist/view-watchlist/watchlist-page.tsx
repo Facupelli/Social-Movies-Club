@@ -1,11 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import z from 'zod';
-import { MovieGrid } from '@/modules/media-catalog/components/movie-grid';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries';
 import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
-import { GridMovieCard } from '@/modules/watchlist/view-watchlist/watchlist-movie-card';
+import { WatchlistItemsGrid } from '@/modules/watchlist/view-watchlist/watchlist-items-grid';
 import {
   parseWatchlistSort,
   sortWatchlistItems,
@@ -83,30 +81,21 @@ export default async function WatchlistPage(props: WatchlistPageProps) {
 
   return (
     <section className="space-y-4 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground text-sm">
-          {items.length} {items.length === 1 ? 'título' : 'títulos'}
-        </p>
-        <WatchlistSortControl
-          socialSortingAvailable={socialSortingAvailable}
-          value={activeSort}
-        />
-      </div>
       {socialSortingAvailable ? null : (
         <output className="block text-muted-foreground text-sm">
           Las calificaciones de personas que seguís no están disponibles ahora.
         </output>
       )}
-      <MovieGrid>
-        {items.map(({ mediaId, movie, trustedRating }) => (
-          <GridMovieCard
-            isOwner={isOwner}
-            key={`${getMediaIdentityKey(movie.tmdbId, movie.kind)}-${mediaId}`}
-            movie={movie}
-            trustedRating={trustedRating}
+      <WatchlistItemsGrid
+        controls={
+          <WatchlistSortControl
+            socialSortingAvailable={socialSortingAvailable}
+            value={activeSort}
           />
-        ))}
-      </MovieGrid>
+        }
+        initialItems={items}
+        isOwner={isOwner}
+      />
     </section>
   );
 }

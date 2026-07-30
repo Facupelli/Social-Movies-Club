@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useActionState, useCallback } from 'react';
-import { trustedRatingQueryKeys } from '@/modules/trusted-rating-context/use-search-trusted-rating-summaries';
+import { invalidateTrustedRatingContext } from '@/modules/trusted-rating-context/invalidate-trusted-rating-context';
 import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import type { ApiResponse } from '@/shared/http/safe-execute';
@@ -26,9 +26,7 @@ export function FollowUserButton({
       return;
     }
 
-    await queryClient.invalidateQueries({
-      queryKey: trustedRatingQueryKeys.viewerScope(session.user.id),
-    });
+    await invalidateTrustedRatingContext(queryClient, session.user.id);
   }, [queryClient, session?.user.id]);
   const followWithInvalidation = useCallback(
     async (previousState: ApiResponse<void>, formData: FormData) => {

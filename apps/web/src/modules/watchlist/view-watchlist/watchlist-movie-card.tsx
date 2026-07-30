@@ -17,10 +17,12 @@ export function GridMovieCard({
   movie,
   isOwner,
   trustedRating,
+  onRatingSaved,
 }: {
   movie: MovieView;
   isOwner: boolean;
   trustedRating: TrustedRatingSummary;
+  onRatingSaved?: () => void;
 }) {
   return (
     <MovieCard>
@@ -41,6 +43,7 @@ export function GridMovieCard({
           <div>
             <RateDialog
               kind={movie.kind}
+              onRatingSaved={onRatingSaved}
               posterPath={movie.posterPath}
               title={movie.title}
               tmdbId={movie.tmdbId}

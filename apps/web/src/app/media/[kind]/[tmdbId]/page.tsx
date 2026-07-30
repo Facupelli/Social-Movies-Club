@@ -49,6 +49,7 @@ export default async function MediaPage({ params }: PageProps) {
         trustedDetails={null}
         viewerRating={null}
         viewerRatingFailed={false}
+        viewerUserId={null}
       />
     );
   }
@@ -74,6 +75,7 @@ export default async function MediaPage({ params }: PageProps) {
         }}
         viewerRating={null}
         viewerRatingFailed={false}
+        viewerUserId={viewerUserId}
       />
     );
   }
@@ -97,6 +99,7 @@ export default async function MediaPage({ params }: PageProps) {
           : null
       }
       viewerRatingFailed={viewerRatingResult.status === 'rejected'}
+      viewerUserId={viewerUserId}
     />
   );
 }

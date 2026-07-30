@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import {
   type MediaKind,
@@ -79,6 +78,7 @@ type RateDialogProps = {
   kind: MediaKind;
   year: string;
   posterPath: string;
+  onRatingSaved?: () => void;
 };
 
 export function RateDialog({
@@ -87,6 +87,7 @@ export function RateDialog({
   kind,
   year,
   posterPath,
+  onRatingSaved,
 }: RateDialogProps) {
   const isMobile = useIsMobile();
   const { data: session } = authClient.useSession();
@@ -111,6 +112,7 @@ export function RateDialog({
       isMobile={isMobile}
       kind={kind}
       onClose={() => setOpen(false)}
+      onRatingSaved={onRatingSaved}
       posterPath={posterPath}
       title={title}
       tmdbId={tmdbId}
@@ -163,6 +165,7 @@ type RateDialogBodyProps = {
   posterPath: string;
   isMobile: boolean;
   onClose: () => void;
+  onRatingSaved?: () => void;
   userId?: string;
   userRating?: UserRating;
 };
@@ -175,6 +178,7 @@ function RateDialogBody({
   posterPath,
   isMobile,
   onClose,
+  onRatingSaved,
   userId,
   userRating,
 }: RateDialogBodyProps) {
@@ -198,12 +202,18 @@ function RateDialogBody({
     _state: ApiResponse<RateMediaResult>,
     formData: FormData
   ) => {
-    return await mutateRateMedia(formData, {
+    const result = await mutateRateMedia(formData, {
       tmdbId,
       kind,
       score: rating,
       watchedDate,
     });
+
+    if (result.success) {
+      onRatingSaved?.();
+    }
+
+    return result;
   };
 
   const [state, action, isPending] = useActionState(
@@ -455,12 +465,6 @@ function RatingSuccessView({
   onClose,
   userId,
 }: RatingSuccessViewProps) {
-  const router = useRouter();
-
-  const handleAccept = () => {
-    onClose();
-    router.refresh();
-  };
 
   return (
     <div className="grid gap-y-6 py-7 sm:py-9">
@@ -485,7 +489,7 @@ function RatingSuccessView({
       <div className="mx-auto grid w-full max-w-xs gap-y-3">
         <Button
           className="rounded-full"
-          onClick={handleAccept}
+          onClick={onClose}
           type="button"
           variant="secondary"
         >

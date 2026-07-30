@@ -66,7 +66,11 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
         return result;
       }
 
-      if (!viewerUserId || latestMutation.current !== mutationId) {
+      if (latestMutation.current !== mutationId) {
+        return result;
+      }
+
+      if (!viewerUserId) {
         return result;
       }
 
