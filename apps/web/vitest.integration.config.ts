@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.pg.test.ts'],
+    fileParallelism: false,
     sequence: { concurrent: false },
   },
 });

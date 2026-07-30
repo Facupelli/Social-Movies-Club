@@ -225,10 +225,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
             href={`/profile/${item.actorId}`}
           >
             <Avatar className="size-7 md:size-10">
-              <FeedAvatarImage
-                alt={item.actorName}
-                src={item.actorImage}
-              />
+              <FeedAvatarImage alt={item.actorName} src={item.actorImage} />
               <AvatarFallback>
                 {item.actorName.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -239,19 +236,21 @@ function FeedItemCard({ item }: { item: FeedItem }) {
         <div className="relative flex-shrink-0 w-full md:w-44">
           <div className="sticky top-0">
             <div className="relative">
-              <Image
-                alt={item.movieTitle}
-                className="rounded-xs object-cover w-full h-auto max-h-[250px] md:max-h-[300px]"
-                height={288}
-                src={
-                  (isMobile
-                    ? `https://image.tmdb.org/t/p/w500${item.movieBackdrop}`
-                    : `https://image.tmdb.org/t/p/original${item.moviePoster}`) ||
-                  '/placeholder.svg?height=288&width=192'
-                }
-                unoptimized
-                width={192}
-              />
+              <Link href={`/media/${item.kind}/${item.movieTmdbId}`}>
+                <Image
+                  alt={item.movieTitle}
+                  className="rounded-xs object-cover w-full h-auto max-h-[250px] md:max-h-[300px]"
+                  height={288}
+                  src={
+                    (isMobile
+                      ? `https://image.tmdb.org/t/p/w500${item.movieBackdrop}`
+                      : `https://image.tmdb.org/t/p/original${item.moviePoster}`) ||
+                    '/placeholder.svg?height=288&width=192'
+                  }
+                  unoptimized
+                  width={192}
+                />
+              </Link>
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xs" />
 
@@ -283,7 +282,12 @@ function FeedItemCard({ item }: { item: FeedItem }) {
           <div className="grid ">
             <div className="flex items-baseline">
               <div className="flex-1">
-                <MovieTitle className="md:text-xl" title={item.movieTitle} />
+                <Link
+                  className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  href={`/media/${item.kind}/${item.movieTmdbId}`}
+                >
+                  <MovieTitle className="md:text-xl" title={item.movieTitle} />
+                </Link>
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
                 <span>hace</span>
@@ -311,10 +315,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 href={`/profile/${item.actorId}`}
               >
                 <Avatar className="size-7 md:size-10">
-                  <FeedAvatarImage
-                    alt={item.actorName}
-                    src={item.actorImage}
-                  />
+                  <FeedAvatarImage alt={item.actorName} src={item.actorImage} />
                   <AvatarFallback>
                     {item.actorName.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -343,13 +344,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
   );
 }
 
-function FeedAvatarImage({
-  alt,
-  src,
-}: {
-  alt: string;
-  src: string | null;
-}) {
+function FeedAvatarImage({ alt, src }: { alt: string; src: string | null }) {
   if (!src) {
     return null;
   }
@@ -400,9 +395,16 @@ function MoviesList({ debouncedSearchTerm }: { debouncedSearchTerm: string }) {
       <MovieGrid>
         {movies?.map((movie) => (
           <MovieCard key={getMediaIdentityKey(movie.tmdbId, movie.kind)}>
-            <MoviePoster posterPath={movie.posterPath} title={movie.title} />
+            <Link href={`/media/${movie.kind}/${movie.tmdbId}`}>
+              <MoviePoster posterPath={movie.posterPath} title={movie.title} />
+            </Link>
             <CardContent className="flex flex-col gap-1 px-4 pt-2">
-              <MovieTitle title={movie.title} />
+              <Link
+                className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                href={`/media/${movie.kind}/${movie.tmdbId}`}
+              >
+                <MovieTitle title={movie.title} />
+              </Link>
               <div className="flex items-center justify-between">
                 <MovieReleaseDate year={movie.year} />
                 <MovieMediaKind kind={movie.kind} />
