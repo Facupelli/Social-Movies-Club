@@ -361,7 +361,7 @@ function LoadNextPageButton({
   isFetchingNextPage: boolean;
 }) {
   return (
-    <div className="flex justify-center">
+    <div className="mt-4 flex justify-center">
       <Button
         disabled={isFetchingNextPage}
         onClick={onFecthNextPage}

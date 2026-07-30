@@ -1,13 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import z from 'zod';
+import { profileIdSchema } from '@/modules/profiles/profile-id';
 import { FollowUserButton } from '@/modules/social/follow-user/follow-user-button';
 import { listFollowingUsers } from '@/modules/social/list-following/list-following';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
-
-const profileIdSchema = z.string().nonempty();
 
 export function shouldShowFollowButton(
   viewerUserId: string,

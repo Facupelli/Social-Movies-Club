@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import z from 'zod';
+import { profileIdSchema } from '@/modules/profiles/profile-id';
 import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries/get-trusted-rating-summaries';
 import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
@@ -11,8 +11,6 @@ import {
 import { WatchlistSortControl } from '@/modules/watchlist/view-watchlist/watchlist-sort-control';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
-
-const profileIdSchema = z.string().nonempty();
 
 type WatchlistPageProps = Readonly<{
   params: Promise<{ id: string }>;

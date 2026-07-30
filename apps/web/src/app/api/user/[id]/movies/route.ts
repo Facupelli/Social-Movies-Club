@@ -1,8 +1,8 @@
-import z from 'zod';
 import {
   parseProfileRatingsFilters,
   toProfileRatingsRepositoryFilters,
 } from '@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser';
+import { profileIdSchema } from '@/modules/profiles/profile-id';
 import { loadProfileRatingsPage } from '@/modules/ratings/list-profile-ratings/profile-ratings-query-loader.server';
 import { PROFILE_RATINGS_PAGE_SIZE } from '@/modules/ratings/list-profile-ratings/use-user-movies';
 import { getServerSession } from '@/platform/auth/get-server-session';
@@ -23,7 +23,7 @@ export async function GET(
   }
 
   const { id: rawProfileUserId } = await params;
-  const profileUserId = z.uuid().safeParse(rawProfileUserId);
+  const profileUserId = profileIdSchema.safeParse(rawProfileUserId);
   if (!profileUserId.success) {
     return authenticatedJson({ error: 'Invalid profile ID' }, { status: 400 });
   }
