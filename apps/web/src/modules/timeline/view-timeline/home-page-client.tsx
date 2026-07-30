@@ -54,8 +54,15 @@ function SessionMessage({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 function Feed({ viewerUserId }: { viewerUserId?: string }) {
-  const { data, isPending, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    useInfiniteQuery(getUserFeedQueryOptions(viewerUserId));
+  const {
+    data,
+    isPending,
+    isError,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useInfiniteQuery(getUserFeedQueryOptions(viewerUserId));
 
   if (!viewerUserId) {
     return null;
@@ -63,6 +70,20 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
 
   if (isPending) {
     return <FeedSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="mx-auto max-w-md space-y-3 px-4 py-12 text-center">
+        <p className="font-semibold">No pudimos cargar tu feed</p>
+        <p className="text-muted-foreground text-sm">
+          Revisá tu conexión e intentá nuevamente.
+        </p>
+        <Button onClick={() => refetch()} type="button" variant="secondary">
+          Reintentar
+        </Button>
+      </div>
+    );
   }
 
   const flatItems = data?.pages.flatMap((page) => page.items);
@@ -199,7 +220,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
                 <span>hace</span>
-                {formatFeedItemTime(item.ratedAt)}
+                {formatFeedItemTime(item.occurredAt)}
               </div>
             </div>
 
@@ -245,10 +266,51 @@ function FeedItemCard({ item }: { item: FeedItem }) {
 
               <MovieScore score={item.score} />
             </div>
+
+            <TimelineTrustedContext item={item} />
           </div>
         </div>
       </div>
     </MovieCard>
+  );
+}
+
+function TimelineTrustedContext({ item }: { item: FeedItem }) {
+  const context = item.trustedRatingContext;
+  if (!context || context.otherRaterCount === 0) {
+    return null;
+  }
+
+  const firstRater = context.otherPreviewRaters[0];
+  const remainingCount = context.otherRaterCount - 1;
+
+  return (
+    <div className="mt-2 flex items-center gap-2 px-1">
+      <div aria-hidden="true" className="flex shrink-0 -space-x-2">
+        {context.otherPreviewRaters.map((rater) => (
+          <Avatar className="size-7 border-2 border-background" key={rater.userId}>
+            {rater.avatarUrl ? <AvatarImage alt="" src={rater.avatarUrl} /> : null}
+            <AvatarFallback className="text-[10px]">
+              {rater.displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        ))}
+      </div>
+      <p className="min-w-0 text-muted-foreground text-xs leading-snug">
+        <span className="text-foreground">{firstRater?.displayName}</span>
+        {remainingCount > 0 ? ` y ${remainingCount} más` : ''} también{' '}
+        {context.otherRaterCount === 1 ? 'la calificó' : 'la calificaron'}
+        {context.summary.averageScore !== null ? (
+          <>
+            {' '}
+            · promedio{' '}
+            <strong className="text-primary tabular-nums">
+              {context.summary.averageScore.toFixed(1)}
+            </strong>
+          </>
+        ) : null}
+      </p>
+    </div>
   );
 }
 

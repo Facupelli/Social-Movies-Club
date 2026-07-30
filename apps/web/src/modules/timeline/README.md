@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Timeline shows recent ratings from people the viewer follows.
+Timeline shows historically delivered rating-created activities. Each entry keeps its original position while displaying the rating author's current score.
 
 ## Business invariants
 
@@ -13,3 +13,5 @@ Timeline shows recent ratings from people the viewer follows.
 - Entries represent individual rating activities and retain their original position.
 - A delivered entry reads the rating's current score because ratings are authoritative and no historical score snapshot exists.
 - Trusted Rating Context is current-network data and is not derived from Timeline deliveries.
+- Timeline enrichment is loaded in one batch per feed page and may fail without hiding historical entries.
+- Supplemental raters exclude the entry actor, while the canonical trusted average includes that actor when they are still followed.

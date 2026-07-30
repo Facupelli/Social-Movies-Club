@@ -85,8 +85,10 @@ export async function getUserFeed({
       movieBackdrop: row.movieBackdrop,
       kind: row.kind,
       score: row.score,
+      occurredAt: row.feedOccurredAt.toISOString(),
       ratedAt: row.ratedAt.toISOString(),
       seenAt: row.seenAt?.toISOString() ?? null,
+      trustedRatingContext: null,
     }));
 
     const lastRow = rows.at(-1);

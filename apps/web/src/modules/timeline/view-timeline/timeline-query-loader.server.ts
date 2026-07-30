@@ -1,5 +1,9 @@
 import 'server-only';
 
+import {
+  getTimelineTrustedRatingContexts,
+  timelineTrustedRatingContextKey,
+} from '@/modules/trusted-rating-context/get-timeline-trusted-rating-contexts';
 import type { FeedCursor } from './feed-cursor';
 import type { UserFeedPage } from './feed.types';
 import { getUserFeed } from './timeline.pg';
@@ -11,5 +15,31 @@ export async function loadUserFeedPage({
   userId: string;
   cursor?: FeedCursor | null;
 }): Promise<UserFeedPage> {
-  return await getUserFeed({ userId, cursor });
+  const page = await getUserFeed({ userId, cursor });
+
+  try {
+    const contexts = await getTimelineTrustedRatingContexts(
+      userId,
+      page.items.map((item) => ({
+        mediaId: item.movieId,
+        actorId: item.actorId,
+      }))
+    );
+
+    return {
+      ...page,
+      items: page.items.map((item) => ({
+        ...item,
+        trustedRatingContext:
+          contexts[
+            timelineTrustedRatingContextKey({
+              mediaId: item.movieId,
+              actorId: item.actorId,
+            })
+          ] ?? null,
+      })),
+    };
+  } catch {
+    return page;
+  }
 }

@@ -22,6 +22,29 @@ export type TrustedRatingDetails = {
   raters: TrustedRater[];
 };
 
+export type TimelineTrustedRatingContext = {
+  summary: TrustedRatingSummary;
+  otherPreviewRaters: TrustedRater[];
+  otherRaterCount: number;
+  actorIsCurrentlyTrusted: boolean;
+};
+
+export type TimelineTrustedRatingContextMap = Record<
+  string,
+  TimelineTrustedRatingContext
+>;
+
+export type TimelineTrustedRatingContextRow = {
+  mediaId: string;
+  actorId: string;
+  ratingCount: number;
+  averageScore: string | number | null;
+  actorIsCurrentlyTrusted: boolean;
+  otherRaterCount: number;
+  previewRaters: TrustedRaterRow[];
+  otherPreviewRaters: TrustedRaterRow[];
+};
+
 export type TrustedRatingRow = {
   mediaId: string;
   ratingCount: number;
