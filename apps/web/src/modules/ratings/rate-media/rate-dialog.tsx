@@ -79,6 +79,7 @@ type RateDialogProps = {
   year: string;
   posterPath: string;
   onRatingSaved?: () => void;
+  triggerClassName?: string;
 };
 
 export function RateDialog({
@@ -88,6 +89,7 @@ export function RateDialog({
   year,
   posterPath,
   onRatingSaved,
+  triggerClassName,
 }: RateDialogProps) {
   const isMobile = useIsMobile();
   const { data: session } = authClient.useSession();
@@ -99,7 +101,11 @@ export function RateDialog({
   const userRating = userRatings?.[getMediaIdentityKey(tmdbId, kind)];
 
   const trigger = (
-    <Button className="w-full bg-transparent" size="sm" variant="outline">
+    <Button
+      className={cn('w-full bg-transparent', triggerClassName)}
+      size="sm"
+      variant="outline"
+    >
       <Star className={cn(userRating?.isRated && 'fill-yellow-400')} />
       <span className="sr-only">
         {userRating?.isRated ? 'Editar puntuación' : 'Puntuar'} {title}
