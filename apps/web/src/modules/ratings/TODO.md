@@ -7,7 +7,7 @@
   Correcting it must not create timeline activity.
 
 - [x] Preserve watched date when re-rating
-  Re-rating changes only score and activity time.
+  Re-rating updates the current score and watched date while preserving the original rating and activity creation time.
 
 - [x] Add database score constraints
   Enforce the 1 through 10 range.

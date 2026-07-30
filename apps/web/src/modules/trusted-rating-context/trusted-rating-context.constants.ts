@@ -1,0 +1,1 @@
+export const TRUSTED_RATER_PREVIEW_LIMIT = 3;

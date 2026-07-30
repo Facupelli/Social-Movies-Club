@@ -8,7 +8,7 @@
 
 ## Web
 
-- Next.js 15 App Router
+- Next.js 16.2.10 App Router
 - React 19
 - Tailwind CSS 4
 - Radix UI

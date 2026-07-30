@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: ['src/**/*.pg.test.ts', 'node_modules/**'],
+    include: ['src/**/*.pg.test.ts'],
+    sequence: { concurrent: false },
   },
 });
