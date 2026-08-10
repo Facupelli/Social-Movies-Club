@@ -1,8 +1,8 @@
- # Social Movies Club
+ # Que Ves
 
  ## Overview
 
- Social Movies Club is a social discovery app for movies and TV series. It helps people decide what to watch through simple
+ Que Ves is a social discovery app for movies and TV series. It helps people decide what to watch through simple
  ratings from friends and others whose taste they trust.
 
  Instead of relying primarily on global popularity, algorithms, or professional critics, the app turns the viewing activity of
@@ -75,7 +75,7 @@
 
  Product principles
 
- Social Movies Club prioritizes:
+ Que Ves prioritizes:
 
  - Trusted people over anonymous popularity.
  - Fast ratings over long-form reviews.

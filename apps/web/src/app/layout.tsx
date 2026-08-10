@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Social Movies Club',
+  title: 'Que Ves',
   description:
-    'No sabes qué película ver? Tenés amigos con buen gusto para las pelis? Entrá, encontrá pelis y recomendá!',
+    'Descubrí qué ver. Recomendaciones de películas y series de gente en quien confiás.',
 };
 
 export const viewport: Viewport = {

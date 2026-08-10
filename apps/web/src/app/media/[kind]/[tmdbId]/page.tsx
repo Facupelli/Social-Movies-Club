@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   try {
     const { data } = await getMediaDetail(identity.tmdbId, identity.kind);
-    return { title: `${data.title} | Social Movies Club` };
+    return { title: `${data.title} | Que Ves` };
   } catch {
     return {};
   }

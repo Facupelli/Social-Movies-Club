@@ -1,6 +1,6 @@
 # Mission
 
-Social Movies Club helps people decide what to watch through simple ratings from friends and other people whose taste they trust.
+Que Ves helps people decide what to watch through simple ratings from friends and other people whose taste they trust.
 
 Users score movies and TV shows from 1 to 10. Their followers see those ratings in a timeline and can treat them as lightweight recommendations.
 

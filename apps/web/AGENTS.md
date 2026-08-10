@@ -1,6 +1,6 @@
 # Web App
 
-The web app is the main Social Movies Club product. It lets users score movies and TV shows, follow people they trust, and discover what to watch through a social feed.
+The web app is the main Que Ves product. It lets users score movies and TV shows, follow people they trust, and discover what to watch through a social feed.
 
 Before working on a task, consult:
 

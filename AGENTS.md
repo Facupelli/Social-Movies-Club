@@ -1,6 +1,6 @@
 # Agent Context
 
-Monorepo for Social Movies Club, a social movie and TV discovery platform built around ratings from people users trust.
+Monorepo for Que Ves, a social movie and TV discovery platform built around ratings from people users trust.
 
 Use pnpm workspaces and Turborepo.
 

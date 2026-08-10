@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Social Movies Club is a pnpm workspace monorepo managed with Turborepo.
+Que Ves is a pnpm workspace monorepo managed with Turborepo.
 
 ## Applications
 

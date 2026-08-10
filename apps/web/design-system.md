@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This document defines the visual language of Social Movies Club.
+This document defines the visual language of Que Ves.
 
 It provides shared rules for humans and AI coding agents when creating or modifying interfaces. It intentionally avoids prescribing individual screens or components. New UI should be derived from these principles and the semantic design tokens.
 
 ## Product character
 
-Social Movies Club is a mobile-first, dark, social and content-led application.
+Que Ves is a mobile-first, dark, social and content-led application.
 
 The interface should feel:
 
