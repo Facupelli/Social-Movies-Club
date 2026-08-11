@@ -1,15 +1,15 @@
 import 'server-only';
 
 import { searchProfiles as searchProfilesRepository } from './profile-search.pg';
+import type { ProfileSearchResult } from './profile-search.types';
 import {
   MIN_PROFILE_SEARCH_QUERY_LENGTH,
   normalizeProfileSearchQuery,
 } from './profile-search-query';
-import type { ProfileSearchResult } from './profile-search.types';
 
 export async function searchProfiles(
   query: string,
-  _viewerUserId: string
+  viewerUserId: string
 ): Promise<ProfileSearchResult[]> {
   const normalizedQuery = normalizeProfileSearchQuery(query);
 
@@ -17,5 +17,5 @@ export async function searchProfiles(
     return [];
   }
 
-  return await searchProfilesRepository(normalizedQuery);
+  return await searchProfilesRepository(normalizedQuery, viewerUserId);
 }

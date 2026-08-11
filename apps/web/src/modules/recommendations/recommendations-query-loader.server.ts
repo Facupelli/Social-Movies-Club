@@ -1,10 +1,10 @@
 import 'server-only';
 
+import { getUserRecommendations } from './get-user-recommendations.pg';
 import type {
   RecommendationCursor,
   UserRecommendationsPage,
 } from './recommendations.types';
-import { getUserRecommendations } from './get-user-recommendations.pg';
 
 /** Application service shared by Server Components and the Route Handler. */
 export async function loadUserRecommendationsPage({

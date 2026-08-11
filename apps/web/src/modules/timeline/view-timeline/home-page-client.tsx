@@ -84,24 +84,21 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
 
   if (!flatItems || flatItems.length === 0) {
     return (
-      <div>
-        <div className="absolute top-11 inset-0 z-0 bg-radial from-primary to-background opacity-10" />
-        <div className="relative z-20 flex flex-col items-center gap-y-2 px-4 py-10">
-          <p className="text-center font-bold text-xl">
-            Tu feed está un poco vacío
-          </p>
-          <p className="text-center text-muted-foreground text-sm">
-            Sigue a tus amigos para ver sus calificaciones o empieza a puntuar
-            películas para recibir recomendaciones.
-          </p>
-          <div className="pt-4">
-           <Button asChild>
+      <div className="mx-auto max-w-md px-4 py-12 text-center">
+        <p className="font-semibold text-lg">
+          Todavía no hay actividad reciente
+        </p>
+        <p className="mt-2 text-muted-foreground text-sm">
+          Cuando la gente que seguís califique una película o serie, va a
+          aparecer acá.
+        </p>
+        <div className="mt-6">
+          <Button asChild>
             <Link href="/users">
               <UserPlus className="size-4" />
               Encontrá gente para seguir
             </Link>
           </Button>
-          </div>
         </div>
       </div>
     );

@@ -1,7 +1,7 @@
 import {
+  getUsernameHandle,
   USERNAME_INPUT_PATTERN,
   USERNAME_MAX_LENGTH,
-  getUsernameHandle,
 } from '@/modules/account/username-policy';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
@@ -17,21 +17,25 @@ export function UsernameField({
   const errorId = 'username-error';
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="username">Nombre de usuario</Label>
+    <div className="space-y-2">
+      <Label className="text-base" htmlFor="username">
+        Nombre de usuario
+      </Label>
       <div className="relative">
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground text-sm"
+          className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-muted-foreground text-xl"
         >
           @
         </span>
         <Input
-          aria-describedby={error ? `${descriptionId} ${errorId}` : descriptionId}
+          aria-describedby={
+            error ? `${descriptionId} ${errorId}` : descriptionId
+          }
           aria-invalid={Boolean(error)}
           autoCapitalize="none"
           autoComplete="username"
-          className="pl-7"
+          className="h-12 pl-10 text-base"
           defaultValue={
             currentUsername ? getUsernameHandle(currentUsername) : undefined
           }

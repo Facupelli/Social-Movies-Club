@@ -5,8 +5,9 @@ import { countUnreadNotifications as countUnreadNotificationsInPostgres } from '
 
 export async function countUnreadNotifications(
   userId: string,
-  count: (recipientId: string) => Promise<number | string | bigint> =
-    countUnreadNotificationsInPostgres
+  count: (
+    recipientId: string
+  ) => Promise<number | string | bigint> = countUnreadNotificationsInPostgres
 ): Promise<UnreadNotificationCount> {
   const unreadCount = Number(await count(userId));
 

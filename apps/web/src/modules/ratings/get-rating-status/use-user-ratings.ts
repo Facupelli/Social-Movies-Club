@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
-import type { RatingStatusMap } from './rating-status.types';
 import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
+import type { RatingStatusMap } from './rating-status.types';
 
 export const ratingStatusQueryKeys = {
   map: (viewerUserId: string | undefined) =>

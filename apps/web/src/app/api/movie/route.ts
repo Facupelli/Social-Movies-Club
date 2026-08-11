@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
     return Response.json([]);
   }
   if (query.length > MAX_QUERY_LENGTH) {
-    return Response.json({ error: 'Search query is too long' }, { status: 400 });
+    return Response.json(
+      { error: 'Search query is too long' },
+      { status: 400 }
+    );
   }
 
   try {

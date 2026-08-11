@@ -11,8 +11,8 @@ import {
   userProfiles,
 } from '@/platform/database/postgres/schema';
 import { tmdbNamespaceForKindSql } from '@/platform/tmdb/tmdb-media-kind';
-import { encodeFeedCursor } from './feed-cursor';
 import type { FeedItem, GetUserFeedParams, UserFeedPage } from './feed.types';
+import { encodeFeedCursor } from './feed-cursor';
 
 const actorProfile = alias(userProfiles, 'actor_profile');
 

@@ -9,13 +9,13 @@ import {
   userProfiles,
 } from '@/platform/database/postgres/schema';
 import { tmdbNamespaceForKindSql } from '@/platform/tmdb/tmdb-media-kind';
-import { encodeRecommendationsCursor } from './recommendations-cursor';
 import type {
   GetUserRecommendationsParams,
   RecommendationItem,
   TrustedRatingContext,
   UserRecommendationsPage,
 } from './recommendations.types';
+import { encodeRecommendationsCursor } from './recommendations-cursor';
 
 const SUPPORTER_MIN_SCORE = 8;
 const MIN_AVERAGE_SCORE = 7;
@@ -48,10 +48,7 @@ export async function getUserRecommendations({
           ),
         })
         .from(follows)
-        .innerJoin(
-          friendRatings,
-          eq(follows.followeeId, friendRatings.userId)
-        )
+        .innerJoin(friendRatings, eq(follows.followeeId, friendRatings.userId))
         .leftJoin(
           viewerRatings,
           and(
@@ -59,9 +56,7 @@ export async function getUserRecommendations({
             eq(viewerRatings.mediaId, friendRatings.mediaId)
           )
         )
-        .where(
-          and(eq(follows.followerId, userId), isNull(viewerRatings.id))
-        )
+        .where(and(eq(follows.followerId, userId), isNull(viewerRatings.id)))
         .groupBy(friendRatings.mediaId)
         .having(sql`AVG(${friendRatings.score}) >= ${MIN_AVERAGE_SCORE}`)
     );
@@ -158,14 +153,8 @@ export async function getUserRecommendations({
         watchedDate: friendRatings.watchedDate,
       })
       .from(follows)
-      .innerJoin(
-        friendRatings,
-        eq(follows.followeeId, friendRatings.userId)
-      )
-      .innerJoin(
-        friendProfile,
-        eq(friendRatings.userId, friendProfile.userId)
-      )
+      .innerJoin(friendRatings, eq(follows.followeeId, friendRatings.userId))
+      .innerJoin(friendProfile, eq(friendRatings.userId, friendProfile.userId))
       .where(
         and(
           eq(follows.followerId, userId),

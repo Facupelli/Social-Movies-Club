@@ -17,12 +17,15 @@ export default async function UsernamePage() {
   }
 
   return (
-    <section className="p-4 min-h-svh">
-      <h1 className="font-bold text-pretty text-lg">Crear nombre de usuario</h1>
-      <p className="text-pretty text-muted-foreground">
-        Al crear un nombre de usuario, los demás usuarios podrán buscarte en el
-        buscador principal escribiendo tu @ para seguirte.
-      </p>
+    <section className="flex min-h-0 flex-1 flex-col px-4 py-6 md:px-8">
+      <div>
+        <h1 className="font-bold text-xl tracking-tight">
+          Elegí tu nombre de usuario
+        </h1>
+        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+          Así podrán encontrarte y seguirte otras personas en QueVes.
+        </p>
+      </div>
 
       <UsernameOnboardingForm />
     </section>

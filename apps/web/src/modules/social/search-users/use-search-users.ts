@@ -1,12 +1,12 @@
 'use client';
 
 import { queryOptions, useQuery } from '@tanstack/react-query';
+import type { ProfileSearchResult } from '@/modules/profiles/search-profiles/profile-search.types';
 import {
   MAX_PROFILE_SEARCH_QUERY_LENGTH,
   MIN_PROFILE_SEARCH_QUERY_LENGTH,
   normalizeProfileSearchQuery,
 } from '@/modules/profiles/search-profiles/profile-search-query';
-import type { ProfileSearchResult } from '@/modules/profiles/search-profiles/profile-search.types';
 import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 
 export const profileSearchQueryKeys = {

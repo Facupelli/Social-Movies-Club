@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint src",
+    "check": "biome check --write src",
     "check-types": "tsc --noEmit",
     "db:generate": "npx drizzle-kit generate --config=src/platform/database/postgres/drizzle.config.ts",
     "db:check": "drizzle-kit check --config=src/platform/database/postgres/drizzle.config.ts",

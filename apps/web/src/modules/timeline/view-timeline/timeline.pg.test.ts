@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { closeDatabase, db } from '@/platform/database/postgres/db';
+
 vi.mock('server-only', () => ({}));
 
 import { loadUserFeedPage } from './timeline-query-loader.server';

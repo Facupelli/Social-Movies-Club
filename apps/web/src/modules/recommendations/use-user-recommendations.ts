@@ -4,11 +4,7 @@ import type { UserRecommendationsPage } from './recommendations.types';
 
 export const recommendationsQueryKeys = {
   infinite: (viewerUserId: string | undefined) =>
-    personalizedQueryKeys.resource(
-      viewerUserId,
-      'recommendations',
-      'infinite'
-    ),
+    personalizedQueryKeys.resource(viewerUserId, 'recommendations', 'infinite'),
 } as const;
 
 type LoadUserRecommendationsPage = (params: {

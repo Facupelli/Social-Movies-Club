@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
-import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 import type { WatchlistStatusMap } from '@/modules/watchlist/watchlist.types';
+import { personalizedQueryKeys } from '@/platform/react-query/personalized-query-keys';
 
 export const watchlistStatusQueryKeys = {
   map: (viewerUserId: string | undefined) =>

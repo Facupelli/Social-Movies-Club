@@ -7,5 +7,9 @@ export const personalizedQueryKeys = {
   resource: <const TSegments extends readonly unknown[]>(
     viewerUserId: string | undefined,
     ...resourceSegments: TSegments
-  ) => [...personalizedQueryKeys.viewer(viewerUserId), ...resourceSegments] as const,
+  ) =>
+    [
+      ...personalizedQueryKeys.viewer(viewerUserId),
+      ...resourceSegments,
+    ] as const,
 } as const;

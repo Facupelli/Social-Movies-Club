@@ -4,7 +4,11 @@ import { personalizedQueryKeys } from '@/platform/react-query/personalized-query
 
 export const notificationQueryKeys = {
   unreadCount: (viewerUserId: string | undefined) =>
-    personalizedQueryKeys.resource(viewerUserId, 'notifications', 'unread-count'),
+    personalizedQueryKeys.resource(
+      viewerUserId,
+      'notifications',
+      'unread-count'
+    ),
 } as const;
 
 export async function fetchUnreadNotificationCount(

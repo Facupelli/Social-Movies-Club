@@ -17,16 +17,20 @@ export function OnboardingProgress({ labels }: OnboardingProgressProps) {
   const stepIndex = currentStep >= 0 ? currentStep : 0;
 
   return (
-    <div className="border-border border-b px-4 py-3 md:px-8 md:py-4">
-      <p className="text-muted-foreground text-xs">
-        {stepIndex + 1} de {STEP_ORDER.length}
-      </p>
-      <p className="font-semibold text-sm">{labels[STEP_ORDER[stepIndex]]}</p>
-      <div className="mt-2 flex gap-1.5">
+    <div className="shrink-0 border-border border-b px-4 py-4 md:px-8">
+      <div className="flex items-baseline gap-2">
+        <p className="text-sm text-muted-foreground">
+          {stepIndex + 1} de {STEP_ORDER.length}
+        </p>
+        <p className="font-semibold text-base">
+          {labels[STEP_ORDER[stepIndex]]}
+        </p>
+      </div>
+      <div className="mt-3 flex gap-2">
         {STEP_ORDER.map((slug, i) => (
           <div
             className={cn(
-              'h-1 flex-1 rounded-full',
+              'h-1.5 flex-1 rounded-full',
               i <= stepIndex ? 'bg-primary' : 'bg-muted'
             )}
             key={slug}

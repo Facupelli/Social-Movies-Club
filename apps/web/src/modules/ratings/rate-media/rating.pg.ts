@@ -36,8 +36,7 @@ export async function persistRatingMutation(
 ): Promise<PersistRatingMutationResult> {
   return await withDatabase((db) =>
     db.transaction(async (tx) => {
-      const namespace =
-        mediaData.kind === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
+      const namespace = mediaData.kind === 'movie' ? 'tmdb:movie' : 'tmdb:tv';
       const externalId = String(mediaData.tmdbId);
       await tx.execute(
         sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${namespace}:${externalId}`}, 0))`

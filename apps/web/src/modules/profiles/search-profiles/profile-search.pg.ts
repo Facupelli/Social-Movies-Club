@@ -4,7 +4,8 @@ import { userProfiles } from '@/platform/database/postgres/schema';
 import type { ProfileSearchResult } from './profile-search.types';
 
 export async function searchProfiles(
-  query: string
+  query: string,
+  excludeUserId?: string
 ): Promise<ProfileSearchResult[]> {
   return await withDatabase(async (db) => {
     const usernameQuery = `%${query}%`;
@@ -17,6 +18,7 @@ export async function searchProfiles(
           ${userProfiles.username} AS username
         FROM ${userProfiles}
         WHERE ${userProfiles.username} ILIKE ${usernameQuery}
+        ${excludeUserId ? sql`AND ${userProfiles.userId} != ${excludeUserId}` : sql``}
       `);
 
     return rows;

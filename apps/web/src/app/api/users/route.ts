@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server';
+import { searchProfiles } from '@/modules/profiles/search-profiles/profile-search';
 import {
   MAX_PROFILE_SEARCH_QUERY_LENGTH,
   MIN_PROFILE_SEARCH_QUERY_LENGTH,
   normalizeProfileSearchQuery,
 } from '@/modules/profiles/search-profiles/profile-search-query';
-import { searchProfiles } from '@/modules/profiles/search-profiles/profile-search';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import {
   authenticatedJson,
@@ -25,7 +25,10 @@ export async function GET(request: NextRequest) {
     return authenticatedJson([]);
   }
   if (query.length > MAX_PROFILE_SEARCH_QUERY_LENGTH) {
-    return authenticatedJson({ error: 'Search query is too long' }, { status: 400 });
+    return authenticatedJson(
+      { error: 'Search query is too long' },
+      { status: 400 }
+    );
   }
 
   try {

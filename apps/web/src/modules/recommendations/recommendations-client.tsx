@@ -1,7 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { UserPlus } from 'lucide-react';
+import { MoreHorizontal, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { KIND_DICT } from '@/modules/media-catalog/media.constants';
@@ -13,11 +13,14 @@ import { getUserRecommendationsQueryOptions } from '@/modules/recommendations/us
 import SignInButton from '@/shared/components/sign-in-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 import { formatRuntime } from '@/shared/utilities/format-runtime';
-import { RecommendationsSkeleton } from './recommendations-skeleton';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
 import { AddToWatchlistButton } from '../watchlist/add-to-watchlist/add-to-watchlist-button';
+import { RecommendationsSkeleton } from './recommendations-skeleton';
 
 const VISIBLE_RATERS_COUNT = 3;
 
@@ -84,8 +87,8 @@ function Recommendations({ viewerUserId }: { viewerUserId: string }) {
       <div className="mx-auto max-w-md px-4 py-12 text-center">
         <p className="font-semibold text-lg">Todavía no hay recomendaciones</p>
         <p className="mt-2 text-muted-foreground text-sm">
-          Cuando la gente que seguís califique películas o series, sus mejores
-          hallazgos van a aparecer acá.
+          Cuando la gente que seguís tenga películas o series para recomendarte,
+          van a aparecer acá.
         </p>
         <div className="mt-6">
           <Button asChild>
@@ -156,23 +159,23 @@ function RecommendationCard({ item }: { item: RecommendationItem }) {
           </Link>
 
           <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  aria-label="Más opciones"
-                  className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
-                  size="icon"
-                  variant="ghost"
-                >
-                  <MoreHorizontal className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <AddToWatchlistButton
-                  kind={item.kind}
-                  presentation="menu-item"
-                  tmdbId={item.movieTmdbId}
-                />
-              </DropdownMenuContent>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label="Más opciones"
+                className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
+                size="icon"
+                variant="ghost"
+              >
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <AddToWatchlistButton
+                kind={item.kind}
+                presentation="menu-item"
+                tmdbId={item.movieTmdbId}
+              />
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
         <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-base">

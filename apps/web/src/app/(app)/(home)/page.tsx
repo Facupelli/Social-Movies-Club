@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
 import { HomePageClient } from '@/modules/timeline/view-timeline/home-page-client';
+import { loadUserFeedPage } from '@/modules/timeline/view-timeline/timeline-query-loader.server';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { makeQueryClient } from '@/platform/react-query/query-client';

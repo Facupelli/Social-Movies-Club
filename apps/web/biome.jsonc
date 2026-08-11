@@ -2,7 +2,7 @@
   "root": false,
   "extends": ["./../../biome.json", "ultracite"],
   "files": {
-    "includes": ["**", "!!.next"],
+    "includes": ["**", "!!.next", "!src/platform/database/postgres/migrations/meta"],
   },
   "linter": {
     "rules": {

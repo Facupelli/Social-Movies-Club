@@ -1,9 +1,9 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
 import { Bookmark, Home, Search, UserRound } from 'lucide-react';
 import Image from 'next/image';
-import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authClient } from '@/platform/auth/auth-client';

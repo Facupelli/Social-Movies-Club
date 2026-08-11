@@ -1,8 +1,8 @@
+import { profileIdSchema } from '@/modules/profiles/profile-id';
 import {
   parseProfileRatingsFilters,
   toProfileRatingsRepositoryFilters,
 } from '@/modules/ratings/list-profile-ratings/filters/filter-user-movies-parser';
-import { profileIdSchema } from '@/modules/profiles/profile-id';
 import { loadProfileRatingsPage } from '@/modules/ratings/list-profile-ratings/profile-ratings-query-loader.server';
 import { PROFILE_RATINGS_PAGE_SIZE } from '@/modules/ratings/list-profile-ratings/use-user-movies';
 import { getServerSession } from '@/platform/auth/get-server-session';

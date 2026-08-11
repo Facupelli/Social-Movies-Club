@@ -1,12 +1,12 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronRight, Film, Search } from 'lucide-react';
+import { Check, Film, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDeferredValue, useState } from 'react';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { MediaKindDict } from '@/modules/media-catalog/media.type';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import useDebounce from '@/modules/media-catalog/search-media/use-debounce';
 import { useSearchMedia } from '@/modules/media-catalog/search-media/use-search-media';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
@@ -49,7 +49,11 @@ export default function OnboardingRatingsPage() {
 
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  const handleRate = async (tmdbId: number, kind: 'movie' | 'tv_series', score: number) => {
+  const handleRate = async (
+    tmdbId: number,
+    kind: 'movie' | 'tv_series',
+    score: number
+  ) => {
     const identityKey = getMediaIdentityKey(tmdbId, kind);
     setSavingIds((prev) => new Set(prev).add(identityKey));
 
@@ -74,20 +78,22 @@ export default function OnboardingRatingsPage() {
   };
 
   return (
-    <section className="flex min-h-svh flex-col px-4 py-6 md:px-8 md:py-8">
-      <div>
-        <h1 className="font-bold text-xl">¿Qué viste últimamente?</h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          Calificá algunas películas o series para empezar a construir tu
-          perfil.
+    <section className="flex min-h-0 flex-1 flex-col px-4 py-6 md:px-8">
+      <div className="shrink-0">
+        <h1 className="font-bold text-xl tracking-tight">
+          ¿Qué viste últimamente?
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Calificá al menos 1 título para continuar. Si calificás hasta 5, vamos
+          a conocerte mejor.
         </p>
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-5 flex shrink-0 items-center gap-3">
         <div className="flex-1">
-          <div className="h-2 w-full rounded-full bg-muted">
+          <div className="h-1.5 w-full rounded-full bg-muted">
             <div
-              className="h-2 rounded-full bg-primary transition-all duration-300"
+              className="h-1.5 rounded-full bg-primary transition-all duration-300"
               style={{
                 width: `${(displayCount / TARGET_COUNT) * 100}%`,
               }}
@@ -108,43 +114,40 @@ export default function OnboardingRatingsPage() {
         </span>
       </div>
 
-      <div className="relative mt-6">
+      <div className="relative mt-6 shrink-0">
         <Search
           aria-hidden="true"
-          className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground"
+          className="-translate-y-1/2 absolute top-1/2 left-4 size-5 text-muted-foreground"
         />
         <Input
           aria-label="Buscar película o serie"
-          className="min-h-12 pl-10"
+          className="h-12 pl-11 text-base"
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Película o serie"
+          placeholder="Buscá película o serie"
           type="search"
           value={query}
         />
       </div>
 
-      <div className="mt-4 flex-1">
+      <div className="mt-6 min-h-0 flex-1 overflow-y-auto pb-3">
         {!searchTerm && (
-          <p className="border-border border-t pt-8 text-center text-muted-foreground text-sm">
-            Escribí al menos 3 caracteres para buscar.
+          <p className="grid h-full place-items-center text-center text-sm text-muted-foreground">
+            Buscá una película o serie que hayas visto recientemente.
           </p>
         )}
 
         {searchTerm && isLoading && <RatingsSearchSkeleton />}
 
         {searchTerm && !isLoading && movies.length === 0 && (
-          <p className="border-border border-t pt-8 text-center text-muted-foreground text-sm">
+          <p className="grid h-full place-items-center text-center text-sm text-muted-foreground">
             No encontramos resultados para &ldquo;{searchTerm}&rdquo;.
           </p>
         )}
 
         {searchTerm && !isLoading && movies.length > 0 && (
-          <ul className="space-y-3">
+          <ul className="space-y-3 pr-1">
             {movies.map((movie) => {
-              const identityKey = getMediaIdentityKey(
-                movie.tmdbId,
-                movie.kind
-              );
+              const identityKey = getMediaIdentityKey(movie.tmdbId, movie.kind);
               const existingRating = ratingStatus?.[identityKey];
               const isSaving = savingIds.has(identityKey);
 
@@ -180,7 +183,7 @@ export default function OnboardingRatingsPage() {
                       </p>
 
                       <div className="mt-auto">
-                        {existingRating ? (
+                        {existingRating && (
                           <div className="flex items-center gap-2 pt-1">
                             <span className="font-semibold text-primary text-sm tabular-nums">
                               {existingRating.score}/10
@@ -189,11 +192,13 @@ export default function OnboardingRatingsPage() {
                               Calificada
                             </span>
                           </div>
-                        ) : isSaving ? (
+                        )}
+                        {!existingRating && isSaving && (
                           <div className="pt-1">
                             <Skeleton className="h-7 w-full rounded-lg" />
                           </div>
-                        ) : (
+                        )}
+                        {!(existingRating || isSaving) && (
                           <RatingInput
                             onChange={(score) =>
                               handleRate(movie.tmdbId, movie.kind, score)
@@ -212,15 +217,13 @@ export default function OnboardingRatingsPage() {
         )}
       </div>
 
-      <div className="border-border border-t pt-4">
+      <div className="shrink-0 pt-4">
         <Button
-          className="w-full"
+          className="h-12 w-full text-base"
           disabled={!hasMinRatings}
           onClick={() => router.push('/onboarding/people')}
-          size="lg"
         >
           Continuar
-          <ChevronRight className="ml-1 size-4" />
         </Button>
         {!hasMinRatings && (
           <p className="mt-2 text-center text-muted-foreground text-xs">
@@ -229,7 +232,7 @@ export default function OnboardingRatingsPage() {
         )}
         {hasMinRatings && displayCount < TARGET_COUNT && (
           <p className="mt-2 text-center text-muted-foreground text-xs">
-            {TARGET_COUNT - ratedCount} más para un mejor perfil
+            {TARGET_COUNT - ratedCount} más para mejorar tus recomendaciones
           </p>
         )}
       </div>

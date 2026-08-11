@@ -2,10 +2,7 @@ import { Skeleton } from '@/shared/ui/skeleton';
 
 export function ProfileSkeleton() {
   return (
-    <output
-      aria-label="Cargando perfil"
-      className="grid gap-2 py-4"
-    >
+    <output aria-label="Cargando perfil" className="grid gap-2 py-4">
       <div className="flex items-center justify-between">
         <Skeleton className="size-[100px] shrink-0 rounded-full" />
         <Skeleton className="h-9 w-20" />

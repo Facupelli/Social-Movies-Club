@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { MediaListCard } from '@/modules/media-catalog/components/media-list-card';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { EnrichedWatchlistItem } from '@/modules/watchlist/watchlist.types';

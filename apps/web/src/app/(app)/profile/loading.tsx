@@ -1,4 +1,7 @@
-import { ProfileNavSkeleton, ProfileSkeleton } from '@/modules/profiles/view-profile/profile-skeleton';
+import {
+  ProfileNavSkeleton,
+  ProfileSkeleton,
+} from '@/modules/profiles/view-profile/profile-skeleton';
 import { ProfileRatingsSkeleton } from '@/modules/ratings/list-profile-ratings/profile-ratings-skeleton';
 import { Skeleton } from '@/shared/ui/skeleton';
 

@@ -6,8 +6,9 @@ import { markNotificationsRead } from './mark-notifications-read.pg';
 export async function markAllNotificationsReadForViewer(
   viewerUserId: string,
   markRead: (recipientId: string) => Promise<number> = markNotificationsRead,
-  countUnread: (recipientId: string) => Promise<number> =
-    countUnreadNotifications
+  countUnread: (
+    recipientId: string
+  ) => Promise<number> = countUnreadNotifications
 ): Promise<number> {
   await markRead(viewerUserId);
 

@@ -193,7 +193,6 @@ function RateDialogBody({
   const mutateRateMedia = useRateMediaMutation(userId);
 
   const [rating, setRating] = useState(userRating?.score ?? 0);
-  const [hoverRating, setHoverRating] = useState(0);
   const [watchedDate, setWatchedDate] = useState(
     userRating?.watchedDate ?? getLocalTodayDate()
   );
@@ -303,7 +302,6 @@ function RateDialogBody({
               hasInteracted.current = true;
               setRating(v);
             }}
-            onHoverChange={setHoverRating}
             size={isMobile ? 'sm' : 'default'}
             value={rating}
           />
@@ -431,7 +429,6 @@ function RatingSuccessView({
   onClose,
   userId,
 }: RatingSuccessViewProps) {
-
   return (
     <div className="grid gap-y-6 py-7 sm:py-9">
       <div className="grid place-items-center gap-y-3">

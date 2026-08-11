@@ -54,7 +54,9 @@ export const userProfiles = pgTable(
     avatarUrl: text('avatar_url'),
     bio: text('bio'),
     countryCode: text('country_code'),
-    onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
+    onboardingCompletedAt: timestamp('onboarding_completed_at', {
+      withTimezone: true,
+    }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -234,9 +236,7 @@ export const activities = pgTable(
       .notNull(),
   },
   (table) => [
-    unique('activities_deduplication_key_unique').on(
-      table.deduplicationKey
-    ),
+    unique('activities_deduplication_key_unique').on(table.deduplicationKey),
     index('activities_occurred_at_idx').on(
       table.occurredAt.desc(),
       table.id.desc()
@@ -256,9 +256,7 @@ export const ratingActivities = pgTable(
       .notNull()
       .references(() => ratings.id, { onDelete: 'restrict' }),
   },
-  (table) => [
-    unique('rating_activities_rating_id_unique').on(table.ratingId),
-  ]
+  (table) => [unique('rating_activities_rating_id_unique').on(table.ratingId)]
 );
 
 export const feedDeliveries = pgTable(
@@ -383,14 +381,8 @@ export const notifications = pgTable(
     index('notifications_unread_count_idx')
       .on(table.recipientId, table.readAt)
       .where(sql`read_at IS NULL`),
-    index('notifications_actor_created_idx').on(
-      table.actorId,
-      table.createdAt
-    ),
-    index('notifications_type_created_idx').on(
-      table.typeCode,
-      table.createdAt
-    ),
+    index('notifications_actor_created_idx').on(table.actorId, table.createdAt),
+    index('notifications_type_created_idx').on(table.typeCode, table.createdAt),
   ]
 );
 

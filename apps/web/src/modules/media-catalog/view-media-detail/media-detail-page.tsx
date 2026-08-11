@@ -143,7 +143,6 @@ export function MediaDetailPage({
             {media.overview || 'No hay una sinopsis disponible.'}
           </p>
         </section>
-
       </div>
     </main>
   );

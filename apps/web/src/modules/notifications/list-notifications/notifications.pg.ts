@@ -1,5 +1,4 @@
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
-import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   NOTIFICATION_TEMPLATES,
   type NotificationTypeCode,
@@ -9,6 +8,7 @@ import type {
   NotificationListFilters,
   PaginatedNotifications,
 } from '@/modules/notifications/notification.types';
+import { withDatabase } from '@/platform/database/postgres/db-utils';
 import { notifications } from '@/platform/database/postgres/schema';
 
 export async function getNotifications(
@@ -52,9 +52,7 @@ export async function getNotifications(
     const data = results.slice(0, limit).map((notification) => {
       const renderingData = notification.data as NotificationData;
       const template =
-        NOTIFICATION_TEMPLATES[
-          notification.typeCode as NotificationTypeCode
-        ];
+        NOTIFICATION_TEMPLATES[notification.typeCode as NotificationTypeCode];
 
       return {
         id: notification.id,

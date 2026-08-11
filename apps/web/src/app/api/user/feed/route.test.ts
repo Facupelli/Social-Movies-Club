@@ -5,9 +5,12 @@ const { loadUserFeedPage, getServerSession } = vi.hoisted(() => ({
   getServerSession: vi.fn(),
 }));
 
-vi.mock('@/modules/timeline/view-timeline/timeline-query-loader.server', () => ({
-  loadUserFeedPage,
-}));
+vi.mock(
+  '@/modules/timeline/view-timeline/timeline-query-loader.server',
+  () => ({
+    loadUserFeedPage,
+  })
+);
 vi.mock('@/platform/auth/get-server-session', () => ({ getServerSession }));
 
 import { encodeFeedCursor } from '@/modules/timeline/view-timeline/feed-cursor';
@@ -40,20 +43,19 @@ describe('GET /api/user/feed', () => {
     });
   });
 
-  it.each([
-    'cursor=not-a-cursor',
-    'cursor=',
-    'cursor=abc&cursor=def',
-  ])('returns 400 for malformed query %s', async (query) => {
-    const response = await GET(
-      new Request(`http://localhost/api/user/feed?${query}`)
-    );
+  it.each(['cursor=not-a-cursor', 'cursor=', 'cursor=abc&cursor=def'])(
+    'returns 400 for malformed query %s',
+    async (query) => {
+      const response = await GET(
+        new Request(`http://localhost/api/user/feed?${query}`)
+      );
 
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({
-      success: false,
-      error: 'Invalid feed cursor',
-    });
-    expect(loadUserFeedPage).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        success: false,
+        error: 'Invalid feed cursor',
+      });
+      expect(loadUserFeedPage).not.toHaveBeenCalled();
+    }
+  );
 });
