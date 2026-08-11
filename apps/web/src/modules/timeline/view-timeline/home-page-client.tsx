@@ -1,7 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Clapperboard, MoreHorizontal, UserPlus } from 'lucide-react';
+import { MoreHorizontal, UserPlus } from 'lucide-react';
 import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
 
@@ -85,9 +85,8 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
   if (!flatItems || flatItems.length === 0) {
     return (
       <div>
-        <div className="absolute inset-0 z-0 bg-radial from-primary to-background opacity-10" />
+        <div className="absolute top-11 inset-0 z-0 bg-radial from-primary to-background opacity-10" />
         <div className="relative z-20 flex flex-col items-center gap-y-2 px-4 py-10">
-          <Clapperboard className="size-12 text-primary" />
           <p className="text-center font-bold text-xl">
             Tu feed está un poco vacío
           </p>
@@ -96,12 +95,12 @@ function Feed({ viewerUserId }: { viewerUserId?: string }) {
             películas para recibir recomendaciones.
           </p>
           <div className="pt-4">
-            <Button asChild className="font-semibold">
-              <Link href="/users">
-                <UserPlus className="size-5" />
-                Encuentra a tus amigos
-              </Link>
-            </Button>
+           <Button asChild>
+            <Link href="/users">
+              <UserPlus className="size-4" />
+              Encontrá gente para seguir
+            </Link>
+          </Button>
           </div>
         </div>
       </div>

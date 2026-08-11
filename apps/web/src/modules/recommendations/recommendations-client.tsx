@@ -1,6 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { KIND_DICT } from '@/modules/media-catalog/media.constants';
@@ -86,6 +87,14 @@ function Recommendations({ viewerUserId }: { viewerUserId: string }) {
           Cuando la gente que seguís califique películas o series, sus mejores
           hallazgos van a aparecer acá.
         </p>
+        <div className="mt-6">
+          <Button asChild>
+            <Link href="/users">
+              <UserPlus className="size-4" />
+              Encontrá gente para seguir
+            </Link>
+          </Button>
+        </div>
       </div>
     );
   }

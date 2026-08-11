@@ -7,6 +7,6 @@ import { persistOnboardingCompleted } from './complete-onboarding.pg';
 export async function completeOnboarding() {
   await withAuth(async (session) => {
     await persistOnboardingCompleted(session.user.id);
-    redirect('/');
+    redirect('/recommendations');
   });
 }
