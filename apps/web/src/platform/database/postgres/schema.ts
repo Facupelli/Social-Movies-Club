@@ -54,6 +54,7 @@ export const userProfiles = pgTable(
     avatarUrl: text('avatar_url'),
     bio: text('bio'),
     countryCode: text('country_code'),
+    onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },

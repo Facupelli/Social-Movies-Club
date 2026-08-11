@@ -9,6 +9,7 @@ export type PublicProfile = {
   name: string;
   image: string | null;
   username: string | null;
+  onboardingCompletedAt: Date | null;
 };
 
 export async function getPublicProfileById(
@@ -20,7 +21,8 @@ export async function getPublicProfileById(
         ${userProfiles.userId} AS id,
         ${userProfiles.displayName} AS name,
         ${userProfiles.avatarUrl} AS image,
-        ${userProfiles.username} AS username
+        ${userProfiles.username} AS username,
+        ${userProfiles.onboardingCompletedAt} AS "onboardingCompletedAt"
       FROM ${userProfiles}
       WHERE ${userProfiles.userId} = ${userId}
     `;

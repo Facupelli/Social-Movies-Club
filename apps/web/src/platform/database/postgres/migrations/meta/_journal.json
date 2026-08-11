@@ -134,6 +134,20 @@
       "when": 1785354535929,
       "tag": "0019_slimy_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1786484793491,
+      "tag": "0020_colossal_dark_beast",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1786484900000,
+      "tag": "0021_backfill_onboarding_completed",
+      "breakpoints": true
     }
   ]
 }
