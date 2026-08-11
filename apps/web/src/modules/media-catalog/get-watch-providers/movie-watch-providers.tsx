@@ -58,7 +58,7 @@ export function MovieWatchProviders({
               className="h-auto"
               height={10}
               src="https://widget.justwatch.com/assets/JW_logo_color_10px.svg"
-              width={60}
+              width={68}
             />
           </a>
         </div>

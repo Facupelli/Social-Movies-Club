@@ -181,7 +181,7 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 size="icon"
                 variant="ghost"
               >
-                <MoreHorizontal className="size-5" />
+                <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

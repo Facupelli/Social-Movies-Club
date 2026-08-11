@@ -133,6 +133,8 @@ export function MediaDetailPage({
           </>
         ) : null}
 
+        <MovieWatchProviders kind={media.kind} tmdbId={media.id} />
+
         <section aria-labelledby="synopsis-heading" className="space-y-3">
           <h2 className="text-xl font-semibold" id="synopsis-heading">
             Sinopsis
@@ -142,7 +144,6 @@ export function MediaDetailPage({
           </p>
         </section>
 
-        <MovieWatchProviders kind={media.kind} tmdbId={media.id} />
       </div>
     </main>
   );
