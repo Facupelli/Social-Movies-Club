@@ -6,6 +6,7 @@ import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
 
 import { KIND_DICT } from '@/modules/media-catalog/media.constants';
+import { NotificationsLink } from '@/modules/notifications/notifications-link';
 import type { FeedItem } from '@/modules/timeline/view-timeline/feed.types';
 import { FeedSkeleton } from '@/modules/timeline/view-timeline/home-page-skeleton';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
@@ -23,7 +24,10 @@ import { formatFeedItemTime } from '@/shared/utilities/utils';
 
 export function HomePageClient({ viewerUserId }: { viewerUserId?: string }) {
   return (
-    <div className="relative min-h-svh flex-1 py-6 md:min-h-auto">
+    <div className="relative min-h-svh flex-1 pb-6 md:min-h-auto">
+      <header className="flex justify-end px-4 md:px-10">
+        <NotificationsLink viewerUserId={viewerUserId} />
+      </header>
       <SessionMessage isAuthenticated={Boolean(viewerUserId)} />
       <Feed viewerUserId={viewerUserId} />
     </div>

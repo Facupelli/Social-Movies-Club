@@ -1,12 +1,11 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, Bookmark, Home, Search, Users2Icon } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Bookmark, Home, Search, Users2Icon } from 'lucide-react';
 import Image from 'next/image';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { getUserNotificationsCountQueryOptions } from '@/modules/notifications/count-unread/use-user-notifications-count';
 import { authClient } from '@/platform/auth/auth-client';
 import { clearPersonalizedQueries } from '@/platform/react-query/personalized-cache';
 import { Button } from '@/shared/ui/button';
@@ -24,12 +23,6 @@ export function Nav() {
     ? pathname.startsWith(`/profile/${session.user.id}/watchlist`)
     : false;
   const isUsersActive = pathname.startsWith('/users');
-  const isNotificationsActive = pathname.startsWith('/notifications');
-
-  const { data: notificationsCount } = useQuery(
-    getUserNotificationsCountQueryOptions(session?.user.id)
-  );
-
   const handleLogOut = async () => {
     await authClient.signOut();
     await clearPersonalizedQueries(queryClient);
@@ -70,22 +63,6 @@ export function Nav() {
           <Link className={getNavLinkClassName(isUsersActive)} href="/users">
             <Users2Icon className={getNavIconClassName(isUsersActive)} />
             <span className="hidden md:block">Usuarios</span>
-          </Link>
-        </li>
-        <li>
-          <Link
-            className={getNavLinkClassName(isNotificationsActive)}
-            href="/notifications"
-          >
-            <div className="relative">
-              {notificationsCount !== undefined && notificationsCount > 0 ? (
-                <div className="absolute -right-2 -top-2 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs leading-4">
-                  {notificationsCount > 99 ? '99+' : notificationsCount}
-                </div>
-              ) : null}
-              <Bell className={getNavIconClassName(isNotificationsActive)} />
-            </div>
-            <span className="hidden md:block">Notificaciones</span>
           </Link>
         </li>
       </ul>

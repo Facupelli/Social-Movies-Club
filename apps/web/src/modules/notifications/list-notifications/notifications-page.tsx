@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { User } from 'lucide-react';
+import { User, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -19,7 +19,16 @@ export default async function NotificationsPage() {
 
   return (
     <div className="min-h-svh py-6">
-      <h1 className="px-2 font-bold md:px-10 md:text-xl">Notificaciones</h1>
+      <header className="flex items-center justify-between px-4 md:px-10">
+        <h1 className="font-bold md:text-xl">Notificaciones</h1>
+        <Link
+          aria-label="Volver a Inicio"
+          className="flex size-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          href="/"
+        >
+          <X className="size-6" />
+        </Link>
+      </header>
 
       <div className="pt-4">
         <Suspense fallback={<NotificationListSkeleton />}>
