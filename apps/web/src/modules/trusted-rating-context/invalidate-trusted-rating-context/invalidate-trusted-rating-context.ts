@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import { recommendationsQueryKeys } from '@/modules/recommendations/use-user-recommendations';
 import { timelineQueryKeys } from '@/modules/timeline/view-timeline/use-user-feed';
 import { trustedRatingQueryKeys } from '../get-search-trusted-rating-summaries/use-search-trusted-rating-summaries';
 
@@ -13,6 +14,9 @@ export async function invalidateTrustedRatingContext(
     }),
     queryClient.invalidateQueries({
       queryKey: timelineQueryKeys.chronological(viewerUserId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: recommendationsQueryKeys.infinite(viewerUserId),
     }),
   ]);
 }

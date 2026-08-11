@@ -20,7 +20,7 @@ export function NotificationsLink({ viewerUserId }: { viewerUserId?: string }) {
       className="relative flex size-10 items-center justify-center rounded-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       href="/notifications"
     >
-      <Bell className="size-6" />
+      <Bell className="size-5" />
       {notificationsCount && notificationsCount > 0 ? (
         <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-primary" />
       ) : null}

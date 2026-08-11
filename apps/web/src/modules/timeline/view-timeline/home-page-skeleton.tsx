@@ -7,7 +7,7 @@ export function HomePageSkeleton() {
     <output
       aria-busy="true"
       aria-label="Cargando inicio"
-      className="relative block min-h-svh flex-1 py-6 md:min-h-auto"
+      className="relative block flex-1"
     >
       <FeedSkeleton />
     </output>

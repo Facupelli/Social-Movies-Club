@@ -7,6 +7,7 @@ import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import type { RatingStatusMap } from '@/modules/ratings/get-rating-status/rating-status.types';
 import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { profileRatingsQueryKeys } from '@/modules/ratings/list-profile-ratings/use-user-movies';
+import { recommendationsQueryKeys } from '@/modules/recommendations/use-user-recommendations';
 import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { watchlistStatusQueryKeys } from '@/modules/watchlist/get-watchlist-status/use-user-watchlist';
@@ -101,9 +102,14 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
         );
       }
 
-      await queryClient.invalidateQueries({
-        queryKey: profileRatingsQueryKeys.viewerScope(viewerUserId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: profileRatingsQueryKeys.viewerScope(viewerUserId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: recommendationsQueryKeys.infinite(viewerUserId),
+        }),
+      ]);
       return result;
     } catch (error) {
       rollback();
