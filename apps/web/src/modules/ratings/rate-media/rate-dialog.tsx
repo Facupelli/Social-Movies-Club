@@ -17,6 +17,7 @@ import {
 } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
+import { RatingInput } from '@/modules/ratings/rate-media/rating-input';
 import { useRateMediaMutation } from '@/modules/ratings/rate-media/use-rate-media-mutation';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { authClient } from '@/platform/auth/auth-client';
@@ -297,56 +298,15 @@ function RateDialogBody({
         <fieldset>
           <legend className="sr-only">Puntuación</legend>
 
-          <div
-            className={cn('grid grid-cols-10', isMobile ? 'gap-1.5' : 'gap-2')}
-            onMouseLeave={() => setHoverRating(0)}
-            role="radiogroup"
-          >
-            {Array.from({ length: 10 }, (_, index) => index + 1).map(
-              (ratingValue) => {
-                const activeRating = hoverRating || rating;
-                const isSelected = rating === ratingValue;
-                const isFilled = ratingValue <= activeRating;
-
-                return (
-                  <label
-                    className="group relative grid min-w-0 cursor-pointer place-items-center"
-                    key={ratingValue}
-                    onMouseEnter={() => setHoverRating(ratingValue)}
-                  >
-                    <input
-                      aria-label={`${ratingValue} de 10`}
-                      checked={isSelected}
-                      className="peer sr-only"
-                      name="rating"
-                      onChange={() => {
-                        hasInteracted.current = true;
-                        setRating(ratingValue);
-                      }}
-                      type="radio"
-                      value={ratingValue}
-                    />
-
-                    <span
-                      className={cn(
-                        'grid aspect-square w-full place-items-center border font-medium transition-[background-color,border-color,box-shadow,transform] duration-150 group-hover:scale-105 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#171c21]',
-                        isMobile
-                          ? 'max-w-10 rounded-xl text-sm'
-                          : 'max-w-10 rounded-full text-sm',
-                        isFilled
-                          ? 'border-violet-500/70 bg-violet-500/20 text-white'
-                          : 'border-white/20 bg-white/[0.015] text-white/80',
-                        isSelected &&
-                          'border-violet-500 bg-violet-500/30 shadow-[0_0_0_2px_rgba(139,92,246,0.3),0_0_18px_rgba(124,58,237,0.22)]'
-                      )}
-                    >
-                      {ratingValue}
-                    </span>
-                  </label>
-                );
-              }
-            )}
-          </div>
+          <RatingInput
+            onChange={(v) => {
+              hasInteracted.current = true;
+              setRating(v);
+            }}
+            onHoverChange={setHoverRating}
+            size={isMobile ? 'sm' : 'default'}
+            value={rating}
+          />
         </fieldset>
 
         <div

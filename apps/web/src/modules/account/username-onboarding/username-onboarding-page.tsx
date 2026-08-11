@@ -13,7 +13,7 @@ export default async function UsernamePage() {
   const profile = await getCurrentAccountProfile(session.user.id);
 
   if (profile?.username) {
-    redirect('/');
+    redirect('/onboarding/ratings');
   }
 
   return (

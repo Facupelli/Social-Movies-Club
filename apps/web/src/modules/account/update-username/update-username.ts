@@ -52,6 +52,6 @@ export async function createUsername(
       return result;
     }
 
-    redirect('/');
+    redirect('/onboarding/ratings');
   });
 }
