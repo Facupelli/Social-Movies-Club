@@ -1,3 +1,4 @@
+import { ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -45,54 +46,66 @@ export default async function FollowingPage(
     return <section className="py-10">{followingUsersResult.error}</section>;
   }
 
-  if (followingUsersResult.data.length === 0) {
-    return (
-      <div className="flex-1 pt-10 text-neutral-500">
-        {viewerUserId === profileUserId.data
-          ? 'No sigues a nadie'
-          : 'Esta persona no sigue a nadie'}
-      </div>
-    );
-  }
+  const isOwnProfile = viewerUserId === profileUserId.data;
 
   return (
-    <section className="flex-1 space-y-4 pt-10">
-      {followingUsersResult.data.map((user) => (
-        <div className="flex justify-between" key={user.followeeId}>
-          <Link
-            aria-label={`Ver el perfil de ${user.userName}`}
-            className="flex gap-4"
-            href={`/profile/${user.followeeId}`}
-          >
-            <div className="flex size-[50px] items-center justify-center overflow-hidden rounded-full bg-secondary-foreground">
-              {user.userImage ? (
-                <Image
-                  alt={`Foto de perfil de ${user.userName}`}
-                  className="size-full object-cover"
-                  height={50}
-                  src={user.userImage}
-                  width={50}
-                />
-              ) : (
-                <span aria-hidden="true" className="font-semibold">
-                  {user.userName.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div>
-              <div>{user.userName}</div>
-              {user.userUsername && <div>{user.userUsername}</div>}
-            </div>
-          </Link>
-          {shouldShowFollowButton(viewerUserId, user.followeeId) && (
-            <FollowUserButton
-              followedUserId={user.followeeId}
-              isFollowing={user.isFollowing}
-              userName={user.userName}
-            />
-          )}
-        </div>
-      ))}
+    <section className="flex-1 space-y-6 pt-6">
+      {isOwnProfile && (
+        <Link
+          className="flex min-h-10 items-center gap-3 rounded-lg border bg-card px-4 py-2 transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          href="/users"
+        >
+          <Search aria-hidden="true" className="size-6 text-primary" />
+          <span className="flex-1 text-base">Buscar personas</span>
+          <ChevronRight
+            aria-hidden="true"
+            className="size-6 text-muted-foreground"
+          />
+        </Link>
+      )}
+
+      {followingUsersResult.data.length === 0 ? (
+        <p className="text-muted-foreground">
+          {isOwnProfile ? 'No sigues a nadie' : 'Esta persona no sigue a nadie'}
+        </p>
+      ) : (
+        followingUsersResult.data.map((user) => (
+          <div className="flex justify-between" key={user.followeeId}>
+            <Link
+              aria-label={`Ver el perfil de ${user.userName}`}
+              className="flex gap-4"
+              href={`/profile/${user.followeeId}`}
+            >
+              <div className="flex size-[50px] items-center justify-center overflow-hidden rounded-full bg-secondary-foreground">
+                {user.userImage ? (
+                  <Image
+                    alt={`Foto de perfil de ${user.userName}`}
+                    className="size-full object-cover"
+                    height={50}
+                    src={user.userImage}
+                    width={50}
+                  />
+                ) : (
+                  <span aria-hidden="true" className="font-semibold">
+                    {user.userName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <div>{user.userName}</div>
+                {user.userUsername && <div>{user.userUsername}</div>}
+              </div>
+            </Link>
+            {shouldShowFollowButton(viewerUserId, user.followeeId) && (
+              <FollowUserButton
+                followedUserId={user.followeeId}
+                isFollowing={user.isFollowing}
+                userName={user.userName}
+              />
+            )}
+          </div>
+        ))
+      )}
     </section>
   );
 }

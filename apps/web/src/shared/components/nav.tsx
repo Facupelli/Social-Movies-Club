@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { Bookmark, Home, Search, Users2Icon } from 'lucide-react';
+import { Bookmark, Home, Search, UserRound } from 'lucide-react';
 import Image from 'next/image';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -22,7 +22,9 @@ export function Nav() {
   const isWatchlistActive = session?.user.id
     ? pathname.startsWith(`/profile/${session.user.id}/watchlist`)
     : false;
-  const isUsersActive = pathname.startsWith('/users');
+  const isProfileActive = session?.user.id
+    ? pathname.startsWith(`/profile/${session.user.id}`) && !isWatchlistActive
+    : false;
   const handleLogOut = async () => {
     await authClient.signOut();
     await clearPersonalizedQueries(queryClient);
@@ -60,9 +62,13 @@ export function Nav() {
           </Link>
         </li>
         <li>
-          <Link className={getNavLinkClassName(isUsersActive)} href="/users">
-            <Users2Icon className={getNavIconClassName(isUsersActive)} />
-            <span className="hidden md:block">Usuarios</span>
+          <Link
+            className={getNavLinkClassName(isProfileActive)}
+            href={session?.user.id ? `/profile/${session.user.id}` : '#'}
+            prefetch={true}
+          >
+            <UserRound className={getNavIconClassName(isProfileActive)} />
+            <span className="hidden md:block">Perfil</span>
           </Link>
         </li>
       </ul>
