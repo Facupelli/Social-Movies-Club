@@ -1,6 +1,6 @@
 'use client';
 
-import { Popcorn, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDeferredValue, useEffect, useState } from 'react';
@@ -66,10 +66,7 @@ export default function SearchUsersPage({
                     `}
           onTransitionEnd={handleTransitionEnd}
         >
-          <div className="bg-primary p-4 rounded-2xl">
-            <Popcorn className="size-12 text-background" />
-          </div>
-          <h1 className="text-2xl font-bold">Crea tu círculo cinéfilo</h1>
+          <h1 className="text-2xl font-bold">Encuentra a tu gente</h1>
           <p className="text-sm text-muted-foreground text-center text-pretty px-4">
             Sigue a tus amigos para ver sus mejores puntuaciones y descubrir
             nuevas películas a través de gente en la que confías.
