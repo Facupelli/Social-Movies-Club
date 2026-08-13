@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   date,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -388,3 +389,132 @@ export const notifications = pgTable(
 
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+
+/* ------------------------------------------------------------------ *
+ *  Streaming availability                                            *
+ *  - streaming_providers + regions + offers are derived from TMDB    *
+ *  - user_streaming_providers is authoritative user data             *
+ * ------------------------------------------------------------------ */
+
+export const streamingProviders = pgTable('streaming_providers', {
+  id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+  tmdbProviderId: integer('tmdb_provider_id').notNull().unique(),
+  name: text('name').notNull(),
+  logoPath: text('logo_path'),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type StreamingProvider = typeof streamingProviders.$inferSelect;
+
+export const streamingProviderRegions = pgTable(
+  'streaming_provider_regions',
+  {
+    providerId: uuid('provider_id').notNull(),
+    countryCode: text('country_code').notNull(),
+    kind: mediaKindEnum('kind').notNull(),
+    displayPriority: integer('display_priority').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.providerId, table.countryCode, table.kind] }),
+    check(
+      'streaming_provider_regions_country_code_check',
+      sql`${table.countryCode} ~ '^[A-Z]{2}$'`
+    ),
+    index('streaming_provider_regions_country_kind_idx').on(
+      table.countryCode,
+      table.kind
+    ),
+    foreignKey({
+      name: 'streaming_provider_regions_provider_id_fk',
+      columns: [table.providerId],
+      foreignColumns: [streamingProviders.id],
+    }).onDelete('cascade'),
+  ]
+);
+
+export type StreamingProviderRegion =
+  typeof streamingProviderRegions.$inferSelect;
+
+export const streamingProviderCatalogSync = pgTable(
+  'streaming_provider_catalog_sync',
+  {
+    countryCode: text('country_code').notNull(),
+    kind: mediaKindEnum('kind').notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }),
+    refreshLeaseUntil: timestamp('refresh_lease_until', { withTimezone: true }),
+    refreshNotBefore: timestamp('refresh_not_before', { withTimezone: true }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.countryCode, table.kind] }),
+    check(
+      'streaming_provider_catalog_sync_country_code_check',
+      sql`${table.countryCode} ~ '^[A-Z]{2}$'`
+    ),
+  ]
+);
+
+export type StreamingProviderCatalogSync =
+  typeof streamingProviderCatalogSync.$inferSelect;
+
+export const userStreamingProviders = pgTable(
+  'user_streaming_providers',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => streamingProviders.id, { onDelete: 'restrict' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.providerId] })]
+);
+
+export type UserStreamingProvider = typeof userStreamingProviders.$inferSelect;
+
+export const mediaAvailabilitySync = pgTable('media_availability_sync', {
+  mediaId: uuid('media_id')
+    .primaryKey()
+    .references(() => media.id, { onDelete: 'cascade' }),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true }),
+  refreshLeaseUntil: timestamp('refresh_lease_until', { withTimezone: true }),
+  refreshNotBefore: timestamp('refresh_not_before', { withTimezone: true }),
+});
+
+export type MediaAvailabilitySync = typeof mediaAvailabilitySync.$inferSelect;
+
+export const mediaAvailabilityOffers = pgTable(
+  'media_availability_offers',
+  {
+    mediaId: uuid('media_id')
+      .notNull()
+      .references(() => media.id, { onDelete: 'cascade' }),
+    countryCode: text('country_code').notNull(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => streamingProviders.id, { onDelete: 'cascade' }),
+    monetizationType: text('monetization_type').notNull(),
+  },
+  (table) => [
+    unique('media_availability_offers_unique').on(
+      table.mediaId,
+      table.countryCode,
+      table.providerId,
+      table.monetizationType
+    ),
+    check(
+      'media_availability_offers_country_code_check',
+      sql`${table.countryCode} ~ '^[A-Z]{2}$'`
+    ),
+  ]
+);
+
+export type MediaAvailabilityOffer =
+  typeof mediaAvailabilityOffers.$inferSelect;

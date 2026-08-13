@@ -148,6 +148,13 @@
       "when": 1786484900000,
       "tag": "0021_backfill_onboarding_completed",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1786664497616,
+      "tag": "0022_flawless_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }
