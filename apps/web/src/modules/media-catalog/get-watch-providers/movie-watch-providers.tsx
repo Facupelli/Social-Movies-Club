@@ -4,8 +4,27 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useMediaWatchProviders } from '@/modules/media-catalog/get-watch-providers/use-media-watch-providers';
 import type { MediaKind } from '@/modules/media-catalog/media.type';
+import type {
+  TmdbAvailabilityOffer,
+  TmdbMediaAvailability,
+} from '@/platform/tmdb/types/streaming';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
+
+const DEFAULT_REGION = 'AR';
+
+function getFlatRateOffers(
+  availability: TmdbMediaAvailability | undefined
+): TmdbAvailabilityOffer[] {
+  return (
+    availability?.countries
+      .find((country) => country.countryCode === DEFAULT_REGION)
+      ?.offers.filter(
+        (offer) =>
+          offer.monetizationType === 'flatrate' && offer.logoPath !== null
+      ) ?? []
+  );
+}
 
 export function MovieWatchProviders({
   tmdbId,
@@ -16,7 +35,7 @@ export function MovieWatchProviders({
 }) {
   const [requested, setRequested] = useState(false);
   const {
-    data: watchProviders,
+    data: availability,
     isLoading,
     error,
     isFetched,
@@ -30,9 +49,8 @@ export function MovieWatchProviders({
     );
   }
 
-  const flatRateProviders = watchProviders?.data?.flatrate;
-  const hasFlatRateProviders =
-    flatRateProviders !== undefined && flatRateProviders.length > 0;
+  const flatRateProviders = getFlatRateOffers(availability);
+  const hasFlatRateProviders = flatRateProviders.length > 0;
 
   return (
     <div className="md:space-y-2">
@@ -78,13 +96,13 @@ export function MovieWatchProviders({
       {isFetched &&
         (hasFlatRateProviders ? (
           <div className="flex flex-wrap gap-1 py-1">
-            {flatRateProviders?.map((provider) => (
-              <div key={provider.provider_id}>
+            {flatRateProviders.map((provider) => (
+              <div key={provider.tmdbProviderId}>
                 <Image
-                  alt={provider.provider_name}
+                  alt={provider.name}
                   className="h-auto rounded-sm"
                   height={30}
-                  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                  src={`https://image.tmdb.org/t/p/original${provider.logoPath}`}
                   unoptimized
                   width={30}
                 />

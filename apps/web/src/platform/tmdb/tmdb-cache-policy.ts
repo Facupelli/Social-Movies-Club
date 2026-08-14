@@ -1,10 +1,15 @@
 export const TMDB_CACHE_TTL_SECONDS = {
   mediaDetails: 24 * 60 * 60,
+  providerCatalogue: 12 * 60 * 60,
   watchProviders: 12 * 60 * 60,
   search: 10 * 60,
 } as const;
 
-export type TmdbCacheResource = 'media-details' | 'watch-providers' | 'search';
+export type TmdbCacheResource =
+  | 'media-details'
+  | 'provider-catalogue'
+  | 'watch-providers'
+  | 'search';
 
 type CacheKeyValue = boolean | number | string;
 

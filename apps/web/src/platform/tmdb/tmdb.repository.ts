@@ -1,14 +1,18 @@
 import type { z } from 'zod';
-import type { WatchProviderResponse } from '@/modules/media-catalog/get-watch-providers/watch-provider.types';
 import type {
   TMDbMediaMultiSearch,
   TMDbMovieSearch,
 } from '@/modules/media-catalog/media.type';
 import { getCache } from '@/platform/cache/cache';
+import type {
+  TmdbProviderCatalogueEntry,
+  TmdbWatchProviderResponse,
+} from '@/platform/tmdb/tmdb.schemas';
 import {
   movieDetailResponseSchema,
   movieSearchResponseSchema,
   multiSearchResponseSchema,
+  providerCatalogueResponseSchema,
   tvDetailResponseSchema,
   tvSearchResponseSchema,
   watchProviderResponseSchema,
@@ -19,13 +23,22 @@ import {
   TMDB_CACHE_TTL_SECONDS,
 } from '@/platform/tmdb/tmdb-cache-policy';
 import {
+  parseRetryAfterSeconds,
+  TmdbHttpError,
+} from '@/platform/tmdb/tmdb-http-error';
+import {
   fromTmdbMediaType,
   type TmdbMediaType,
 } from '@/platform/tmdb/tmdb-media-kind';
 import type { SearchMovieQueryParams } from '@/platform/tmdb/types/search-movie';
+import type {
+  TmdbAvailabilityOffer,
+  TmdbMediaAvailability,
+  TmdbProvider,
+  TmdbProviderCatalogue,
+} from '@/platform/tmdb/types/streaming';
 
 const DEFAULT_LANGUAGE = 'es-AR';
-const DEFAULT_REGION = 'AR';
 const DEFAULT_PAGE = 1;
 const INCLUDE_ADULT = false;
 
@@ -177,14 +190,34 @@ export class TmdbRepository implements ITmdbRepository {
     };
   }
 
-  async getMovieWatchProviders(
-    movieId: number
-  ): Promise<WatchProviderResponse> {
-    return await this.getWatchProviders(movieId, 'movie');
+  async getWatchProvidersForRegion(
+    countryCode: string,
+    mediaType: TmdbMediaType
+  ): Promise<TmdbProviderCatalogue> {
+    const json = await this.request({
+      endpoint: `/watch/providers/${mediaType}`,
+      query: { watch_region: countryCode },
+      cacheKey: buildTmdbCacheKey('provider-catalogue', {
+        countryCode,
+        mediaType,
+      }),
+      ttlSeconds: TMDB_CACHE_TTL_SECONDS.providerCatalogue,
+      schema: providerCatalogueResponseSchema,
+    });
+
+    return {
+      countryCode,
+      kind: fromTmdbMediaType(mediaType),
+      providers: json.results.map(normalizeProviderCatalogueEntry),
+    };
   }
 
-  async getTvWatchProviders(tvId: number): Promise<WatchProviderResponse> {
-    return await this.getWatchProviders(tvId, 'tv');
+  async getMediaWatchProviders(
+    mediaId: number,
+    mediaType: TmdbMediaType
+  ): Promise<TmdbMediaAvailability> {
+    const json = await this.fetchWatchProviders(mediaId, mediaType);
+    return normalizeMediaAvailability(json);
   }
 
   private async searchByType(
@@ -251,21 +284,16 @@ export class TmdbRepository implements ITmdbRepository {
     };
   }
 
-  private async getWatchProviders(
+  private async fetchWatchProviders(
     mediaId: number,
     mediaType: TmdbMediaType
-  ): Promise<WatchProviderResponse> {
-    const json = await this.request({
+  ): Promise<TmdbWatchProviderResponse> {
+    return await this.request({
       endpoint: `/${mediaType}/${mediaId}/watch/providers`,
-      cacheKey: buildTmdbCacheKey('watch-providers', {
-        mediaId,
-        mediaType,
-        region: DEFAULT_REGION,
-      }),
+      cacheKey: buildTmdbCacheKey('watch-providers', { mediaId, mediaType }),
       ttlSeconds: TMDB_CACHE_TTL_SECONDS.watchProviders,
       schema: watchProviderResponseSchema,
     });
-    return { data: json.results[DEFAULT_REGION] ?? null };
   }
 
   private async request<TSchema extends z.ZodType>({
@@ -311,7 +339,16 @@ export class TmdbRepository implements ITmdbRepository {
     });
 
     if (!response.ok) {
-      throw new Error(`TMDB error (${response.status})`);
+      const retryAfterSeconds =
+        response.status === 429
+          ? parseRetryAfterSeconds(response.headers.get('retry-after'))
+          : undefined;
+
+      throw new TmdbHttpError(
+        `TMDB error (${response.status})`,
+        response.status,
+        retryAfterSeconds
+      );
     }
 
     const data = schema.parse(await response.json());
@@ -324,4 +361,48 @@ export class TmdbRepository implements ITmdbRepository {
 
     return data;
   }
+}
+
+function normalizeProviderCatalogueEntry(
+  entry: TmdbProviderCatalogueEntry
+): TmdbProvider {
+  return {
+    tmdbProviderId: entry.provider_id,
+    name: entry.provider_name,
+    logoPath: entry.logo_path,
+    displayPriority: entry.display_priority,
+  };
+}
+
+const OFFER_CATEGORIES = ['flatrate', 'free', 'ads', 'rent', 'buy'] as const;
+
+function normalizeMediaAvailability(
+  json: TmdbWatchProviderResponse
+): TmdbMediaAvailability {
+  const countries = Object.entries(json.results).map(
+    ([countryCode, region]) => {
+      const offers: TmdbAvailabilityOffer[] = [];
+
+      for (const category of OFFER_CATEGORIES) {
+        const categoryOffers = region[category];
+        if (!categoryOffers) {
+          continue;
+        }
+
+        for (const offer of categoryOffers) {
+          offers.push({
+            tmdbProviderId: offer.provider_id,
+            name: offer.provider_name,
+            logoPath: offer.logo_path,
+            displayPriority: offer.display_priority,
+            monetizationType: category,
+          });
+        }
+      }
+
+      return { countryCode, link: region.link, offers };
+    }
+  );
+
+  return { countries };
 }

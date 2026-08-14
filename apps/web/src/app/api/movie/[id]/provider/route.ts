@@ -29,7 +29,10 @@ export async function GET(
   }
 
   try {
-    const result = await new TmdbService().getWatchProvider(mediaId, kind);
+    const result = await new TmdbService().getMediaWatchProviders(
+      mediaId,
+      kind
+    );
     return Response.json(result);
   } catch {
     return Response.json(

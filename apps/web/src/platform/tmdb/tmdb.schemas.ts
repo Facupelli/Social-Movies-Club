@@ -99,21 +99,23 @@ export const tvDetailResponseSchema = z
   })
   .passthrough();
 
-const watchProviderSchema = z
+export const watchProviderOfferSchema = z
   .object({
-    logo_path: z.string(),
+    logo_path: z.string().nullable(),
     provider_id: z.number().int(),
     provider_name: z.string(),
     display_priority: z.number().int(),
   })
   .passthrough();
 
-const watchProviderRegionSchema = z
+export const watchProviderRegionSchema = z
   .object({
-    link: z.string(),
-    buy: z.array(watchProviderSchema).optional(),
-    flatrate: z.array(watchProviderSchema).optional(),
-    rent: z.array(watchProviderSchema).optional(),
+    link: z.string().nullable(),
+    buy: z.array(watchProviderOfferSchema).optional(),
+    flatrate: z.array(watchProviderOfferSchema).optional(),
+    rent: z.array(watchProviderOfferSchema).optional(),
+    free: z.array(watchProviderOfferSchema).optional(),
+    ads: z.array(watchProviderOfferSchema).optional(),
   })
   .passthrough();
 
@@ -123,3 +125,27 @@ export const watchProviderResponseSchema = z
     results: z.record(z.string(), watchProviderRegionSchema),
   })
   .passthrough();
+
+export const providerCatalogueEntrySchema = z
+  .object({
+    display_priority: z.number().int(),
+    logo_path: z.string().nullable(),
+    provider_id: z.number().int(),
+    provider_name: z.string(),
+  })
+  .passthrough();
+
+export const providerCatalogueResponseSchema = z
+  .object({
+    results: z.array(providerCatalogueEntrySchema),
+  })
+  .passthrough();
+
+export type TmdbWatchProviderOffer = z.infer<typeof watchProviderOfferSchema>;
+export type TmdbWatchProviderRegion = z.infer<typeof watchProviderRegionSchema>;
+export type TmdbWatchProviderResponse = z.infer<
+  typeof watchProviderResponseSchema
+>;
+export type TmdbProviderCatalogueEntry = z.infer<
+  typeof providerCatalogueEntrySchema
+>;
