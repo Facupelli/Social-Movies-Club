@@ -443,14 +443,11 @@ export type StreamingProviderRegion =
 export const streamingProviderCatalogSync = pgTable(
   'streaming_provider_catalog_sync',
   {
-    countryCode: text('country_code').notNull(),
-    kind: mediaKindEnum('kind').notNull(),
+    countryCode: text('country_code').primaryKey(),
     fetchedAt: timestamp('fetched_at', { withTimezone: true }),
     refreshLeaseUntil: timestamp('refresh_lease_until', { withTimezone: true }),
-    refreshNotBefore: timestamp('refresh_not_before', { withTimezone: true }),
   },
   (table) => [
-    primaryKey({ columns: [table.countryCode, table.kind] }),
     check(
       'streaming_provider_catalog_sync_country_code_check',
       sql`${table.countryCode} ~ '^[A-Z]{2}$'`
@@ -485,7 +482,6 @@ export const mediaAvailabilitySync = pgTable('media_availability_sync', {
     .references(() => media.id, { onDelete: 'cascade' }),
   fetchedAt: timestamp('fetched_at', { withTimezone: true }),
   refreshLeaseUntil: timestamp('refresh_lease_until', { withTimezone: true }),
-  refreshNotBefore: timestamp('refresh_not_before', { withTimezone: true }),
 });
 
 export type MediaAvailabilitySync = typeof mediaAvailabilitySync.$inferSelect;

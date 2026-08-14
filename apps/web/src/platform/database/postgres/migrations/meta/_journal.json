@@ -155,6 +155,13 @@
       "when": 1786664497616,
       "tag": "0022_flawless_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1786673475727,
+      "tag": "0023_opposite_inertia",
+      "breakpoints": true
     }
   ]
 }

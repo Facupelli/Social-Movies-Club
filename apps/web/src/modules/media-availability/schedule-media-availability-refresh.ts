@@ -13,8 +13,8 @@ import { refreshMediaAvailability } from './refresh-media-availability';
  * interaction can schedule another attempt.
  *
  * The scheduler only decides WHEN work may run. `refreshMediaAvailability`
- * remains responsible for deciding WHETHER work is necessary (fresh, lease
- * active, or cooldown states all short-circuit without a TMDB request).
+ * remains responsible for deciding WHETHER work is necessary (fresh data or
+ * an active lease short-circuit without a TMDB request).
  */
 export function scheduleMediaAvailabilityRefresh(mediaId: string): void {
   after(async () => {

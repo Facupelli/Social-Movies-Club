@@ -1,5 +1,4 @@
 import { sql } from 'drizzle-orm';
-import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   streamingProviderCatalogSync,
@@ -7,248 +6,116 @@ import {
   streamingProviders,
 } from '@/platform/database/postgres/schema';
 import type { TmdbProvider } from '@/platform/tmdb/types/streaming';
+import { upsertCanonicalStreamingProviders } from './canonical-streaming-providers.pg';
 import type {
-  CatalogueSyncClaimResult,
   LocalStreamingProvider,
   StreamingProviderCatalogueSnapshot,
 } from './streaming-provider.types';
 import { assertValidCountryCode } from './streaming-provider.validation';
 
-const CATALOGUE_SYNC_LOCK_NAMESPACE = 'streaming-provider-catalogue';
-
-type CatalogueSyncRow = {
-  fetchedAt: Date | null;
-  refreshLeaseUntil: Date | null;
-  refreshNotBefore: Date | null;
-};
-
-function isFresh(fetchedAt: Date | null, staleBefore: Date): boolean {
-  return fetchedAt !== null && fetchedAt >= staleBefore;
-}
-
-function isLeaseActive(leaseUntil: Date | null, now: Date): boolean {
-  return leaseUntil !== null && leaseUntil > now;
-}
-
-function isCooldownActive(notBefore: Date | null, now: Date): boolean {
-  return notBefore !== null && notBefore > now;
-}
-
 /**
- * Atomically inspects and, when allowed, claims the refresh lease for one
- * country + kind catalogue. The advisory lock serializes concurrent claims for
- * the same catalogue; the persisted lease remains the durable guard once this
- * transaction commits.
+ * Atomically claims a country catalogue refresh when it has never been fetched
+ * or is stale and no active lease exists.
  */
 export async function claimStreamingProviderCatalogueSync(
   countryCode: string,
-  kind: MediaKind,
   now: Date,
   staleBefore: Date,
   leaseUntil: Date
-): Promise<CatalogueSyncClaimResult> {
+): Promise<boolean> {
   assertValidCountryCode(countryCode);
 
-  return await withDatabase((db) =>
-    db.transaction(async (tx) => {
-      await tx.execute(
-        sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${CATALOGUE_SYNC_LOCK_NAMESPACE}:${countryCode}:${kind}`}, 0))`
-      );
+  return await withDatabase(async (db) => {
+    const { rows } = await db.execute<{ countryCode: string }>(sql`
+      INSERT INTO ${streamingProviderCatalogSync}
+        (country_code, refresh_lease_until)
+      VALUES (${countryCode}, ${leaseUntil})
+      ON CONFLICT (country_code) DO UPDATE
+      SET refresh_lease_until = EXCLUDED.refresh_lease_until
+      WHERE
+        (${streamingProviderCatalogSync.fetchedAt} IS NULL
+          OR ${streamingProviderCatalogSync.fetchedAt} < ${staleBefore})
+        AND (${streamingProviderCatalogSync.refreshLeaseUntil} IS NULL
+          OR ${streamingProviderCatalogSync.refreshLeaseUntil} <= ${now})
+      RETURNING country_code AS "countryCode"
+    `);
 
-      const existing = await tx.execute<CatalogueSyncRow>(sql`
-        SELECT
-          fetched_at AS "fetchedAt",
-          refresh_lease_until AS "refreshLeaseUntil",
-          refresh_not_before AS "refreshNotBefore"
-        FROM ${streamingProviderCatalogSync}
-        WHERE country_code = ${countryCode} AND kind = ${kind}
-        FOR UPDATE
-      `);
-
-      const row = existing.rows[0];
-
-      if (row) {
-        if (isFresh(row.fetchedAt, staleBefore)) {
-          return { status: 'fresh' };
-        }
-
-        if (isLeaseActive(row.refreshLeaseUntil, now)) {
-          return { status: 'skipped', reason: 'lease-active' };
-        }
-
-        if (isCooldownActive(row.refreshNotBefore, now)) {
-          return { status: 'skipped', reason: 'cooldown' };
-        }
-
-        await tx.execute(sql`
-          UPDATE ${streamingProviderCatalogSync}
-          SET refresh_lease_until = ${leaseUntil}
-          WHERE country_code = ${countryCode} AND kind = ${kind}
-        `);
-
-        return { status: 'claimed' };
-      }
-
-      await tx.execute(sql`
-        INSERT INTO ${streamingProviderCatalogSync}
-          (country_code, kind, refresh_lease_until)
-        VALUES (${countryCode}, ${kind}, ${leaseUntil})
-      `);
-
-      return { status: 'claimed' };
-    })
-  );
+    return rows.length > 0;
+  });
 }
 
 /**
- * Replaces the complete local projection for one country + kind with the
- * providers returned by TMDB. Runs in a single transaction so readers observe
- * either the previous snapshot or the new snapshot, never a partial one.
+ * Replaces both movie and TV regional provider snapshots in one transaction.
+ * Readers observe either the previous complete country catalogue or the new
+ * complete country catalogue, never a partially refreshed one.
  */
 export async function persistStreamingProviderCatalogue(
   countryCode: string,
-  kind: MediaKind,
-  providers: TmdbProvider[],
+  movieProviders: TmdbProvider[],
+  tvSeriesProviders: TmdbProvider[],
   fetchedAt: Date
 ): Promise<void> {
   assertValidCountryCode(countryCode);
 
   await withDatabase((db) =>
     db.transaction(async (tx) => {
-      let providerIdByTmdbId = new Map<number, string>();
-
-      if (providers.length > 0) {
-        const providerValues = sql.join(
-          providers.map(
-            (provider) =>
-              sql`(${provider.tmdbProviderId}, ${provider.name}, ${provider.logoPath})`
-          ),
-          sql`, `
-        );
-
-        const inserted = await tx.execute<{
-          id: string;
-          tmdb_provider_id: number;
-        }>(sql`
-          INSERT INTO ${streamingProviders}
-            (tmdb_provider_id, name, logo_path)
-          VALUES ${providerValues}
-          ON CONFLICT (tmdb_provider_id) DO UPDATE
-          SET
-            name = EXCLUDED.name,
-            logo_path = EXCLUDED.logo_path,
-            updated_at = now()
-          RETURNING id, tmdb_provider_id
-        `);
-
-        providerIdByTmdbId = new Map(
-          inserted.rows.map((row) => [row.tmdb_provider_id, row.id])
-        );
-      }
+      const providerIdByTmdbId = await upsertCanonicalStreamingProviders(tx, [
+        ...movieProviders,
+        ...tvSeriesProviders,
+      ]);
 
       await tx.execute(sql`
         DELETE FROM ${streamingProviderRegions}
-        WHERE country_code = ${countryCode} AND kind = ${kind}
+        WHERE country_code = ${countryCode}
       `);
 
-      if (providers.length > 0) {
-        const regionValues = sql.join(
-          providers.map((provider) => {
-            const providerId = providerIdByTmdbId.get(provider.tmdbProviderId);
-            if (!providerId) {
-              throw new Error(
-                `Unable to resolve streaming provider id for TMDB provider ${provider.tmdbProviderId}`
-              );
-            }
+      const regionValues = [
+        ...movieProviders.map((provider) => ({
+          provider,
+          kind: 'movie' as const,
+        })),
+        ...tvSeriesProviders.map((provider) => ({
+          provider,
+          kind: 'tv_series' as const,
+        })),
+      ].map(({ provider, kind }) => {
+        const providerId = providerIdByTmdbId.get(provider.tmdbProviderId);
+        if (!providerId) {
+          throw new Error(
+            `Unable to resolve streaming provider id for TMDB provider ${provider.tmdbProviderId}`
+          );
+        }
 
-            return sql`(${providerId}, ${countryCode}, ${kind}, ${provider.displayPriority})`;
-          }),
-          sql`, `
-        );
+        return sql`(${providerId}, ${countryCode}, ${kind}, ${provider.displayPriority})`;
+      });
 
+      if (regionValues.length > 0) {
         await tx.execute(sql`
           INSERT INTO ${streamingProviderRegions}
             (provider_id, country_code, kind, display_priority)
-          VALUES ${regionValues}
+          VALUES ${sql.join(regionValues, sql`, `)}
         `);
       }
 
       await tx.execute(sql`
         INSERT INTO ${streamingProviderCatalogSync}
-          (country_code, kind, fetched_at)
-        VALUES (${countryCode}, ${kind}, ${fetchedAt})
-        ON CONFLICT (country_code, kind) DO UPDATE
+          (country_code, fetched_at)
+        VALUES (${countryCode}, ${fetchedAt})
+        ON CONFLICT (country_code) DO UPDATE
         SET
           fetched_at = EXCLUDED.fetched_at,
-          refresh_lease_until = NULL,
-          refresh_not_before = NULL
+          refresh_lease_until = NULL
       `);
     })
   );
 }
 
-/**
- * Records a rate-limit cooldown without touching the previously persisted
- * catalogue snapshot.
- */
-export async function recordStreamingProviderCatalogueCooldown(
-  countryCode: string,
-  kind: MediaKind,
-  notBefore: Date
-): Promise<void> {
-  assertValidCountryCode(countryCode);
-
-  await withDatabase((db) =>
-    db.execute(sql`
-      INSERT INTO ${streamingProviderCatalogSync}
-        (country_code, kind, refresh_not_before)
-      VALUES (${countryCode}, ${kind}, ${notBefore})
-      ON CONFLICT (country_code, kind) DO UPDATE
-      SET
-        refresh_lease_until = NULL,
-        refresh_not_before = EXCLUDED.refresh_not_before
-    `)
-  );
-}
-
-/**
- * Releases the active lease after a non-rate-limit failure so a later
- * interaction can retry. Existing catalogue data is left untouched.
- */
-export async function releaseStreamingProviderCatalogueLease(
-  countryCode: string,
-  kind: MediaKind
-): Promise<void> {
-  assertValidCountryCode(countryCode);
-
-  await withDatabase((db) =>
-    db.execute(sql`
-      UPDATE ${streamingProviderCatalogSync}
-      SET refresh_lease_until = NULL
-      WHERE country_code = ${countryCode} AND kind = ${kind}
-    `)
-  );
-}
-
 type CatalogueSnapshotRow = {
   providers: LocalStreamingProvider[];
-  movieFetchedAt: Date | null;
-  tvSeriesFetchedAt: Date | null;
+  fetchedAt: Date | null;
 };
 
-/**
- * Reads the unified local provider catalogue for one country together with the
- * persisted sync timestamps for its movie and tv_series catalogues.
- *
- * This is a single PostgreSQL round trip. The provider list preserves the
- * previous regional catalogue semantics (one canonical provider at most once,
- * merged movie/TV support, minimum regional display priority, and deterministic
- * ordering), while the two sync timestamps come from
- * streaming_provider_catalog_sync. A missing sync row or NULL fetched_at
- * produces a NULL timestamp.
- *
- * PostgreSQL-only: never acquires a lease or calls TMDB.
- */
+/** Reads the unified local provider catalogue for one country. */
 export async function getStreamingProviderCatalogueSnapshot(
   countryCode: string
 ): Promise<StreamingProviderCatalogueSnapshot> {
@@ -256,14 +123,7 @@ export async function getStreamingProviderCatalogueSnapshot(
 
   return await withDatabase(async (db) => {
     const { rows } = await db.execute<CatalogueSnapshotRow>(sql`
-      WITH catalogue_sync AS (
-        SELECT
-          MAX(fetched_at) FILTER (WHERE kind = 'movie') AS "movieFetchedAt",
-          MAX(fetched_at) FILTER (WHERE kind = 'tv_series') AS "tvSeriesFetchedAt"
-        FROM ${streamingProviderCatalogSync}
-        WHERE country_code = ${countryCode}
-      ),
-      catalogue_providers AS (
+      WITH catalogue_providers AS (
         SELECT
           sp.id,
           sp.tmdb_provider_id AS "tmdbProviderId",
@@ -294,16 +154,17 @@ export async function getStreamingProviderCatalogueSnapshot(
           ),
           '[]'::jsonb
         ) AS "providers",
-        (SELECT "movieFetchedAt" FROM catalogue_sync) AS "movieFetchedAt",
-        (SELECT "tvSeriesFetchedAt" FROM catalogue_sync) AS "tvSeriesFetchedAt"
+        (
+          SELECT fetched_at
+          FROM ${streamingProviderCatalogSync}
+          WHERE country_code = ${countryCode}
+        ) AS "fetchedAt"
     `);
 
     const row = rows[0];
-
     return {
       providers: row?.providers ?? [],
-      movieFetchedAt: row?.movieFetchedAt ?? null,
-      tvSeriesFetchedAt: row?.tvSeriesFetchedAt ?? null,
+      fetchedAt: row?.fetchedAt ?? null,
     };
   });
 }
