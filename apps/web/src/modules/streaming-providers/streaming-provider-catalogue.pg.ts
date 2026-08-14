@@ -10,6 +10,7 @@ import type { TmdbProvider } from '@/platform/tmdb/types/streaming';
 import type {
   CatalogueSyncClaimResult,
   LocalStreamingProvider,
+  StreamingProviderCatalogueSnapshot,
 } from './streaming-provider.types';
 import { assertValidCountryCode } from './streaming-provider.validation';
 
@@ -229,48 +230,80 @@ export async function releaseStreamingProviderCatalogueLease(
   );
 }
 
-type LocalStreamingProviderRow = {
-  id: string;
-  tmdbProviderId: number;
-  name: string;
-  logoPath: string | null;
-  supportedKinds: MediaKind[];
-  displayPriority: number;
+type CatalogueSnapshotRow = {
+  providers: LocalStreamingProvider[];
+  movieFetchedAt: Date | null;
+  tvSeriesFetchedAt: Date | null;
 };
 
 /**
- * Reads the unified local provider catalogue for one country. Each provider is
- * returned at most once even when it appears in both the movie and tv_series
- * catalogues.
+ * Reads the unified local provider catalogue for one country together with the
+ * persisted sync timestamps for its movie and tv_series catalogues.
+ *
+ * This is a single PostgreSQL round trip. The provider list preserves the
+ * previous regional catalogue semantics (one canonical provider at most once,
+ * merged movie/TV support, minimum regional display priority, and deterministic
+ * ordering), while the two sync timestamps come from
+ * streaming_provider_catalog_sync. A missing sync row or NULL fetched_at
+ * produces a NULL timestamp.
+ *
+ * PostgreSQL-only: never acquires a lease or calls TMDB.
  */
-export async function listStreamingProvidersForCountry(
+export async function getStreamingProviderCatalogueSnapshot(
   countryCode: string
-): Promise<LocalStreamingProvider[]> {
+): Promise<StreamingProviderCatalogueSnapshot> {
   assertValidCountryCode(countryCode);
 
   return await withDatabase(async (db) => {
-    const { rows } = await db.execute<LocalStreamingProviderRow>(sql`
+    const { rows } = await db.execute<CatalogueSnapshotRow>(sql`
+      WITH catalogue_sync AS (
+        SELECT
+          MAX(fetched_at) FILTER (WHERE kind = 'movie') AS "movieFetchedAt",
+          MAX(fetched_at) FILTER (WHERE kind = 'tv_series') AS "tvSeriesFetchedAt"
+        FROM ${streamingProviderCatalogSync}
+        WHERE country_code = ${countryCode}
+      ),
+      catalogue_providers AS (
+        SELECT
+          sp.id,
+          sp.tmdb_provider_id AS "tmdbProviderId",
+          sp.name,
+          sp.logo_path AS "logoPath",
+          array_agg(DISTINCT spr.kind::text ORDER BY spr.kind::text) AS "supportedKinds",
+          MIN(spr.display_priority) AS "displayPriority"
+        FROM ${streamingProviderRegions} spr
+        INNER JOIN ${streamingProviders} sp ON sp.id = spr.provider_id
+        WHERE spr.country_code = ${countryCode}
+        GROUP BY sp.id, sp.tmdb_provider_id, sp.name, sp.logo_path
+      )
       SELECT
-        sp.id AS "id",
-        sp.tmdb_provider_id AS "tmdbProviderId",
-        sp.name AS "name",
-        sp.logo_path AS "logoPath",
-        array_agg(DISTINCT spr.kind ORDER BY spr.kind) AS "supportedKinds",
-        MIN(spr.display_priority) AS "displayPriority"
-      FROM ${streamingProviderRegions} spr
-      INNER JOIN ${streamingProviders} sp ON sp.id = spr.provider_id
-      WHERE spr.country_code = ${countryCode}
-      GROUP BY sp.id, sp.tmdb_provider_id, sp.name, sp.logo_path
-      ORDER BY MIN(spr.display_priority) ASC, sp.name ASC, sp.id ASC
+        COALESCE(
+          (
+            SELECT JSONB_AGG(
+              JSONB_BUILD_OBJECT(
+                'id', cp.id,
+                'tmdbProviderId', cp."tmdbProviderId",
+                'name', cp.name,
+                'logoPath', cp."logoPath",
+                'supportedKinds', cp."supportedKinds",
+                'displayPriority', cp."displayPriority"
+              )
+              ORDER BY cp."displayPriority" ASC, cp.name ASC, cp.id ASC
+            )
+            FROM catalogue_providers cp
+          ),
+          '[]'::jsonb
+        ) AS "providers",
+        (SELECT "movieFetchedAt" FROM catalogue_sync) AS "movieFetchedAt",
+        (SELECT "tvSeriesFetchedAt" FROM catalogue_sync) AS "tvSeriesFetchedAt"
     `);
 
-    return rows.map((row) => ({
-      id: row.id,
-      tmdbProviderId: row.tmdbProviderId,
-      name: row.name,
-      logoPath: row.logoPath,
-      supportedKinds: row.supportedKinds,
-      displayPriority: row.displayPriority,
-    }));
+    const row = rows[0];
+
+    return {
+      providers: row?.providers ?? [],
+      movieFetchedAt: row?.movieFetchedAt ?? null,
+      tvSeriesFetchedAt: row?.tvSeriesFetchedAt ?? null,
+    };
   });
 }

@@ -18,3 +18,11 @@ export type LocalStreamingProvider = {
   supportedKinds: MediaKind[];
   displayPriority: number;
 };
+
+export type StreamingProviderCatalogueState = 'missing' | 'fresh' | 'stale';
+
+export type StreamingProviderCatalogueSnapshot = {
+  providers: LocalStreamingProvider[];
+  movieFetchedAt: Date | null;
+  tvSeriesFetchedAt: Date | null;
+};
