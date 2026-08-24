@@ -112,8 +112,23 @@ export async function persistStreamingProviderCatalogue(
 
 type CatalogueSnapshotRow = {
   providers: LocalStreamingProvider[];
-  fetchedAt: Date | null;
+  fetchedAt: string | null;
 };
+
+/**
+ * The node-postgres driver used through raw `db.execute` returns timestamp
+ * columns as strings, so the boundary normalizes them to the promised `Date`.
+ * Unparseable values degrade to `null`, which callers treat as never-fetched.
+ */
+function parseFetchedAt(value: string | null): Date | null {
+  if (value === null) {
+    return null;
+  }
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
 
 /** Reads the unified local provider catalogue for one country. */
 export async function getStreamingProviderCatalogueSnapshot(
@@ -164,7 +179,7 @@ export async function getStreamingProviderCatalogueSnapshot(
     const row = rows[0];
     return {
       providers: row?.providers ?? [],
-      fetchedAt: row?.fetchedAt ?? null,
+      fetchedAt: parseFetchedAt(row?.fetchedAt ?? null),
     };
   });
 }

@@ -10,22 +10,41 @@ import {
 
 const COUNTRY_UNKNOWN_ERROR = 'No pudimos guardar tu país. Inténtalo de nuevo.';
 
+async function saveCountryResult(
+  userId: string,
+  formData: FormData
+): Promise<ApiResponse<{ countryCode: string }>> {
+  try {
+    const data = await saveStreamingCountry(userId, formData);
+    return { success: true, data };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof StreamingPreferencesApplicationError
+          ? error.message
+          : COUNTRY_UNKNOWN_ERROR,
+    };
+  }
+}
+
 export async function updateStreamingCountry(
   formData: FormData
 ): Promise<ApiResponse<{ countryCode: string }>> {
   return await withAuth(async (session) => {
-    try {
-      const data = await saveStreamingCountry(session.user.id, formData);
+    const result = await saveCountryResult(session.user.id, formData);
+
+    if (result.success) {
       refresh();
-      return { success: true, data };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof StreamingPreferencesApplicationError
-            ? error.message
-            : COUNTRY_UNKNOWN_ERROR,
-      };
     }
+
+    return result;
   });
+}
+
+export async function setStreamingCountry(
+  _state: ApiResponse<{ countryCode: string }>,
+  formData: FormData
+): Promise<ApiResponse<{ countryCode: string }>> {
+  return await updateStreamingCountry(formData);
 }

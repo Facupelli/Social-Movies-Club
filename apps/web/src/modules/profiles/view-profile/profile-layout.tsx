@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -29,10 +29,11 @@ export default async function ProfileLayout(
 
   return (
     <div className="min-h-svh">
-      <div className="px-2 py-2 md:px-10">
+      <div className="flex items-center justify-between px-2 py-2 md:px-10">
         <Link href="/">
           <ArrowLeft />
         </Link>
+        {session.user.id === profileUserId && <ProfileSettingsLink />}
       </div>
 
       <div className="px-4 md:px-10">
@@ -127,5 +128,17 @@ async function UserInfo({
         </p>
       </div>
     </div>
+  );
+}
+
+function ProfileSettingsLink() {
+  return (
+    <Link
+      aria-label="Configuración"
+      className="flex size-11 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      href="/settings/streaming"
+    >
+      <Settings className="size-5" />
+    </Link>
   );
 }
