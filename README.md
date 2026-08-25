@@ -1,98 +1,38 @@
- # Que Ves
+# QueVes
 
- ## Overview
+QueVes is a social discovery app for movies and TV series.
 
- Que Ves is a social discovery app for movies and TV series. It helps people decide what to watch through simple
- ratings from friends and others whose taste they trust.
+The idea is simple: the opinion of a few people whose taste you trust can be more useful than a rating from thousands of strangers.
 
- Instead of relying primarily on global popularity, algorithms, or professional critics, the app turns the viewing activity of
- trusted people into lightweight, personal recommendations.
+QueVes takes the ratings of friends and other people you choose to follow and turns them into recommendations. A rating is enough. You do not need to write a review or explain why you liked something.
 
- Main objective
+## The approach
 
- The core goal is to answer:
+QueVes starts with people, not global popularity.
 
- │ What are the people I trust watching, and how highly do they recommend it?
+When someone you trust rates a movie or series highly, that rating is a recommendation. As more people in your circle watch and rate things, their opinions create a picture of what might be worth your time.
 
- Users build a network by following people whose taste matters to them. When those people rate something, their activity appears
- in a chronological feed. This creates a recommendation experience grounded in personal trust rather than anonymous consensus.
+Recommendations should also be easy to understand. You should be able to see who liked something and how they rated it, rather than receive a suggestion with no idea where it came from.
 
- Current capabilities
+The goal is not to predict your taste from everything you click. It is to make better use of opinions you already care about.
 
- ### Discover movies and TV series
+## The philosophy
 
- - Search for movies and TV series using TMDB data.
- - View essential media information.
- - See where supported titles are available to watch.
- - Add interesting titles to a personal watchlist.
+QueVes treats personal taste as social.
 
- ### Rate what you watch
+A score from someone whose taste you know has context. You know when you usually agree with them. You know which genres they care about. Sometimes you even know that a bad rating from one friend means you will probably love it.
 
- - Score movies and TV series from 1 to 10.
- - Record the date watched, defaulting to today.
- - Update an existing rating.
- - Automatically remove a title from the watchlist after rating it.
- - Use ratings as quick recommendations without writing full reviews.
+That context is hard to capture in a global score.
 
- ### Follow people you trust
+QueVes does not try to replace that relationship with a smarter algorithm. It gives those small signals a place to accumulate and become useful when you are deciding what to watch.
 
- - Search for other users.
- - Visit their profiles.
- - Follow or unfollow them.
- - View who a user follows.
- - Receive an in-app notification when someone follows you.
+## The idea
 
- ### Get trusted recommendations
+Most people already have someone they ask:
 
- - See a chronological feed of ratings from followed users.
- - Discover what trusted people watched and how they scored it.
- - Receive only new activity created while following someone.
- - Keep previously received feed entries after unfollowing.
+> "Have you watched anything good lately?"
 
- ### Explore profiles
+QueVes is built around that question.
 
- Each authenticated user profile includes:
-
- - The user’s identity and social summary.
- - Their ratings.
- - Their watchlist.
- - The people they follow.
- - Follow controls for other users.
-
- ### Manage a watchlist
-
- - Save movies and TV series to watch later.
- - Remove saved titles.
- - View another user’s watchlist.
- - Automatically clear a title from your watchlist when you rate it.
-
- ### Manage an account
-
- - Sign in and access personalized features.
- - Choose a unique username during onboarding.
- - Update your own username.
- - View notifications and mark them as read.
-
- Product principles
-
- Que Ves prioritizes:
-
- - Trusted people over anonymous popularity.
- - Fast ratings over long-form reviews.
- - Personal taste over professional criticism.
- - Recent social activity over complex recommendation systems.
- - Simple discovery over unnecessary interaction and complexity.
-
- Current product boundaries
-
- The app currently focuses on ratings, follows, profiles, watchlists, and a chronological social feed.
-
- It does not currently support:
-
- - Written reviews or comments.
- - Likes or reactions.
- - Rating deletion.
- - Historical feed backfilling when following someone.
- - Email or push notifications.
- - Automatically generated algorithmic recommendations.
+[queves.app](https://queves.vercel.app)
 
