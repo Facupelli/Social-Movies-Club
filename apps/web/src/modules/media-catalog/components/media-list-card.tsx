@@ -85,6 +85,8 @@ export function MediaListCard({
               kind={movie.kind}
               onRatingSaved={onRatingSaved}
               posterPath={movie.posterPath}
+              publicationMode="publish"
+              recommendationCache="invalidate"
               title={movie.title}
               tmdbId={movie.tmdbId}
               triggerClassName="size-10 px-0"

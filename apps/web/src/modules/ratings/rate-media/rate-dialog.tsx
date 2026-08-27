@@ -19,7 +19,10 @@ import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { RatingInput } from '@/modules/ratings/rate-media/rating-input';
 import { useRateMediaMutation } from '@/modules/ratings/rate-media/use-rate-media-mutation';
-import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
+import type {
+  RateMediaResult,
+  RatingPublicationMode,
+} from '@/modules/ratings/rating-mutation.types';
 import { authClient } from '@/platform/auth/auth-client';
 import { SubmitButton } from '@/shared/components/submit-button';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
@@ -73,13 +76,24 @@ type UserRating = {
   watchedDate: string;
 };
 
+export type InitialRating = {
+  score: number;
+  watchedDate: string;
+} | null;
+
 type RateDialogProps = {
   tmdbId: number;
   title: string;
   kind: MediaKind;
   year: string;
   posterPath: string;
+  publicationMode: RatingPublicationMode;
+  recommendationCache: 'invalidate' | 'preserve';
+  initialRating?: InitialRating;
   onRatingSaved?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
   triggerClassName?: string;
 };
 
@@ -89,7 +103,13 @@ export function RateDialog({
   kind,
   year,
   posterPath,
+  publicationMode,
+  recommendationCache,
+  initialRating,
   onRatingSaved,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
   triggerClassName,
 }: RateDialogProps) {
   const isMobile = useIsMobile();
@@ -97,9 +117,26 @@ export function RateDialog({
   const { data: userRatings } = useQuery(
     getUserRatingsQueryOptions(session?.user.id)
   );
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
 
-  const userRating = userRatings?.[getMediaIdentityKey(tmdbId, kind)];
+  const cachedRating = userRatings?.[getMediaIdentityKey(tmdbId, kind)];
+  const userRating =
+    cachedRating ??
+    (initialRating
+      ? {
+          isRated: true,
+          score: initialRating.score,
+          watchedDate: initialRating.watchedDate,
+        }
+      : undefined);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  };
 
   const trigger = (
     <Button
@@ -118,9 +155,11 @@ export function RateDialog({
     <RateDialogBody
       isMobile={isMobile}
       kind={kind}
-      onClose={() => setOpen(false)}
+      onClose={() => handleOpenChange(false)}
       onRatingSaved={onRatingSaved}
       posterPath={posterPath}
+      publicationMode={publicationMode}
+      recommendationCache={recommendationCache}
       title={title}
       tmdbId={tmdbId}
       userId={session?.user.id}
@@ -131,8 +170,8 @@ export function RateDialog({
 
   if (isMobile) {
     return (
-      <Drawer onOpenChange={setOpen} open={open}>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+      <Drawer onOpenChange={handleOpenChange} open={open}>
+        {showTrigger ? <DrawerTrigger asChild>{trigger}</DrawerTrigger> : null}
 
         <DrawerContent
           aria-describedby={undefined}
@@ -149,8 +188,8 @@ export function RateDialog({
   }
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
+      {showTrigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
 
       <DialogContent
         aria-describedby={undefined}
@@ -170,6 +209,8 @@ type RateDialogBodyProps = {
   kind: MediaKind;
   year: string;
   posterPath: string;
+  publicationMode: RatingPublicationMode;
+  recommendationCache: 'invalidate' | 'preserve';
   isMobile: boolean;
   onClose: () => void;
   onRatingSaved?: () => void;
@@ -183,6 +224,8 @@ function RateDialogBody({
   kind,
   year,
   posterPath,
+  publicationMode,
+  recommendationCache,
   isMobile,
   onClose,
   onRatingSaved,
@@ -190,7 +233,10 @@ function RateDialogBody({
   userRating,
 }: RateDialogBodyProps) {
   const hasInteracted = useRef(false);
-  const mutateRateMedia = useRateMediaMutation(userId);
+  const mutateRateMedia = useRateMediaMutation(userId, {
+    publicationMode,
+    recommendationCache,
+  });
 
   const [rating, setRating] = useState(userRating?.score ?? 0);
   const [watchedDate, setWatchedDate] = useState(

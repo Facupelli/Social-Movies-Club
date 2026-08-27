@@ -87,6 +87,8 @@ export function MediaDetailPage({
                 <RateDialog
                   kind={media.kind}
                   posterPath={media.posterPath}
+                  publicationMode="publish"
+                  recommendationCache="invalidate"
                   title={media.title}
                   tmdbId={media.id}
                   year={media.year}

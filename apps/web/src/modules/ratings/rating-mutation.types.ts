@@ -1,5 +1,7 @@
 import type { MediaKind } from '@/modules/media-catalog/media.type';
 
+export type RatingPublicationMode = 'publish' | 'silent';
+
 /** Browser-safe authoritative result of rating media. */
 export type RateMediaResult = {
   mediaIdentity: {

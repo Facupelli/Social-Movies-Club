@@ -34,7 +34,10 @@ export default function OnboardingRatingsPage() {
   const { data: ratingStatus } = useQuery(
     getUserRatingsQueryOptions(viewerUserId)
   );
-  const mutateRateMedia = useRateMediaMutation(viewerUserId);
+  const mutateRateMedia = useRateMediaMutation(viewerUserId, {
+    publicationMode: 'publish',
+    recommendationCache: 'invalidate',
+  });
 
   const ratedCount = ratingStatus ? Object.keys(ratingStatus).length : 0;
   const displayCount = Math.min(ratedCount, TARGET_COUNT);

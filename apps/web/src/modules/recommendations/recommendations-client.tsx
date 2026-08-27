@@ -1,21 +1,35 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { MoreHorizontal, UserPlus } from 'lucide-react';
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { MoreHorizontal, Star, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRef, useState } from 'react';
 import { KIND_DICT } from '@/modules/media-catalog/media.constants';
+import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
+import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
+import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
 import type {
   RecommendationItem,
   TrustedRatingContext,
+  UserRecommendationsPage,
 } from '@/modules/recommendations/recommendations.types';
-import { getUserRecommendationsQueryOptions } from '@/modules/recommendations/use-user-recommendations';
+import {
+  getUserRecommendationsQueryOptions,
+  recommendationsQueryKeys,
+} from '@/modules/recommendations/use-user-recommendations';
 import SignInButton from '@/shared/components/sign-in-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { formatRuntime } from '@/shared/utilities/format-runtime';
@@ -106,7 +120,11 @@ function Recommendations({ viewerUserId }: { viewerUserId: string }) {
     <div>
       <div className="divide-y divide-border">
         {items.map((item) => (
-          <RecommendationCard item={item} key={item.movieId} />
+          <RecommendationCard
+            item={item}
+            key={item.movieId}
+            viewerUserId={viewerUserId}
+          />
         ))}
       </div>
 
@@ -125,72 +143,146 @@ function Recommendations({ viewerUserId }: { viewerUserId: string }) {
   );
 }
 
-function RecommendationCard({ item }: { item: RecommendationItem }) {
+function RecommendationCard({
+  item,
+  viewerUserId,
+}: {
+  item: RecommendationItem;
+  viewerUserId: string;
+}) {
   const href = `/media/${item.kind}/${item.movieTmdbId}`;
+  const queryClient = useQueryClient();
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const removeAfterDialogCloses = useRef(false);
+  const { data: ratingStatus } = useQuery(
+    getUserRatingsQueryOptions(viewerUserId)
+  );
+  const cachedRating =
+    ratingStatus?.[getMediaIdentityKey(item.movieTmdbId, item.kind)];
+  const publicationMode = cachedRating ? 'publish' : 'silent';
+
+  const handleRatingDialogOpenChange = (open: boolean) => {
+    setRatingDialogOpen(open);
+
+    if (open || !removeAfterDialogCloses.current) {
+      return;
+    }
+
+    removeAfterDialogCloses.current = false;
+    queryClient.setQueryData<InfiniteData<UserRecommendationsPage>>(
+      recommendationsQueryKeys.infinite(viewerUserId),
+      (current) =>
+        current
+          ? {
+              ...current,
+              pages: current.pages.map((page) => ({
+                ...page,
+                items: page.items.filter(
+                  (recommendation) => recommendation.movieId !== item.movieId
+                ),
+              })),
+            }
+          : current
+    );
+  };
 
   return (
-    <article className="flex gap-3 px-4 py-5 first:pt-4 md:gap-5 md:px-10 md:py-7">
-      <Link
-        aria-label={`Ver ${item.movieTitle}`}
-        className="relative aspect-[2/3] w-30 shrink-0 self-start overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-36"
-        href={href}
-      >
-        {item.moviePoster ? (
-          <Image
-            alt={item.movieTitle}
-            className="object-cover"
-            fill
-            sizes="(min-width: 768px) 144px, 128px"
-            src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
-            unoptimized
-          />
-        ) : null}
-      </Link>
+    <>
+      <article className="flex gap-3 px-4 py-5 first:pt-4 md:gap-5 md:px-10 md:py-7">
+        <Link
+          aria-label={`Ver ${item.movieTitle}`}
+          className="relative aspect-[2/3] w-30 shrink-0 self-start overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-36"
+          href={href}
+        >
+          {item.moviePoster ? (
+            <Image
+              alt={item.movieTitle}
+              className="object-cover"
+              fill
+              sizes="(min-width: 768px) 144px, 128px"
+              src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
+              unoptimized
+            />
+          ) : null}
+        </Link>
 
-      <div className="min-w-0 flex-1 flex flex-col">
-        <div className="flex justify-between">
-          <Link
-            className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            href={href}
-          >
-            <h2 className="text-pretty font-semibold md:text-lg leading-snug">
-              {item.movieTitle}
-            </h2>
-          </Link>
+        <div className="min-w-0 flex-1 flex flex-col">
+          <div className="flex justify-between">
+            <Link
+              className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              href={href}
+            >
+              <h2 className="text-pretty font-semibold md:text-lg leading-snug">
+                {item.movieTitle}
+              </h2>
+            </Link>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                aria-label="Más opciones"
-                className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
-                size="icon"
-                variant="ghost"
-              >
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <AddToWatchlistButton
-                kind={item.kind}
-                presentation="menu-item"
-                tmdbId={item.movieTmdbId}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-base">
-          {item.movieYear ? `${item.movieYear} · ` : ''}
-          {KIND_DICT[item.kind]}
-        </p>
-        {item.movieRuntimeMinutes ? (
-          <p className="mt-1 text-subtle-foreground text-xs leading-snug md:text-sm">
-            {formatRuntime(item.movieRuntimeMinutes)}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  aria-label="Más opciones"
+                  className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
+                  size="icon"
+                  variant="ghost"
+                >
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <AddToWatchlistButton
+                  kind={item.kind}
+                  presentation="menu-item"
+                  tmdbId={item.movieTmdbId}
+                />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    requestAnimationFrame(() => setRatingDialogOpen(true));
+                  }}
+                >
+                  <Star />
+                  {cachedRating ? 'Editar puntuación' : 'Ya lo vi'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-base">
+            {item.movieYear ? `${item.movieYear} · ` : ''}
+            {KIND_DICT[item.kind]}
           </p>
-        ) : null}
+          {item.movieRuntimeMinutes ? (
+            <p className="mt-1 text-subtle-foreground text-xs leading-snug md:text-sm">
+              {formatRuntime(item.movieRuntimeMinutes)}
+            </p>
+          ) : null}
 
-        <RecommendationRatingContext item={item} />
-      </div>
-    </article>
+          <RecommendationRatingContext item={item} />
+        </div>
+      </article>
+
+      <RateDialog
+        initialRating={
+          cachedRating
+            ? {
+                score: cachedRating.score,
+                watchedDate: cachedRating.watchedDate,
+              }
+            : null
+        }
+        kind={item.kind}
+        onOpenChange={handleRatingDialogOpenChange}
+        onRatingSaved={() => {
+          removeAfterDialogCloses.current = true;
+        }}
+        open={ratingDialogOpen}
+        posterPath={item.moviePoster}
+        publicationMode={publicationMode}
+        recommendationCache="preserve"
+        showTrigger={false}
+        title={item.movieTitle}
+        tmdbId={item.movieTmdbId}
+        year={item.movieYear}
+      />
+    </>
   );
 }
 

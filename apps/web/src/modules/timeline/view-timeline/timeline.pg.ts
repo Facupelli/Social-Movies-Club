@@ -15,6 +15,8 @@ import type { FeedItem, GetUserFeedParams, UserFeedPage } from './feed.types';
 import { encodeFeedCursor } from './feed-cursor';
 
 const actorProfile = alias(userProfiles, 'actor_profile');
+const actorRatings = alias(ratings, 'actor_ratings');
+const viewerRatings = alias(ratings, 'viewer_ratings');
 
 export async function getUserFeed({
   userId,
@@ -40,8 +42,10 @@ export async function getUserFeed({
         movieRuntimeMinutes: media.runtimeMinutes,
         kind: media.kind,
         movieOverview: sql<string>`COALESCE(${media.overview}, '')`,
-        score: ratings.score,
-        ratedAt: ratings.createdAt,
+        score: actorRatings.score,
+        ratedAt: actorRatings.createdAt,
+        viewerRatingScore: viewerRatings.score,
+        viewerRatingWatchedDate: viewerRatings.watchedDate,
       })
       .from(feedDeliveries)
       .innerJoin(activities, eq(feedDeliveries.activityId, activities.id))
@@ -49,9 +53,16 @@ export async function getUserFeed({
         ratingActivities,
         eq(ratingActivities.activityId, activities.id)
       )
-      .innerJoin(ratings, eq(ratingActivities.ratingId, ratings.id))
+      .innerJoin(actorRatings, eq(ratingActivities.ratingId, actorRatings.id))
+      .leftJoin(
+        viewerRatings,
+        and(
+          eq(viewerRatings.userId, userId),
+          eq(viewerRatings.mediaId, actorRatings.mediaId)
+        )
+      )
       .innerJoin(actorProfile, eq(activities.actorId, actorProfile.userId))
-      .innerJoin(media, eq(ratings.mediaId, media.id))
+      .innerJoin(media, eq(actorRatings.mediaId, media.id))
       .innerJoin(
         mediaExternalIds,
         and(
@@ -87,6 +98,13 @@ export async function getUserFeed({
       movieRuntimeMinutes: row.movieRuntimeMinutes,
       kind: row.kind,
       score: row.score,
+      viewerRating:
+        row.viewerRatingScore !== null && row.viewerRatingWatchedDate !== null
+          ? {
+              score: row.viewerRatingScore,
+              watchedDate: row.viewerRatingWatchedDate,
+            }
+          : null,
       occurredAt: row.feedOccurredAt.toISOString(),
       ratedAt: row.ratedAt.toISOString(),
       seenAt: row.seenAt?.toISOString() ?? null,

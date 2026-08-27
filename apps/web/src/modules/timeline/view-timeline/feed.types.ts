@@ -9,6 +9,11 @@ export interface GetUserFeedParams {
   onlyUnseen?: boolean;
 }
 
+export type FeedViewerRating = {
+  score: number;
+  watchedDate: string;
+};
+
 export type FeedItem = {
   feedItemId: string;
   actorId: string;
@@ -25,6 +30,7 @@ export type FeedItem = {
   movieOverview: string;
   kind: MediaKind;
   score: number;
+  viewerRating: FeedViewerRating | null;
   occurredAt: string;
   ratedAt: string;
   seenAt: string | null;

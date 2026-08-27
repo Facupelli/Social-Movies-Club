@@ -6,7 +6,7 @@ import { withAuth } from '@/platform/auth/auth-server-action.middleware';
 import { type ApiResponse, execute } from '@/shared/http/safe-execute';
 import { validateMovieRating } from './rating-validation';
 
-export async function addRatingToMovie(
+export async function addSilentRatingToMovie(
   formData: FormData
 ): Promise<ApiResponse<RateMediaResult>> {
   return await withAuth(async (session) => {
@@ -19,7 +19,7 @@ export async function addRatingToMovie(
         rating,
         kind,
         watchedDate,
-        publicationMode: 'publish',
+        publicationMode: 'silent',
       });
     });
 

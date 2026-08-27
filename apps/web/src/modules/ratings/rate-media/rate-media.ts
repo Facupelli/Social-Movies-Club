@@ -5,7 +5,10 @@ import type {
   PersistMediaInput,
   TMDbMediaMultiSearch,
 } from '@/modules/media-catalog/media.type';
-import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
+import type {
+  RateMediaResult,
+  RatingPublicationMode,
+} from '@/modules/ratings/rating-mutation.types';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import { persistRatingMutation } from './rating.pg';
 
@@ -26,12 +29,14 @@ export async function rateMedia(
     rating,
     kind,
     watchedDate,
+    publicationMode,
   }: {
     userId: string;
     tmdbId: number;
     rating: number;
     kind: MediaKind;
     watchedDate: string;
+    publicationMode: RatingPublicationMode;
   },
   dependencies: RateMediaDependencies = defaultDependencies
 ): Promise<RateMediaResult> {
@@ -54,7 +59,8 @@ export async function rateMedia(
     userId,
     mediaData,
     rating,
-    watchedDate
+    watchedDate,
+    publicationMode
   );
 
   return {

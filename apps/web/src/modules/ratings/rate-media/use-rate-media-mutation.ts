@@ -8,7 +8,11 @@ import type { RatingStatusMap } from '@/modules/ratings/get-rating-status/rating
 import { ratingStatusQueryKeys } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { profileRatingsQueryKeys } from '@/modules/ratings/list-profile-ratings/use-user-movies';
 import { addRatingToMovie } from '@/modules/ratings/rate-media/add-rating';
-import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
+import { addSilentRatingToMovie } from '@/modules/ratings/rate-media/add-silent-rating';
+import type {
+  RateMediaResult,
+  RatingPublicationMode,
+} from '@/modules/ratings/rating-mutation.types';
 import { recommendationsQueryKeys } from '@/modules/recommendations/use-user-recommendations';
 import { watchlistStatusQueryKeys } from '@/modules/watchlist/get-watchlist-status/use-user-watchlist';
 import type { WatchlistStatusMap } from '@/modules/watchlist/watchlist.types';
@@ -21,9 +25,21 @@ type OptimisticRating = {
   watchedDate: string;
 };
 
+type RateMediaMutationOptions = {
+  publicationMode: RatingPublicationMode;
+  recommendationCache: 'invalidate' | 'preserve';
+};
+
 /** Owns every browser cache effect caused by rating media. */
-export function useRateMediaMutation(viewerUserId: string | undefined) {
+export function useRateMediaMutation(
+  viewerUserId: string | undefined,
+  options: RateMediaMutationOptions
+) {
   const queryClient = useQueryClient();
+  const rateMediaAction =
+    options.publicationMode === 'publish'
+      ? addRatingToMovie
+      : addSilentRatingToMovie;
   const latestMutation = useRef(0);
 
   return async function mutateRateMedia(
@@ -61,7 +77,7 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
     };
 
     try {
-      const result = await addRatingToMovie(formData);
+      const result = await rateMediaAction(formData);
       if (!result.success) {
         rollback();
         return result;
@@ -106,9 +122,13 @@ export function useRateMediaMutation(viewerUserId: string | undefined) {
         queryClient.invalidateQueries({
           queryKey: profileRatingsQueryKeys.viewerScope(viewerUserId),
         }),
-        queryClient.invalidateQueries({
-          queryKey: recommendationsQueryKeys.infinite(viewerUserId),
-        }),
+        ...(options.recommendationCache === 'invalidate'
+          ? [
+              queryClient.invalidateQueries({
+                queryKey: recommendationsQueryKeys.infinite(viewerUserId),
+              }),
+            ]
+          : []),
       ]);
       return result;
     } catch (error) {

@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import type { PersistMediaInput } from '@/modules/media-catalog/media.type';
+import type { RatingPublicationMode } from '@/modules/ratings/rating-mutation.types';
 import { withDatabase } from '@/platform/database/postgres/db-utils';
 import {
   activities,
@@ -32,7 +33,8 @@ export async function persistRatingMutation(
   userId: string,
   mediaData: PersistMediaInput,
   score: number,
-  watchedDate: string
+  watchedDate: string,
+  publicationMode: RatingPublicationMode
 ): Promise<PersistRatingMutationResult> {
   return await withDatabase((db) =>
     db.transaction(async (tx) => {
@@ -120,7 +122,7 @@ export async function persistRatingMutation(
         RETURNING media_id
       `);
 
-      if (!existingRatingId) {
+      if (!existingRatingId && publicationMode === 'publish') {
         const { rows: activityRows } = await tx.execute<{ id: string }>(sql`
           INSERT INTO ${activities}
             (type_code, actor_id, occurred_at, payload, deduplication_key)
