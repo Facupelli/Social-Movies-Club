@@ -153,6 +153,7 @@ function RecommendationCard({
   const href = `/media/${item.kind}/${item.movieTmdbId}`;
   const queryClient = useQueryClient();
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const removeAfterDialogCloses = useRef(false);
   const { data: ratingStatus } = useQuery(
     getUserRatingsQueryOptions(viewerUserId)
@@ -169,6 +170,10 @@ function RecommendationCard({
     }
 
     removeAfterDialogCloses.current = false;
+    setIsExiting(true);
+  };
+
+  const removeRecommendationFromCache = () => {
     queryClient.setQueryData<InfiniteData<UserRecommendationsPage>>(
       recommendationsQueryKeys.infinite(viewerUserId),
       (current) =>
@@ -188,76 +193,95 @@ function RecommendationCard({
 
   return (
     <>
-      <article className="flex gap-3 px-4 py-5 first:pt-4 md:gap-5 md:px-10 md:py-7">
-        <Link
-          aria-label={`Ver ${item.movieTitle}`}
-          className="relative aspect-[2/3] w-30 shrink-0 self-start overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-36"
-          href={href}
-        >
-          {item.moviePoster ? (
-            <Image
-              alt={item.movieTitle}
-              className="object-cover"
-              fill
-              sizes="(min-width: 768px) 144px, 128px"
-              src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
-              unoptimized
-            />
-          ) : null}
-        </Link>
-
-        <div className="min-w-0 flex-1 flex flex-col">
-          <div className="flex justify-between">
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-[175ms] ease-out motion-reduce:duration-[1ms] first:[&>div>article]:pt-4 ${
+          isExiting
+            ? 'pointer-events-none grid-rows-[0fr] opacity-0'
+            : 'grid-rows-[1fr] opacity-100'
+        }`}
+        onTransitionEnd={(event) => {
+          if (
+            isExiting &&
+            event.currentTarget === event.target &&
+            event.propertyName === 'grid-template-rows'
+          ) {
+            removeRecommendationFromCache();
+          }
+        }}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <article className="flex gap-3 px-4 py-5 md:gap-5 md:px-10 md:py-7">
             <Link
-              className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`Ver ${item.movieTitle}`}
+              className="relative aspect-[2/3] w-30 shrink-0 self-start overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-36"
               href={href}
             >
-              <h2 className="text-pretty font-semibold md:text-lg leading-snug">
-                {item.movieTitle}
-              </h2>
+              {item.moviePoster ? (
+                <Image
+                  alt={item.movieTitle}
+                  className="object-cover"
+                  fill
+                  sizes="(min-width: 768px) 144px, 128px"
+                  src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
+                  unoptimized
+                />
+              ) : null}
             </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  aria-label="Más opciones"
-                  className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
-                  size="icon"
-                  variant="ghost"
+            <div className="min-w-0 flex-1 flex flex-col">
+              <div className="flex justify-between">
+                <Link
+                  className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  href={href}
                 >
-                  <MoreHorizontal className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <AddToWatchlistButton
-                  kind={item.kind}
-                  presentation="menu-item"
-                  tmdbId={item.movieTmdbId}
-                />
-                <DropdownMenuItem
-                  onSelect={() => {
-                    requestAnimationFrame(() => setRatingDialogOpen(true));
-                  }}
-                >
-                  <Star />
-                  {cachedRating ? 'Editar puntuación' : 'Ya lo vi'}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-base">
-            {item.movieYear ? `${item.movieYear} · ` : ''}
-            {KIND_DICT[item.kind]}
-          </p>
-          {item.movieRuntimeMinutes ? (
-            <p className="mt-1 text-subtle-foreground text-xs leading-snug md:text-sm">
-              {formatRuntime(item.movieRuntimeMinutes)}
-            </p>
-          ) : null}
+                  <h2 className="text-pretty font-semibold md:text-lg leading-snug">
+                    {item.movieTitle}
+                  </h2>
+                </Link>
 
-          <RecommendationRatingContext item={item} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-label="Más opciones"
+                      className="-mr-2 -mt-2 shrink-0 text-muted-foreground"
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <AddToWatchlistButton
+                      kind={item.kind}
+                      presentation="menu-item"
+                      tmdbId={item.movieTmdbId}
+                    />
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        requestAnimationFrame(() => setRatingDialogOpen(true));
+                      }}
+                    >
+                      <Star />
+                      {cachedRating ? 'Editar puntuación' : 'Ya lo vi'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-base">
+                {item.movieYear ? `${item.movieYear} · ` : ''}
+                {KIND_DICT[item.kind]}
+              </p>
+              {item.movieRuntimeMinutes ? (
+                <p className="mt-1 text-subtle-foreground text-xs leading-snug md:text-sm">
+                  {formatRuntime(item.movieRuntimeMinutes)}
+                </p>
+              ) : null}
+
+              <RecommendationRatingContext item={item} />
+            </div>
+          </article>
         </div>
-      </article>
+      </div>
 
       <RateDialog
         initialRating={
