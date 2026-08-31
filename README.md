@@ -1,38 +1,70 @@
-# QueVes
+# Que Ves
 
-QueVes is a social discovery app for movies and TV series.
+Social movie discovery and recommendations PWA.
 
-The idea is simple: the opinion of a few people whose taste you trust can be more useful than a rating from thousands of strangers.
+Que Ves is a mobile-first app for rating movies and series, following friends, discovering what people around you are watching, and keeping track of what you want to watch next.
 
-QueVes takes the ratings of friends and other people you choose to follow and turns them into recommendations. A rating is enough. You do not need to write a review or explain why you liked something.
+## Product
 
-## The approach
+Users can rate movies and series, see activity from people they follow, discover recommendations based on their social circle, and maintain their own watchlist.
 
-QueVes starts with people, not global popularity.
+<p align="center">
+  <img
+    src="./.github/assets/que-ves-feed.png"
+    alt="Que Ves social feed showing movie ratings from followed users"
+    width="260"
+  />
+  &nbsp;&nbsp;
+  <img
+    src="./.github/assets/que-ves-recommendations.png"
+    alt="Que Ves personalized recommendations showing movies recommended by followed users"
+    width="260"
+  />
+  &nbsp;&nbsp;
+  <img
+    src="./.github/assets/que-ves-profile.png"
+    alt="Que Ves user profile showing saved movies and personal lists"
+    width="260"
+  />
+</p>
 
-When someone you trust rates a movie or series highly, that rating is a recommendation. As more people in your circle watch and rate things, their opinions create a picture of what might be worth your time.
+## Core capabilities
 
-Recommendations should also be easy to understand. You should be able to see who liked something and how they rated it, rather than receive a suggestion with no idea where it came from.
+- Rate movies and series
+- Follow other users
+- Social activity feed
+- Recommendations based on people you follow
+- Personal watchlist
+- User profiles and activity
+- Search and movie discovery
+- Installable mobile-first PWA
 
-The goal is not to predict your taste from everything you click. It is to make better use of opinions you already care about.
+## Engineering highlights
 
-## The philosophy
+### Social recommendation model
 
-QueVes treats personal taste as social.
+Recommendations are driven by the activity of people a user follows rather than by a generic global popularity list.
 
-A score from someone whose taste you know has context. You know when you usually agree with them. You know which genres they care about. Sometimes you even know that a bad rating from one friend means you will probably love it.
+This makes discovery contextual: users can see who recommended a title, their ratings, and the average opinion within their social circle.
 
-That context is hard to capture in a global score.
+### Activity feed
 
-QueVes does not try to replace that relationship with a smarter algorithm. It gives those small signals a place to accumulate and become useful when you are deciding what to watch.
+Ratings are represented as social activity, allowing users to discover movies and series naturally through people they know rather than through a traditional catalog-only interface.
 
-## The idea
+### Mobile-first PWA
 
-Most people already have someone they ask:
+Que Ves is designed primarily around mobile interaction and can be installed as a Progressive Web App, providing an app-like experience without requiring a native client.
 
-> "Have you watched anything good lately?"
+## Tech stack
 
-QueVes is built around that question.
+### Frontend
 
-[queves.app](https://queves.vercel.app)
+- Next.js
+- React
+- Tailwind CSS
 
+### Data
+
+- PostgreSQL
+- Drizzle ORM
+- Redis
