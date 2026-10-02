@@ -4,7 +4,7 @@ import type { MovieView } from '@/modules/media-catalog/movie-view';
 export type UserRatings = {
   movieId: string;
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
   createdAt: Date;
   title: string;
   year: string;
@@ -21,7 +21,7 @@ export interface GetUserRatingMovies {
   nextCursor: number | null;
 }
 
-export type ProfileRatingsSortBy = 'score' | 'createdAt';
+export type ProfileRatingsSortBy = 'score' | 'watchedDate';
 export type ProfileRatingsSortOrder = 'asc' | 'desc';
 export type ProfileRatingsKindFilter = 'all' | MediaKind;
 

@@ -24,11 +24,15 @@ const MovieRatingSchema = z.object({
       message: 'Rating must be between 1 and 10',
     }),
   kind: z.enum(['movie', 'tv_series']),
-  watchedDate: z.iso
-    .date('Watched date must be a valid date')
-    .refine((value) => value <= getTodayDate(), {
-      message: 'Watched date cannot be in the future',
-    }),
+  watchedDate: z.preprocess(
+    (value) => (value === '' || value === undefined ? null : value),
+    z.iso
+      .date('Watched date must be a valid date')
+      .refine((value) => value <= getTodayDate(), {
+        message: 'Watched date cannot be in the future',
+      })
+      .nullable()
+  ),
 });
 
 export type MovieRatingInput = z.infer<typeof MovieRatingSchema>;

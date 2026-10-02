@@ -9,7 +9,7 @@ const RecommendationCursorSchema = z
     supporterCount: z.int().nonnegative(),
     averageScore: z.string().regex(/^\d+(?:\.\d+)?$/),
     ratingCount: z.int().nonnegative(),
-    latestWatchedDate: z.iso.date(),
+    latestWatchedDate: z.iso.date().nullable(),
     mediaId: z.uuid(),
   })
   .strict();

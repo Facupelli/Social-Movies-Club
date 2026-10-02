@@ -11,7 +11,7 @@ export interface GetUserFeedParams {
 
 export type FeedViewerRating = {
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
 };
 
 export type FeedItem = {

@@ -4,7 +4,7 @@ export type TrustedRater = {
   username: string | null;
   avatarUrl: string | null;
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
   ratedAt: string;
 };
 
@@ -58,7 +58,7 @@ export type TrustedRaterRow = {
   username: string | null;
   avatarUrl: string | null;
   score: number;
-  watchedDate: Date | string;
+  watchedDate: Date | string | null;
   ratedAt: Date | string;
 };
 

@@ -58,7 +58,7 @@ function getLocalTodayDate(): string {
 
 function formatWatchedDate(date: string): string {
   if (!date) {
-    return 'Elegí una fecha';
+    return 'Sin fecha';
   }
 
   return new Intl.DateTimeFormat('es-AR', {
@@ -73,12 +73,12 @@ function formatWatchedDate(date: string): string {
 type UserRating = {
   isRated: boolean;
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
 };
 
 export type InitialRating = {
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
 } | null;
 
 type RateDialogProps = {
@@ -232,21 +232,29 @@ function RateDialogBody({
   userId,
   userRating,
 }: RateDialogBodyProps) {
-  const hasInteracted = useRef(false);
+  const hasChangedRating = useRef(false);
+  const hasChangedWatchedDate = useRef(false);
   const mutateRateMedia = useRateMediaMutation(userId, {
     publicationMode,
     recommendationCache,
   });
 
   const [rating, setRating] = useState(userRating?.score ?? 0);
-  const [watchedDate, setWatchedDate] = useState(
-    userRating?.watchedDate ?? getLocalTodayDate()
-  );
+  const [watchedDate, setWatchedDate] = useState(() => {
+    if (userRating) {
+      return userRating.watchedDate ?? '';
+    }
+    return publicationMode === 'silent' ? '' : getLocalTodayDate();
+  });
 
   useEffect(() => {
-    if (userRating && !hasInteracted.current) {
-      setRating(userRating.score);
-      setWatchedDate(userRating.watchedDate);
+    if (userRating) {
+      if (!hasChangedRating.current) {
+        setRating(userRating.score);
+      }
+      if (!hasChangedWatchedDate.current) {
+        setWatchedDate(userRating.watchedDate ?? '');
+      }
     }
   }, [userRating]);
 
@@ -258,7 +266,7 @@ function RateDialogBody({
       tmdbId,
       kind,
       score: rating,
-      watchedDate,
+      watchedDate: watchedDate || null,
     });
 
     if (result.success) {
@@ -345,7 +353,7 @@ function RateDialogBody({
 
           <RatingInput
             onChange={(v) => {
-              hasInteracted.current = true;
+              hasChangedRating.current = true;
               setRating(v);
             }}
             size={isMobile ? 'sm' : 'default'}
@@ -400,23 +408,33 @@ function RateDialogBody({
 
               <input
                 aria-label="Fecha en que la viste"
-                className={cn(
-                  'absolute inset-0 size-full cursor-pointer opacity-0',
-                  userRating?.isRated && 'cursor-default'
-                )}
+                className="absolute inset-0 size-full cursor-pointer opacity-0"
                 id={`watched-date-${tmdbId}-${kind}`}
                 max={getLocalTodayDate()}
                 name="watchedDate"
                 onChange={(event) => {
-                  hasInteracted.current = true;
+                  hasChangedWatchedDate.current = true;
                   setWatchedDate(event.target.value);
                 }}
-                readOnly={userRating?.isRated}
-                required
+                required={publicationMode === 'publish' && !userRating?.isRated}
                 type="date"
                 value={watchedDate}
               />
             </div>
+            {watchedDate &&
+              (userRating?.isRated || publicationMode === 'silent') && (
+                <Button
+                  className="h-10 shrink-0 px-3 text-white/65 hover:text-white"
+                  onClick={() => {
+                    hasChangedWatchedDate.current = true;
+                    setWatchedDate('');
+                  }}
+                  type="button"
+                  variant="ghost"
+                >
+                  Quitar fecha
+                </Button>
+              )}
           </div>
         </div>
 

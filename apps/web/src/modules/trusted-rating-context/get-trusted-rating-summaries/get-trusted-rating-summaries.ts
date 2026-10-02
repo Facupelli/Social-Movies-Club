@@ -29,7 +29,8 @@ export function toTrustedRater(row: TrustedRaterRow): TrustedRater {
     username: row.username,
     avatarUrl: row.avatarUrl,
     score: row.score,
-    watchedDate: toDateString(row.watchedDate),
+    watchedDate:
+      row.watchedDate === null ? null : toDateString(row.watchedDate),
     ratedAt: toIsoString(row.ratedAt),
   };
 }

@@ -11,7 +11,7 @@ export type RateMediaResult = {
   rating: {
     score: number;
     /** Calendar date in YYYY-MM-DD form, not an instant. */
-    watchedDate: string;
+    watchedDate: string | null;
   };
   removedFromWatchlist: boolean;
 };

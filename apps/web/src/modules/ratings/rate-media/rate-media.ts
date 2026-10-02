@@ -35,7 +35,7 @@ export async function rateMedia(
     tmdbId: number;
     rating: number;
     kind: MediaKind;
-    watchedDate: string;
+    watchedDate: string | null;
     publicationMode: RatingPublicationMode;
   },
   dependencies: RateMediaDependencies = defaultDependencies

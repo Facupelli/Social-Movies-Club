@@ -11,7 +11,7 @@ import type {
 export async function getUserRatingMovies(
   userId: string,
   {
-    sortBy = 'createdAt',
+    sortBy = 'watchedDate',
     sortOrder = 'desc',
     kindFilter = 'all',
     limit,
@@ -23,8 +23,8 @@ export async function getUserRatingMovies(
   return await withDatabase(async (db) => {
     const orderExpr =
       sortBy === 'score'
-        ? sql`r.score ${sql.raw(sortOrder)} , r.created_at DESC`
-        : sql`r.created_at ${sql.raw(sortOrder)}`;
+        ? sql`r.score ${sql.raw(sortOrder)}, r.created_at DESC, r.id ASC`
+        : sql`r.watched_date ${sql.raw(sortOrder)} NULLS LAST, r.created_at DESC, r.id ASC`;
 
     const kindFilterExpr =
       kindFilter === 'all'

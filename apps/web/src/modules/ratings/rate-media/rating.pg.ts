@@ -18,7 +18,7 @@ export type PersistedRating = {
   user_id: string;
   media_id: string;
   score: number;
-  watched_date: string;
+  watched_date: string | null;
   created_at: Date | string;
   updated_at: Date | string;
 };
@@ -33,7 +33,7 @@ export async function persistRatingMutation(
   userId: string,
   mediaData: PersistMediaInput,
   score: number,
-  watchedDate: string,
+  watchedDate: string | null,
   publicationMode: RatingPublicationMode
 ): Promise<PersistRatingMutationResult> {
   return await withDatabase((db) =>
@@ -92,6 +92,10 @@ export async function persistRatingMutation(
         FOR UPDATE
       `);
       const existingRatingId = existingRating.rows[0]?.id;
+
+      if (!existingRatingId && publicationMode === 'publish' && !watchedDate) {
+        throw new Error('Watched date is required for new published ratings');
+      }
 
       const { rows: ratingRows } = existingRatingId
         ? await tx.execute<PersistedRating>(sql`

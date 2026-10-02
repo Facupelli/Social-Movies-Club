@@ -99,7 +99,7 @@ export async function getUserFeed({
       kind: row.kind,
       score: row.score,
       viewerRating:
-        row.viewerRatingScore !== null && row.viewerRatingWatchedDate !== null
+        row.viewerRatingScore !== null
           ? {
               score: row.viewerRatingScore,
               watchedDate: row.viewerRatingWatchedDate,

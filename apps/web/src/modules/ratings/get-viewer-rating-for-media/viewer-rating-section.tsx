@@ -46,7 +46,9 @@ export function ViewerRatingSection({
             <strong className="text-2xl tabular-nums">{rating.score}/10</strong>
           </div>
           <p className="text-right text-xs text-muted-foreground">
-            Vista el {formatDate(rating.watchedDate)}
+            {rating.watchedDate
+              ? `Vista el ${formatDate(rating.watchedDate)}`
+              : 'Fecha en que la viste desconocida'}
           </p>
         </div>
       ) : null}

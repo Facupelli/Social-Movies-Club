@@ -43,9 +43,9 @@ export async function getUserRecommendations({
           averageScore: sql<string>`AVG(${friendRatings.score})::numeric`.as(
             'average_score'
           ),
-          latestWatchedDate: sql<string>`MAX(${friendRatings.watchedDate})`.as(
-            'latest_watched_date'
-          ),
+          latestWatchedDate: sql<
+            string | null
+          >`MAX(${friendRatings.watchedDate})`.as('latest_watched_date'),
         })
         .from(follows)
         .innerJoin(friendRatings, eq(follows.followeeId, friendRatings.userId))
@@ -110,15 +110,18 @@ export async function getUserRecommendations({
                   ${candidates.supporterCount} = ${cursor.supporterCount}
                   AND ${candidates.averageScore} = ${cursor.averageScore}::numeric
                   AND ${candidates.ratingCount} = ${cursor.ratingCount}
-                  AND ${candidates.latestWatchedDate} < ${cursor.latestWatchedDate}::date
-                )
-
-                OR (
-                  ${candidates.supporterCount} = ${cursor.supporterCount}
-                  AND ${candidates.averageScore} = ${cursor.averageScore}::numeric
-                  AND ${candidates.ratingCount} = ${cursor.ratingCount}
-                  AND ${candidates.latestWatchedDate} = ${cursor.latestWatchedDate}::date
-                  AND ${candidates.mediaId} > ${cursor.mediaId}::uuid
+                  AND ${
+                    cursor.latestWatchedDate === null
+                      ? sql`${candidates.latestWatchedDate} IS NULL AND ${candidates.mediaId} > ${cursor.mediaId}::uuid`
+                      : sql`(
+                          ${candidates.latestWatchedDate} < ${cursor.latestWatchedDate}::date
+                          OR ${candidates.latestWatchedDate} IS NULL
+                          OR (
+                            ${candidates.latestWatchedDate} = ${cursor.latestWatchedDate}::date
+                            AND ${candidates.mediaId} > ${cursor.mediaId}::uuid
+                          )
+                        )`
+                  }
                 )
               )
             `
@@ -128,7 +131,7 @@ export async function getUserRecommendations({
         desc(candidates.supporterCount),
         desc(candidates.averageScore),
         desc(candidates.ratingCount),
-        desc(candidates.latestWatchedDate),
+        sql`${candidates.latestWatchedDate} DESC NULLS LAST`,
         candidates.mediaId
       )
       .limit(limit);

@@ -185,7 +185,7 @@ export const ratings = pgTable(
       .notNull()
       .references(() => media.id, { onDelete: 'cascade' }),
     score: smallint('score').notNull(),
-    watchedDate: date('watched_date').default(sql`CURRENT_DATE`).notNull(),
+    watchedDate: date('watched_date'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

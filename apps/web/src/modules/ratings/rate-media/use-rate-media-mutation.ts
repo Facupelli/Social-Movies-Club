@@ -22,7 +22,7 @@ type OptimisticRating = {
   tmdbId: number;
   kind: MediaKind;
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
 };
 
 type RateMediaMutationOptions = {

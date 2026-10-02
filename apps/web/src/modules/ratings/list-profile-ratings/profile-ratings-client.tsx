@@ -214,7 +214,7 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
   };
 
   const handleSortByChange = (value: string) => {
-    if (value === 'score' || value === 'createdAt') {
+    if (value === 'score' || value === 'watchedDate') {
       updateFilters({ sortBy: value });
     }
   };
@@ -312,9 +312,9 @@ function RatingFilters({ isOwner }: { isOwner: boolean }) {
                   <Star className="size-4" />
                   Puntaje
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem className="gap-2" value="createdAt">
+                <DropdownMenuRadioItem className="gap-2" value="watchedDate">
                   <Calendar className="size-4" />
-                  Fecha agregada
+                  Fecha vista
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

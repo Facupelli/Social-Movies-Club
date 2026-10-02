@@ -94,7 +94,9 @@ export function TrustedRatingDetailsSection({
                 {rater.displayName}
               </p>
               <p className="text-xs text-muted-foreground">
-                Vio el {formatDate(rater.watchedDate)}
+                {rater.watchedDate
+                  ? `Vio el ${formatDate(rater.watchedDate)}`
+                  : 'Fecha en que la vio desconocida'}
               </p>
             </div>
             <strong className="text-base tabular-nums">{rater.score}/10</strong>

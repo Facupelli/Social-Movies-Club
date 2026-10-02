@@ -14,13 +14,13 @@ export const PROFILE_RATINGS_SEARCH_PARAMS = {
 } as const;
 
 export const DEFAULT_PROFILE_RATINGS_FILTERS: ProfileRatingsFilters = {
-  sortBy: 'createdAt',
+  sortBy: 'watchedDate',
   sortOrder: 'desc',
   kindFilter: 'all',
   bothRated: false,
 };
 
-const SORT_FIELDS: readonly ProfileRatingsSortBy[] = ['score', 'createdAt'];
+const SORT_FIELDS: readonly ProfileRatingsSortBy[] = ['score', 'watchedDate'];
 const SORT_ORDERS: readonly ProfileRatingsSortOrder[] = ['asc', 'desc'];
 const MEDIA_KINDS: readonly ProfileRatingsKindFilter[] = [
   'all',

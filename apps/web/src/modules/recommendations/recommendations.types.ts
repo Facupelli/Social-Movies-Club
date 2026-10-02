@@ -2,7 +2,7 @@ export type RecommendationCursor = {
   supporterCount: number;
   averageScore: string;
   ratingCount: number;
-  latestWatchedDate: string;
+  latestWatchedDate: string | null;
   mediaId: string;
 };
 
@@ -18,7 +18,7 @@ export type TrustedRatingContext = {
   username: string | null;
   avatarUrl: string | null;
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
 };
 
 export type RecommendationItem = {
@@ -35,7 +35,7 @@ export type RecommendationItem = {
   ratingCount: number;
   supporterCount: number;
   averageScore: number;
-  latestWatchedDate: string;
+  latestWatchedDate: string | null;
 
   trustedRatingContext: TrustedRatingContext[];
 };

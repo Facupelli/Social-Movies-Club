@@ -1,5 +1,5 @@
 export type ViewerMediaRating = {
   score: number;
-  watchedDate: string;
+  watchedDate: string | null;
   ratedAt: string;
 };
