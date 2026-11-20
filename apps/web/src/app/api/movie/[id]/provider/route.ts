@@ -1,8 +1,8 @@
+import { getWatchAvailability } from '@/modules/media-availability/get-watch-availability';
 import {
   type MediaKind,
   MediaKindEnum,
 } from '@/modules/media-catalog/media.type';
-import { TmdbService } from '@/platform/tmdb/tmdb.service';
 
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
 
@@ -29,11 +29,17 @@ export async function GET(
   }
 
   try {
-    const result = await new TmdbService().getMediaWatchProviders(
-      mediaId,
-      kind
-    );
-    return Response.json(result);
+    const result = await getWatchAvailability(mediaId, kind);
+    if (!result) {
+      return Response.json(
+        { error: 'Watch providers are refreshing' },
+        {
+          status: 503,
+          headers: { 'Cache-Control': 'no-store', 'Retry-After': '1' },
+        }
+      );
+    }
+    return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return Response.json(
       { error: 'Unable to load watch providers' },

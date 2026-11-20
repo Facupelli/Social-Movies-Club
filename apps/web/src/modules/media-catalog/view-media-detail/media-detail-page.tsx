@@ -1,6 +1,6 @@
 import { Film } from 'lucide-react';
 import Image from 'next/image';
-import { MovieWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
+import { DetailWatchProviders } from '@/modules/media-catalog/get-watch-providers/movie-watch-providers';
 import type { TMDbMediaMultiSearch } from '@/modules/media-catalog/media.type';
 import { MediaKindDict } from '@/modules/media-catalog/media.type';
 import type { ViewerMediaRating } from '@/modules/ratings/get-viewer-rating-for-media/viewer-rating-for-media.types';
@@ -135,7 +135,7 @@ export function MediaDetailPage({
           </>
         ) : null}
 
-        <MovieWatchProviders kind={media.kind} tmdbId={media.id} />
+        <DetailWatchProviders kind={media.kind} tmdbId={media.id} />
 
         <section aria-labelledby="synopsis-heading" className="space-y-3">
           <h2 className="text-xl font-semibold" id="synopsis-heading">

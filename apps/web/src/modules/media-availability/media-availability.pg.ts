@@ -89,13 +89,32 @@ export async function getMediaAvailabilityIdentity(
 export async function persistMediaAvailability(
   mediaId: string,
   availability: TmdbMediaAvailability,
-  fetchedAt: Date
+  fetchedAt: Date,
+  leaseUntil: Date
 ): Promise<void> {
   await withDatabase((db) =>
     db.transaction(async (tx) => {
-      const providers = availability.countries.flatMap((country) =>
-        isValidCountryCode(country.countryCode) ? country.offers : []
+      const countries = availability.countries.filter(({ countryCode }) =>
+        isValidCountryCode(countryCode)
       );
+      const regionalLinks = Object.fromEntries(
+        countries.flatMap(({ countryCode, link }) =>
+          link ? [[countryCode, link]] : []
+        )
+      );
+      const { rows } = await tx.execute(sql`
+        UPDATE ${mediaAvailabilitySync}
+        SET fetched_at = ${fetchedAt},
+          regional_links = ${JSON.stringify(regionalLinks)}::jsonb,
+          refresh_lease_until = NULL
+        WHERE media_id = ${mediaId} AND refresh_lease_until = ${leaseUntil}
+        RETURNING media_id
+      `);
+      if (rows.length === 0) {
+        return;
+      }
+
+      const providers = countries.flatMap(({ offers }) => offers);
       const providerIdByTmdbId = await upsertCanonicalStreamingProviders(
         tx,
         providers
@@ -109,11 +128,7 @@ export async function persistMediaAvailability(
       const offerValues: SQL[] = [];
       const seenOffers = new Set<string>();
 
-      for (const country of availability.countries) {
-        if (!isValidCountryCode(country.countryCode)) {
-          continue;
-        }
-
+      for (const country of countries) {
         for (const offer of country.offers) {
           const providerId = providerIdByTmdbId.get(offer.tmdbProviderId);
           if (!providerId) {
@@ -141,16 +156,6 @@ export async function persistMediaAvailability(
           VALUES ${sql.join(offerValues, sql`, `)}
         `);
       }
-
-      await tx.execute(sql`
-        INSERT INTO ${mediaAvailabilitySync}
-          (media_id, fetched_at)
-        VALUES (${mediaId}, ${fetchedAt})
-        ON CONFLICT (media_id) DO UPDATE
-        SET
-          fetched_at = EXCLUDED.fetched_at,
-          refresh_lease_until = NULL
-      `);
     })
   );
 }
@@ -173,8 +178,11 @@ export async function getMediaAvailabilityForCountry(
   return await withDatabase((db) =>
     db.transaction(
       async (tx) => {
-        const syncRows = await tx.execute<{ fetchedAt: Date | null }>(sql`
-          SELECT fetched_at AS "fetchedAt"
+        const syncRows = await tx.execute<{
+          fetchedAt: Date | null;
+          link: string | null;
+        }>(sql`
+          SELECT fetched_at AS "fetchedAt", regional_links ->> ${countryCode}::text AS link
           FROM ${mediaAvailabilitySync}
           WHERE media_id = ${mediaId}
         `);
@@ -197,6 +205,7 @@ export async function getMediaAvailabilityForCountry(
         return {
           state: computeAvailabilityState(fetchedAt, new Date()),
           fetchedAt,
+          link: syncRows.rows[0]?.link ?? null,
           offers: rows,
         };
       },

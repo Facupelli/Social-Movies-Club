@@ -30,3 +30,7 @@ export interface TmdbCountryAvailability {
 export interface TmdbMediaAvailability {
   countries: TmdbCountryAvailability[];
 }
+
+export interface TmdbMediaAvailabilitySnapshot extends TmdbMediaAvailability {
+  fetchedAt: string;
+}

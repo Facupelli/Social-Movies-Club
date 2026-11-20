@@ -9,7 +9,7 @@ import {
 } from '@/platform/tmdb/tmdb.repository';
 import { toTmdbMediaType } from '@/platform/tmdb/tmdb-media-kind';
 import type {
-  TmdbMediaAvailability,
+  TmdbMediaAvailabilitySnapshot,
   TmdbProviderCatalogue,
 } from '@/platform/tmdb/types/streaming';
 
@@ -64,7 +64,7 @@ export class TmdbService {
   async getMediaWatchProviders(
     mediaId: number,
     kind: MediaKind
-  ): Promise<TmdbMediaAvailability> {
+  ): Promise<TmdbMediaAvailabilitySnapshot> {
     return await this.repo.getMediaWatchProviders(
       mediaId,
       toTmdbMediaType(kind)

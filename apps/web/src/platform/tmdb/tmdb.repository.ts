@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import type {
   TMDbMediaMultiSearch,
   TMDbMovieSearch,
@@ -36,6 +36,7 @@ import type { SearchMovieQueryParams } from '@/platform/tmdb/types/search-movie'
 import type {
   TmdbAvailabilityOffer,
   TmdbMediaAvailability,
+  TmdbMediaAvailabilitySnapshot,
   TmdbProvider,
   TmdbProviderCatalogue,
 } from '@/platform/tmdb/types/streaming';
@@ -47,9 +48,16 @@ const NOW_PLAYING_MAX_PAGES = 50;
 const NOW_PLAYING_CONCURRENCY = 4;
 const NOW_PLAYING_TIMEOUT_MS = 5000;
 const NOW_PLAYING_CACHE_TIMEOUT_MS = 150;
+const WATCH_PROVIDERS_TIMEOUT_MS = 8000;
+const WATCH_PROVIDERS_CACHE_TIMEOUT_MS = 1000;
+const watchProvidersCacheSchema = z.object({
+  data: watchProviderResponseSchema,
+  fetchedAt: z.iso.datetime(),
+});
 
-async function withNowPlayingCacheDeadline<T>(
-  operation: Promise<T>
+async function withCacheDeadline<T>(
+  operation: Promise<T>,
+  timeoutMs: number
 ): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -57,8 +65,8 @@ async function withNowPlayingCacheDeadline<T>(
       operation,
       new Promise<never>((_, reject) => {
         timer = setTimeout(
-          () => reject(new Error('Now-playing cache timed out')),
-          NOW_PLAYING_CACHE_TIMEOUT_MS
+          () => reject(new Error('TMDB cache timed out')),
+          timeoutMs
         );
       }),
     ]);
@@ -247,14 +255,18 @@ export class TmdbRepository implements ITmdbRepository {
   async getMediaWatchProviders(
     mediaId: number,
     mediaType: TmdbMediaType
-  ): Promise<TmdbMediaAvailability> {
-    const json = await this.fetchWatchProviders(mediaId, mediaType);
-    return normalizeMediaAvailability(json);
+  ): Promise<TmdbMediaAvailabilitySnapshot> {
+    const { data, fetchedAt } = await this.fetchWatchProviders(
+      mediaId,
+      mediaType
+    );
+    return { ...normalizeMediaAvailability(data), fetchedAt };
   }
 
   async readNowPlayingMovieIds(countryCode: string): Promise<number[] | null> {
-    const cached = await withNowPlayingCacheDeadline(
-      getCache().get<unknown>(nowPlayingCacheKey(countryCode))
+    const cached = await withCacheDeadline(
+      getCache().get<unknown>(nowPlayingCacheKey(countryCode)),
+      NOW_PLAYING_CACHE_TIMEOUT_MS
     );
     const parsed = nowPlayingMovieIdsSchema.safeParse(cached);
     return parsed.success ? parsed.data : null;
@@ -325,12 +337,13 @@ export class TmdbRepository implements ITmdbRepository {
     }
 
     const snapshot = [...movieIds];
-    await withNowPlayingCacheDeadline(
+    await withCacheDeadline(
       getCache().set(
         nowPlayingCacheKey(countryCode),
         snapshot,
         TMDB_CACHE_TTL_SECONDS.nowPlaying
-      )
+      ),
+      NOW_PLAYING_CACHE_TIMEOUT_MS
     );
     return snapshot;
   }
@@ -402,13 +415,40 @@ export class TmdbRepository implements ITmdbRepository {
   private async fetchWatchProviders(
     mediaId: number,
     mediaType: TmdbMediaType
-  ): Promise<TmdbWatchProviderResponse> {
-    return await this.request({
-      endpoint: `/${mediaType}/${mediaId}/watch/providers`,
-      cacheKey: buildTmdbCacheKey('watch-providers', { mediaId, mediaType }),
-      ttlSeconds: TMDB_CACHE_TTL_SECONDS.watchProviders,
-      schema: watchProviderResponseSchema,
+  ): Promise<z.infer<typeof watchProvidersCacheSchema>> {
+    const cache = getCache();
+    const key = buildTmdbCacheKey('watch-providers', {
+      mediaId,
+      mediaType,
+      snapshotVersion: 2,
     });
+
+    const cached = watchProvidersCacheSchema.safeParse(
+      await withCacheDeadline(
+        cache.get(key),
+        WATCH_PROVIDERS_CACHE_TIMEOUT_MS
+      ).catch(() => null)
+    );
+    if (cached.success) {
+      const age = Date.now() - Date.parse(cached.data.fetchedAt);
+      if (age >= 0 && age < TMDB_CACHE_TTL_SECONDS.watchProviders * 1000) {
+        return cached.data;
+      }
+    }
+
+    const data = watchProviderResponseSchema.parse(
+      await this.fetchJson(
+        `/${mediaType}/${mediaId}/watch/providers`,
+        undefined,
+        AbortSignal.timeout(WATCH_PROVIDERS_TIMEOUT_MS)
+      )
+    );
+    const snapshot = { data, fetchedAt: new Date().toISOString() };
+    await withCacheDeadline(
+      cache.set(key, snapshot, TMDB_CACHE_TTL_SECONDS.watchProviders),
+      WATCH_PROVIDERS_CACHE_TIMEOUT_MS
+    ).catch(() => null);
+    return snapshot;
   }
 
   private async request<TSchema extends z.ZodType>({

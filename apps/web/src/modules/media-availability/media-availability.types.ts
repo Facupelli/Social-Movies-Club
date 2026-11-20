@@ -18,5 +18,15 @@ export type MediaAvailabilityOffer = {
 export type MediaAvailabilityForCountry = {
   state: MediaAvailabilityState;
   fetchedAt: Date | null;
+  link: string | null;
   offers: MediaAvailabilityOffer[];
+};
+
+export type WatchAvailability = {
+  fetchedAt: string;
+  link: string | null;
+  offers: (Pick<
+    MediaAvailabilityOffer,
+    'tmdbProviderId' | 'logoPath' | 'monetizationType'
+  > & { name: string })[];
 };

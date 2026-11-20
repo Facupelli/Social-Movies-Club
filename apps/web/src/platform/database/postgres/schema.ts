@@ -481,6 +481,7 @@ export const mediaAvailabilitySync = pgTable('media_availability_sync', {
     .primaryKey()
     .references(() => media.id, { onDelete: 'cascade' }),
   fetchedAt: timestamp('fetched_at', { withTimezone: true }),
+  regionalLinks: jsonb('regional_links').$type<Record<string, string>>(),
   refreshLeaseUntil: timestamp('refresh_lease_until', { withTimezone: true }),
 });
 

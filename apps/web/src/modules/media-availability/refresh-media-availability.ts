@@ -1,5 +1,6 @@
 import 'server-only';
 
+import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { TmdbService } from '@/platform/tmdb/tmdb.service';
 import {
   MEDIA_AVAILABILITY_FRESHNESS_MS,
@@ -34,24 +35,8 @@ export async function refreshMediaAvailability(
   mediaId: string,
   dependencies: RefreshMediaAvailabilityDependencies = defaultDependencies
 ): Promise<void> {
-  const now = new Date();
-  const claimed = await dependencies.claim(
-    mediaId,
-    now,
-    new Date(now.getTime() - MEDIA_AVAILABILITY_FRESHNESS_MS),
-    new Date(now.getTime() + MEDIA_AVAILABILITY_LEASE_MS)
-  );
-
-  if (!claimed) {
-    return;
-  }
-
   const identity = await dependencies.getIdentity(mediaId);
-  if (!identity) {
-    return;
-  }
-
-  if (identity.externalId === null) {
+  if (!identity || identity.externalId === null) {
     return;
   }
 
@@ -60,10 +45,48 @@ export async function refreshMediaAvailability(
     return;
   }
 
+  await refreshMediaAvailabilityByTmdbIdentity(
+    mediaId,
+    tmdbId,
+    identity.kind,
+    dependencies
+  );
+}
+
+export async function refreshMediaAvailabilityByTmdbIdentity(
+  mediaId: string,
+  tmdbId: number,
+  kind: MediaKind,
+  dependencies: RefreshMediaAvailabilityDependencies = defaultDependencies
+) {
+  const now = new Date();
+  const leaseUntil = new Date(now.getTime() + MEDIA_AVAILABILITY_LEASE_MS);
+  const claimed = await dependencies
+    .claim(
+      mediaId,
+      now,
+      new Date(now.getTime() - MEDIA_AVAILABILITY_FRESHNESS_MS),
+      leaseUntil
+    )
+    .catch(() => null);
+
+  if (claimed === false) {
+    return null;
+  }
+
   const availability = await dependencies.tmdb.getMediaWatchProviders(
     tmdbId,
-    identity.kind
+    kind
   );
-
-  await dependencies.persist(mediaId, availability, new Date());
+  if (claimed) {
+    await dependencies
+      .persist(
+        mediaId,
+        availability,
+        new Date(availability.fetchedAt),
+        leaseUntil
+      )
+      .catch(() => null);
+  }
+  return availability;
 }

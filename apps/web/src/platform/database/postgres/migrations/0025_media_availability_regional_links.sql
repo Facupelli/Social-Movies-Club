@@ -1,0 +1,1 @@
+ALTER TABLE "media_availability_sync" ADD COLUMN "regional_links" jsonb;
