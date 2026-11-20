@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentAccountProfile } from '@/modules/account/current-account-profile';
 import { getServerSession } from '@/platform/auth/get-server-session';
+import { SignInProvider } from '@/platform/auth/sign-in-provider';
 import { Nav } from '@/shared/components/nav';
 
 export default async function AppLayout({
@@ -23,11 +24,13 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="relative mx-auto flex max-w-5xl flex-col text-card-foreground md:flex-row">
-      <Nav />
-      <div className="flex-1 border-border bg-surface pb-[60px] md:border-r md:border-l md:pb-0">
-        {children}
+    <SignInProvider>
+      <div className="relative mx-auto flex max-w-5xl flex-col text-card-foreground md:flex-row">
+        <Nav />
+        <div className="flex-1 border-border bg-surface pb-[60px] md:border-r md:border-l md:pb-0">
+          {children}
+        </div>
       </div>
-    </div>
+    </SignInProvider>
   );
 }
