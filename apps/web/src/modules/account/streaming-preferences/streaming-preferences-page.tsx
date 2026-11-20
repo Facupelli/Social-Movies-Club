@@ -9,7 +9,7 @@ export async function StreamingPreferencesPage({ userId }: { userId: string }) {
   const settings = await loadStreamingPreferencesSettings(userId);
 
   return (
-    <div className="min-h-svh p-4 md:px-10 md:py-6">
+    <div className="p-4 md:px-10 md:py-6">
       <header className="flex items-center gap-2">
         <Link
           aria-label="Volver a tu perfil"

@@ -3,10 +3,13 @@ import { Skeleton } from '@/shared/ui/skeleton';
 
 export default function WatchlistLoading() {
   return (
-    <section className="space-y-4 py-10">
-      <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-5 w-16" />
-        <Skeleton className="h-11 w-52 max-w-[70vw]" />
+    <section className="space-y-4 py-6 md:pb-10">
+      <div className="space-y-1">
+        <div className="flex h-10 items-center justify-between gap-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-10 w-36 rounded-md sm:w-56" />
+        </div>
+        <Skeleton className="h-11 w-40 rounded-full" />
       </div>
       <MovieGrid>
         {[...Array(6)].map((_, idx) => (

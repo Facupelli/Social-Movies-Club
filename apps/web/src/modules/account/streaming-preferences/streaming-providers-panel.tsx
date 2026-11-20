@@ -19,7 +19,7 @@ function SavedStreamingProviders({
   return (
     <ul
       aria-label="Tus plataformas"
-      className="divide-border divide-y border-border border-y"
+      className="max-h-[min(45svh,24rem)] divide-border divide-y overflow-y-auto border-border border-y"
     >
       {selectedProviders.map((provider) => (
         <li className="flex min-h-14 items-center gap-3 py-2" key={provider.id}>

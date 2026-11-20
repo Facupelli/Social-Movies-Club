@@ -2,7 +2,7 @@ import { Skeleton } from '@/shared/ui/skeleton';
 
 export function StreamingPreferencesSkeleton() {
   return (
-    <div className="min-h-svh p-4 md:px-10 md:py-6">
+    <div className="p-4 md:px-10 md:py-6">
       <header className="flex items-center gap-2">
         <Skeleton className="-ml-2 size-11 shrink-0 rounded-sm" />
         <Skeleton className="h-6 w-32" />

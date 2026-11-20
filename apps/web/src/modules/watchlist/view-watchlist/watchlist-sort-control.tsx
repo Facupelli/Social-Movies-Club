@@ -12,10 +12,22 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-const options: { label: string; value: WatchlistSort }[] = [
-  { label: 'Agregadas recientemente', value: 'recently-added' },
-  { label: 'Calificación de personas que seguís', value: 'trusted-rating' },
-  { label: 'Más calificadas por personas que seguís', value: 'most-rated' },
+const options: { label: string; shortLabel: string; value: WatchlistSort }[] = [
+  {
+    label: 'Agregadas recientemente',
+    shortLabel: 'Más recientes',
+    value: 'recently-added',
+  },
+  {
+    label: 'Calificación de personas que seguís',
+    shortLabel: 'Mejor puntuadas',
+    value: 'trusted-rating',
+  },
+  {
+    label: 'Más calificadas por personas que seguís',
+    shortLabel: 'Más puntuadas',
+    value: 'most-rated',
+  },
 ];
 
 export function WatchlistSortControl({
@@ -47,9 +59,15 @@ export function WatchlistSortControl({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="min-h-11 max-w-full gap-2" variant="outline">
-          <ArrowUpDown className="size-4 shrink-0" />
-          <span className="truncate">{selected.label}</span>
+        <Button
+          aria-label={`Ordenar: ${selected.label}`}
+          className="h-10 min-w-0 shrink bg-transparent transition-colors"
+          type="button"
+          variant="outline"
+        >
+          <ArrowUpDown aria-hidden="true" className="size-4" />
+          <span className="truncate sm:hidden">{selected.shortLabel}</span>
+          <span className="hidden truncate sm:inline">{selected.label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-w-[calc(100vw-2rem)]">

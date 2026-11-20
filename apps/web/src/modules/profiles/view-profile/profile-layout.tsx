@@ -20,10 +20,7 @@ export default async function ProfileLayout(
 ) {
   const session = await getServerSession();
 
-  if (!session) {
-    redirect('/');
-  }
-
+  const viewerId = session?.user.id;
   const params = await props.params;
   const profileUserId = params.id;
 
@@ -33,18 +30,15 @@ export default async function ProfileLayout(
         <Link href="/">
           <ArrowLeft />
         </Link>
-        {session.user.id === profileUserId && <ProfileSettingsLink />}
+        {viewerId === profileUserId && <ProfileSettingsLink />}
       </div>
 
       <div className="px-4 md:px-10">
         <Suspense fallback={<ProfileSkeleton />}>
-          <UserInfo
-            profileUserId={profileUserId}
-            sessionUserId={session.user.id}
-          />
+          <UserInfo profileUserId={profileUserId} sessionUserId={viewerId} />
         </Suspense>
 
-        <ProfileNav userId={profileUserId} />
+        {viewerId && <ProfileNav userId={profileUserId} />}
 
         {props.children}
       </div>
@@ -52,11 +46,11 @@ export default async function ProfileLayout(
   );
 }
 
-async function getUserInfo(profileUserId: string, sessionUserId: string) {
+async function getUserInfo(profileUserId: string, sessionUserId?: string) {
   const profileUserPromise = getPublicProfile(profileUserId);
   const profileFollowsInfoPromise = getFollowSummary(profileUserId);
   const isFollowingUserPromise =
-    sessionUserId === profileUserId
+    !sessionUserId || sessionUserId === profileUserId
       ? Promise.resolve(false)
       : getIsFollowingUser(sessionUserId, profileUserId);
 
@@ -74,7 +68,7 @@ async function UserInfo({
   sessionUserId,
 }: {
   profileUserId: string;
-  sessionUserId: string;
+  sessionUserId: string | undefined;
 }) {
   const { isFollowing, profileFollowsInfo, profileUser } = await getUserInfo(
     profileUserId,
@@ -101,7 +95,7 @@ async function UserInfo({
             />
           </div>
         )}
-        {sessionUserId !== profileUser.id && (
+        {sessionUserId && sessionUserId !== profileUser.id && (
           <div>
             <FollowUserButton
               followedUserId={profileUser.id}

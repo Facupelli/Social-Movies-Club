@@ -111,11 +111,11 @@ export function StreamingProvidersForm({
     <form action={action} className="flex flex-col">
       <ul
         aria-label="Plataformas de streaming"
-        className="divide-border divide-y border-border border-y"
+        className="relative max-h-[min(45svh,24rem)] divide-border divide-y overflow-y-auto border-border border-y"
       >
         {options.map((provider) => (
           <li key={provider.id}>
-            <label className="flex min-h-14 cursor-pointer items-center gap-3 px-2 py-2 transition-colors has-[input:checked]:bg-primary-subtle has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:outline-none">
+            <label className="flex min-h-14 cursor-pointer items-center gap-3 px-2 py-2 transition-colors has-[input:checked]:bg-primary-subtle has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:outline-none has-[input:focus-visible]:ring-inset">
               <input
                 className="peer sr-only"
                 defaultChecked={selectedProviderIds.includes(provider.id)}
