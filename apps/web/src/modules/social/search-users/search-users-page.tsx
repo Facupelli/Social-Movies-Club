@@ -67,7 +67,7 @@ export default function SearchUsersPage({
           onTransitionEnd={handleTransitionEnd}
         >
           <h1 className="text-2xl font-bold">Encuentra a tu gente</h1>
-          <p className="text-sm text-muted-foreground text-center text-pretty px-4">
+          <p className="text-sm text-muted-foreground text-center text-balance px-4">
             Sigue a tus amigos para ver sus mejores puntuaciones y descubrir
             nuevas películas a través de gente en la que confías.
           </p>
@@ -92,6 +92,8 @@ function SearchInput({ onChange }: { onChange: (values: string) => void }) {
     <div className="relative">
       <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-primary" />
       <Input
+        aria-label="Buscar usuario por su @"
+        autoFocus
         className="w-full px-10"
         onChange={(e) => onChange(e.target.value)}
         placeholder="Buscar usuario por su @"

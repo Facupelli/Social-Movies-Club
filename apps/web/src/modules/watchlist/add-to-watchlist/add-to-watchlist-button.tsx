@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useActionState } from 'react';
 import type { MediaKind } from '@/modules/media-catalog/media.type';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
@@ -12,8 +12,8 @@ import type {
   WatchlistStatusMap,
 } from '@/modules/watchlist/watchlist.types';
 import { authClient } from '@/platform/auth/auth-client';
-import { SubmitButton } from '@/shared/components/submit-button';
 import type { ApiResponse } from '@/shared/http/safe-execute';
+import { Button } from '@/shared/ui/button';
 import { DropdownMenuItem } from '@/shared/ui/dropdown-menu';
 import { cn } from '@/shared/utilities/utils';
 import { addMovieToWatchlist } from './add-movie';
@@ -88,8 +88,11 @@ export function AddToWatchlistButton({
     return result;
   };
 
-  const [addState, addAction] = useActionState(handleAdd, initialState);
-  const [removeState, removeAction] = useActionState(
+  const [addState, addAction, isAdding] = useActionState(
+    handleAdd,
+    initialState
+  );
+  const [removeState, removeAction, isRemoving] = useActionState(
     handleRemove,
     initialState
   );
@@ -101,30 +104,30 @@ export function AddToWatchlistButton({
     ? undefined
     : addState.error || (removeState.success ? undefined : removeState.error);
 
-  const actionButton = isInWatchlist ? (
-    <SubmitButton
-      aria-label="Quitar de tu lista"
+  const isPending = isAdding || isRemoving;
+  const label = isInWatchlist ? 'Quitar de tu lista' : 'Agregar a tu lista';
+  const WatchlistIcon = isInWatchlist ? EyeOff : Eye;
+  const actionButton = (
+    <Button
+      aria-busy={isPending}
+      aria-label={label}
       className={cn('w-full', className)}
-      formAction={removeAction}
-      hideLoadingText={presentation === 'button'}
+      disabled={isPending}
+      formAction={isInWatchlist ? removeAction : addAction}
       size="sm"
+      type="submit"
       variant={presentation === 'menu-item' ? 'ghost' : variant}
     >
-      <EyeOff className="size-4" />
-      {presentation === 'menu-item' ? 'Quitar de tu lista' : null}
-    </SubmitButton>
-  ) : (
-    <SubmitButton
-      aria-label="Agregar a tu lista"
-      className={cn('w-full', className)}
-      formAction={addAction}
-      hideLoadingText={presentation === 'button'}
-      size="sm"
-      variant={presentation === 'menu-item' ? 'ghost' : variant}
-    >
-      <Eye className="size-4" />
-      {presentation === 'menu-item' ? 'Agregar a tu lista' : null}
-    </SubmitButton>
+      {isPending ? (
+        <Loader2
+          aria-hidden="true"
+          className="size-4 motion-safe:animate-spin"
+        />
+      ) : (
+        <WatchlistIcon aria-hidden="true" className="size-4" />
+      )}
+      {presentation === 'menu-item' ? label : null}
+    </Button>
   );
 
   return (
@@ -133,7 +136,9 @@ export function AddToWatchlistButton({
       <input name="kind" type="hidden" value={kind} />
 
       {presentation === 'menu-item' ? (
-        <DropdownMenuItem asChild>{actionButton}</DropdownMenuItem>
+        <DropdownMenuItem asChild onSelect={(event) => event.preventDefault()}>
+          {actionButton}
+        </DropdownMenuItem>
       ) : (
         actionButton
       )}

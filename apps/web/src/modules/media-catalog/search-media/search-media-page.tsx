@@ -39,8 +39,9 @@ export function SearchMediaPage({
       params.delete('q');
     }
     const next = params.toString();
+    // Passing Next.js's internal history state would bypass router URL syncing.
     window.history.replaceState(
-      window.history.state,
+      null,
       '',
       next ? `${pathname}?${next}` : pathname
     );
