@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { enrichTheatricalAvailability } from '@/modules/theatrical-availability/enrich-theatrical-availability.server';
 import {
   getTimelineTrustedRatingContexts,
   timelineTrustedRatingContextKey,
@@ -17,29 +18,30 @@ export async function loadUserFeedPage({
 }): Promise<UserFeedPage> {
   const page = await getUserFeed({ userId, cursor });
 
-  try {
-    const contexts = await getTimelineTrustedRatingContexts(
+  const [items, contexts] = await Promise.all([
+    enrichTheatricalAvailability(userId, page.items),
+    getTimelineTrustedRatingContexts(
       userId,
       page.items.map((item) => ({
         mediaId: item.movieId,
         actorId: item.actorId,
       }))
-    );
+    ).catch(() => null),
+  ]);
 
-    return {
-      ...page,
-      items: page.items.map((item) => ({
-        ...item,
-        trustedRatingContext:
-          contexts[
-            timelineTrustedRatingContextKey({
-              mediaId: item.movieId,
-              actorId: item.actorId,
-            })
-          ] ?? null,
-      })),
-    };
-  } catch {
-    return page;
-  }
+  return {
+    ...page,
+    items: contexts
+      ? items.map((item) => ({
+          ...item,
+          trustedRatingContext:
+            contexts[
+              timelineTrustedRatingContextKey({
+                mediaId: item.movieId,
+                actorId: item.actorId,
+              })
+            ] ?? null,
+        }))
+      : items,
+  };
 }

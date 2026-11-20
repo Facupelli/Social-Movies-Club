@@ -23,6 +23,7 @@ import {
   getUserRecommendationsQueryOptions,
   recommendationsQueryKeys,
 } from '@/modules/recommendations/use-user-recommendations';
+import { InTheatersBadge } from '@/modules/theatrical-availability/in-theaters-badge';
 import SignInButton from '@/shared/components/sign-in-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
@@ -221,7 +222,7 @@ function RecommendationCard({
                   alt={item.movieTitle}
                   className="object-cover"
                   fill
-                  sizes="(min-width: 768px) 144px, 128px"
+                  sizes="(min-width: 768px) 144px, 120px"
                   src={`https://image.tmdb.org/t/p/w342${item.moviePoster}`}
                   unoptimized
                 />
@@ -229,15 +230,21 @@ function RecommendationCard({
             </Link>
 
             <div className="min-w-0 flex-1 flex flex-col">
-              <div className="flex justify-between">
-                <Link
-                  className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  href={href}
-                >
-                  <h2 className="text-pretty font-semibold md:text-lg leading-snug">
+              <div className="flex justify-between gap-2">
+                <h2 className="min-w-0 wrap-anywhere font-semibold md:text-lg leading-snug">
+                  <Link
+                    className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    href={href}
+                  >
                     {item.movieTitle}
-                  </h2>
-                </Link>
+                  </Link>
+                  {item.theatricalAvailability === 'now_playing' ? (
+                    <>
+                      {' '}
+                      <InTheatersBadge title={item.movieTitle} />
+                    </>
+                  ) : null}
+                </h2>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

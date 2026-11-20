@@ -1,9 +1,9 @@
 import 'server-only';
 
 import { ZodError } from 'zod';
+import { findAccountCountry } from '@/modules/account/current-account-profile';
 import { DatabaseError } from '@/platform/database/postgres/db-utils';
 import {
-  findUserStreamingCountry,
   persistStreamingCountry,
   replaceStreamingProviders,
   UNKNOWN_STREAMING_PROVIDER_CODE,
@@ -58,7 +58,7 @@ export async function saveStreamingProviders(
   try {
     const { providerIds } = validateStreamingProviders(formData);
 
-    const countryCode = await findUserStreamingCountry(userId);
+    const countryCode = await findAccountCountry(userId);
     if (!countryCode) {
       throw new StreamingPreferencesApplicationError(COUNTRY_REQUIRED_ERROR);
     }

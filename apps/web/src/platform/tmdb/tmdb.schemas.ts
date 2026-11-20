@@ -6,6 +6,16 @@ const searchEnvelopeSchema = z.object({
   total_results: z.number().int(),
 });
 
+const tmdbMovieIdSchema = z.number().int().positive();
+
+export const nowPlayingMovieIdsSchema = z.array(tmdbMovieIdSchema);
+
+export const nowPlayingPageSchema = z.object({
+  page: z.number().int().positive(),
+  total_pages: z.number().int().nonnegative(),
+  results: z.array(z.object({ id: tmdbMovieIdSchema })),
+});
+
 const movieSearchResultSchema = z
   .object({
     id: z.number().int(),

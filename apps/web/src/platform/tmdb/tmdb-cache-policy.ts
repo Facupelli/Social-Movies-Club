@@ -1,5 +1,6 @@
 export const TMDB_CACHE_TTL_SECONDS = {
   mediaDetails: 24 * 60 * 60,
+  nowPlaying: 12 * 60 * 60,
   providerCatalogue: 12 * 60 * 60,
   watchProviders: 12 * 60 * 60,
   search: 10 * 60,
@@ -7,6 +8,7 @@ export const TMDB_CACHE_TTL_SECONDS = {
 
 export type TmdbCacheResource =
   | 'media-details'
+  | 'now-playing'
   | 'provider-catalogue'
   | 'watch-providers'
   | 'search';

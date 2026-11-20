@@ -1,3 +1,5 @@
+import type { TheatricalAvailability } from '@/modules/theatrical-availability/theatrical-availability.types';
+
 export type RecommendationCursor = {
   supporterCount: number;
   averageScore: string;
@@ -31,6 +33,7 @@ export type RecommendationItem = {
   movieRuntimeMinutes: number | null;
   movieOverview: string;
   kind: 'movie' | 'tv_series';
+  theatricalAvailability?: TheatricalAvailability;
 
   ratingCount: number;
   supporterCount: number;

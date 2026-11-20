@@ -12,6 +12,8 @@ import {
   movieDetailResponseSchema,
   movieSearchResponseSchema,
   multiSearchResponseSchema,
+  nowPlayingMovieIdsSchema,
+  nowPlayingPageSchema,
   providerCatalogueResponseSchema,
   tvDetailResponseSchema,
   tvSearchResponseSchema,
@@ -41,6 +43,36 @@ import type {
 const DEFAULT_LANGUAGE = 'es-AR';
 const DEFAULT_PAGE = 1;
 const INCLUDE_ADULT = false;
+const NOW_PLAYING_MAX_PAGES = 50;
+const NOW_PLAYING_CONCURRENCY = 4;
+const NOW_PLAYING_TIMEOUT_MS = 5000;
+const NOW_PLAYING_CACHE_TIMEOUT_MS = 150;
+
+async function withNowPlayingCacheDeadline<T>(
+  operation: Promise<T>
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('Now-playing cache timed out')),
+          NOW_PLAYING_CACHE_TIMEOUT_MS
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function nowPlayingCacheKey(countryCode: string): string {
+  return buildTmdbCacheKey('now-playing', {
+    countryCode,
+    language: DEFAULT_LANGUAGE,
+  });
+}
 
 interface ITmdbRepository {
   searchMovies(params: SearchMovieQueryParams): Promise<SearchMoviesResult>;
@@ -220,6 +252,89 @@ export class TmdbRepository implements ITmdbRepository {
     return normalizeMediaAvailability(json);
   }
 
+  async readNowPlayingMovieIds(countryCode: string): Promise<number[] | null> {
+    const cached = await withNowPlayingCacheDeadline(
+      getCache().get<unknown>(nowPlayingCacheKey(countryCode))
+    );
+    const parsed = nowPlayingMovieIdsSchema.safeParse(cached);
+    return parsed.success ? parsed.data : null;
+  }
+
+  async refreshNowPlayingMovieIds(countryCode: string): Promise<number[]> {
+    const controller = new AbortController();
+    const signal = AbortSignal.any([
+      controller.signal,
+      AbortSignal.timeout(NOW_PLAYING_TIMEOUT_MS),
+    ]);
+    const loadPage = async (page: number) => {
+      const response = await this.fetchJson(
+        '/movie/now_playing',
+        { language: DEFAULT_LANGUAGE, page: String(page), region: countryCode },
+        signal
+      );
+      const data = nowPlayingPageSchema.parse(response);
+      if (data.page !== page) {
+        throw new Error('Unexpected TMDB now-playing page');
+      }
+      return data;
+    };
+
+    const movieIds = new Set<number>();
+    try {
+      const first = await loadPage(1);
+      const totalPages = first.total_pages;
+      if (
+        totalPages > NOW_PLAYING_MAX_PAGES ||
+        (totalPages === 0 && first.results.length > 0) ||
+        (totalPages > 1 && first.results.length === 0)
+      ) {
+        throw new Error('Invalid TMDB now-playing page count');
+      }
+      for (const { id } of first.results) {
+        movieIds.add(id);
+      }
+
+      let nextPage = 2;
+      const loadRemainingPages = async (): Promise<void> => {
+        if (nextPage > totalPages) {
+          return;
+        }
+        const page = await loadPage(nextPage++);
+        if (page.total_pages !== totalPages || page.results.length === 0) {
+          throw new Error('TMDB now-playing pagination changed during refresh');
+        }
+        for (const { id } of page.results) {
+          movieIds.add(id);
+        }
+        await loadRemainingPages();
+      };
+
+      await Promise.all(
+        Array.from(
+          {
+            length: Math.min(
+              NOW_PLAYING_CONCURRENCY,
+              Math.max(0, totalPages - 1)
+            ),
+          },
+          loadRemainingPages
+        )
+      );
+    } finally {
+      controller.abort();
+    }
+
+    const snapshot = [...movieIds];
+    await withNowPlayingCacheDeadline(
+      getCache().set(
+        nowPlayingCacheKey(countryCode),
+        snapshot,
+        TMDB_CACHE_TTL_SECONDS.nowPlaying
+      )
+    );
+    return snapshot;
+  }
+
   private async searchByType(
     type: TmdbMediaType,
     params: SearchMovieQueryParams
@@ -326,12 +441,33 @@ export class TmdbRepository implements ITmdbRepository {
       // Cache outages must not make the upstream resource unavailable.
     }
 
+    const data = schema.parse(await this.fetchJson(endpoint, query));
+
+    try {
+      await sharedCache.set(cacheKey, data, ttlSeconds);
+    } catch {
+      // Cache writes are best-effort and never replace a valid upstream result.
+    }
+
+    return data;
+  }
+
+  private async fetchJson(
+    endpoint: string,
+    query?: Record<string, string>,
+    signal?: AbortSignal
+  ): Promise<unknown> {
+    if (!this.bearer) {
+      throw new Error('TMDB_ACCESS_TOKEN is required');
+    }
+
     const url = new URL(`${this.baseUrl}${endpoint}`);
     for (const [key, value] of Object.entries(query ?? {})) {
       url.searchParams.set(key, value);
     }
 
     const response = await fetch(url, {
+      signal,
       headers: {
         Authorization: `Bearer ${this.bearer}`,
         'Content-Type': 'application/json;charset=utf-8',
@@ -351,15 +487,7 @@ export class TmdbRepository implements ITmdbRepository {
       );
     }
 
-    const data = schema.parse(await response.json());
-
-    try {
-      await sharedCache.set(cacheKey, data, ttlSeconds);
-    } catch {
-      // Cache writes are best-effort and never replace a valid upstream result.
-    }
-
-    return data;
+    return await response.json();
   }
 }
 

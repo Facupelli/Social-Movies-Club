@@ -51,20 +51,6 @@ export async function findStreamingPreferencesBase(
   });
 }
 
-export async function findUserStreamingCountry(
-  userId: string
-): Promise<string | null> {
-  return await withDatabase(async (db) => {
-    const rows = await db
-      .select({ countryCode: userProfiles.countryCode })
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
-      .limit(1);
-
-    return rows[0]?.countryCode ?? null;
-  });
-}
-
 /**
  * Persists the user's country without touching their provider selections.
  */

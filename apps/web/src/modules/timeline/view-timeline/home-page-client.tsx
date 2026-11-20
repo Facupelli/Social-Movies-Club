@@ -10,6 +10,7 @@ import { KIND_DICT } from '@/modules/media-catalog/media.constants';
 import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
 import { getUserRatingsQueryOptions } from '@/modules/ratings/get-rating-status/use-user-ratings';
 import { RateDialog } from '@/modules/ratings/rate-media/rate-dialog';
+import { InTheatersBadge } from '@/modules/theatrical-availability/in-theaters-badge';
 import type { FeedItem } from '@/modules/timeline/view-timeline/feed.types';
 import { FeedSkeleton } from '@/modules/timeline/view-timeline/home-page-skeleton';
 import { getUserFeedQueryOptions } from '@/modules/timeline/view-timeline/use-user-feed';
@@ -227,7 +228,8 @@ function FeedItemCard({
 
           <div className="mt-3 flex min-w-0 gap-3 md:gap-4">
             <Link
-              className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-28"
+              aria-label={`Ver ${item.movieTitle}`}
+              className="relative aspect-[2/3] w-24 shrink-0 self-start overflow-hidden rounded-xs bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-28"
               href={`/media/${item.kind}/${item.movieTmdbId}`}
             >
               {item.moviePoster ? (
@@ -243,14 +245,20 @@ function FeedItemCard({
             </Link>
 
             <div className="min-w-0 flex-1 py-0.5">
-              <Link
-                className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                href={`/media/${item.kind}/${item.movieTmdbId}`}
-              >
-                <h2 className="text-pretty font-semibold leading-snug md:text-lg">
+              <h2 className="wrap-anywhere font-semibold leading-snug md:text-lg">
+                <Link
+                  className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  href={`/media/${item.kind}/${item.movieTmdbId}`}
+                >
                   {item.movieTitle}
-                </h2>
-              </Link>
+                </Link>
+                {item.theatricalAvailability === 'now_playing' ? (
+                  <>
+                    {' '}
+                    <InTheatersBadge title={item.movieTitle} />
+                  </>
+                ) : null}
+              </h2>
               <p className="mt-1 text-muted-foreground text-xs leading-snug md:text-sm">
                 {item.movieYear} · {KIND_DICT[item.kind]}
               </p>

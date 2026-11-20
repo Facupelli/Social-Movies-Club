@@ -33,14 +33,20 @@ export async function StreamingPreferencesPage({ userId }: { userId: string }) {
         </p>
       </section>
 
-      <CountrySection settings={settings} />
+      <CountrySection settings={settings} viewerUserId={userId} />
     </div>
   );
 }
 
 type Settings = Awaited<ReturnType<typeof loadStreamingPreferencesSettings>>;
 
-function CountrySection({ settings }: { settings: Settings }) {
+function CountrySection({
+  settings,
+  viewerUserId,
+}: {
+  settings: Settings;
+  viewerUserId: string;
+}) {
   if (settings.countryCode === null) {
     return (
       <div className="pt-2">
@@ -50,6 +56,7 @@ function CountrySection({ settings }: { settings: Settings }) {
         <StreamingCountryForm
           countryCode={SUPPORTED_STREAMING_COUNTRY.code}
           submitLabel="Configurar plataformas"
+          viewerUserId={viewerUserId}
         />
       </div>
     );
@@ -65,6 +72,7 @@ function CountrySection({ settings }: { settings: Settings }) {
         <StreamingCountryForm
           countryCode={SUPPORTED_STREAMING_COUNTRY.code}
           submitLabel="Usar Argentina"
+          viewerUserId={viewerUserId}
         />
       </div>
     );

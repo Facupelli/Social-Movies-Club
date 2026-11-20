@@ -1,4 +1,5 @@
 import type { MediaKind } from '@/modules/media-catalog/media.type';
+import type { TheatricalAvailability } from '@/modules/theatrical-availability/theatrical-availability.types';
 import type { TimelineTrustedRatingContext } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import type { FeedCursor } from './feed-cursor';
 
@@ -29,6 +30,7 @@ export type FeedItem = {
   movieTmdbId: number;
   movieOverview: string;
   kind: MediaKind;
+  theatricalAvailability?: TheatricalAvailability;
   score: number;
   viewerRating: FeedViewerRating | null;
   occurredAt: string;

@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { enrichTheatricalAvailability } from '@/modules/theatrical-availability/enrich-theatrical-availability.server';
 import { getUserRecommendations } from './get-user-recommendations.pg';
 import type {
   RecommendationCursor,
@@ -14,5 +15,9 @@ export async function loadUserRecommendationsPage({
   userId: string;
   cursor?: RecommendationCursor | null;
 }): Promise<UserRecommendationsPage> {
-  return await getUserRecommendations({ userId, cursor });
+  const page = await getUserRecommendations({ userId, cursor });
+  return {
+    ...page,
+    items: await enrichTheatricalAvailability(userId, page.items),
+  };
 }
