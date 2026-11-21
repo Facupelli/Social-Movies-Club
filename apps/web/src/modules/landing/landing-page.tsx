@@ -1,4 +1,10 @@
-import { ArrowRight, CircleCheck, UserPlus } from 'lucide-react';
+import {
+  ArrowRight,
+  CircleCheck,
+  ListFilter,
+  Settings,
+  UserPlus,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SignInProvider } from '@/platform/auth/sign-in-provider';
@@ -248,7 +254,63 @@ export function LandingPage({ signedIn }: { signedIn: boolean }) {
           </div>
         </section>
 
-        <section aria-labelledby="faq-title" className={section} id="preguntas">
+        <section
+          aria-labelledby="streaming-title"
+          className={section}
+          id="plataformas"
+        >
+          <div className={cn(container, 'grid gap-8 md:grid-cols-2 md:gap-12')}>
+            <h2 className={heading} id="streaming-title">
+              Encontrá qué ver{' '}
+              <span className="block text-primary-hover">
+                en las plataformas que usás.
+              </span>
+            </h2>
+            <ol className="divide-y divide-border">
+              <li className="flex items-start gap-4 pb-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary-hover">
+                  <Settings aria-hidden="true" className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-semibold">Guardá tus plataformas.</h3>
+                  <p className="mt-1 text-pretty text-muted-foreground leading-relaxed">
+                    Elegí en Configuración los servicios de streaming que usás.
+                    Podés cambiarlos cuando quieras.
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4 pt-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary-hover">
+                  <ListFilter aria-hidden="true" className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-semibold">Filtrá por tus plataformas.</h3>
+                  <p className="mt-1 text-pretty text-muted-foreground leading-relaxed">
+                    Activá{' '}
+                    <strong className="font-semibold text-foreground">
+                      En mis plataformas
+                    </strong>{' '}
+                    en tu lista,{' '}
+                    <strong className="font-semibold text-foreground">
+                      Para vos
+                    </strong>{' '}
+                    o{' '}
+                    <strong className="font-semibold text-foreground">
+                      Recientes
+                    </strong>{' '}
+                    para ver solo las películas y series disponibles en ellas.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="faq-title"
+          className={cn(section, 'bg-surface')}
+          id="preguntas"
+        >
           <div
             className={cn(
               container,
@@ -285,7 +347,7 @@ export function LandingPage({ signedIn }: { signedIn: boolean }) {
           </div>
         </section>
 
-        <section aria-labelledby="cta-title" className="pb-14 sm:pb-20">
+        <section aria-labelledby="cta-title" className="py-14 sm:py-20">
           <div className={container}>
             <div className="rounded-lg border border-border bg-card px-4 py-10 text-center sm:px-8 sm:py-14">
               <h2 className={cn(heading, 'mx-auto max-w-2xl')} id="cta-title">
@@ -295,7 +357,7 @@ export function LandingPage({ signedIn }: { signedIn: boolean }) {
                 Seguí a personas cuyo gusto te interesa, compartí tus notas y
                 descubrí qué ver.
               </p>
-              <div className="mt-6">{primaryAction}</div>
+              <div className="mt-6 flex justify-center">{primaryAction}</div>
             </div>
           </div>
         </section>
