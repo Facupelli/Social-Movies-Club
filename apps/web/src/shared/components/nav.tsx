@@ -12,12 +12,12 @@ import { Button } from '@/shared/ui/button';
 import SignInButton from './sign-in-button';
 
 export function Nav() {
-  const pathname = usePathname() || '/';
+  const pathname = usePathname() || '';
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
 
-  const isHomeActive = pathname === '/';
+  const isHomeActive = pathname === '/app' || pathname === '/recommendations';
   const isSearchActive = pathname.startsWith('/search');
   const isWatchlistActive = session?.user.id
     ? pathname.startsWith(`/profile/${session.user.id}/watchlist`)
@@ -36,7 +36,7 @@ export function Nav() {
     <nav className="fixed z-10 bottom-0 left-0 flex w-full flex-row justify-center bg-sidebar px-4 py-2 md:sticky md:top-0 md:h-screen md:w-[250px] md:flex-col md:px-4 md:py-8">
       <ul className="flex gap-6 md:gap-2 md:grid">
         <li>
-          <Link className={getNavLinkClassName(isHomeActive)} href="/">
+          <Link className={getNavLinkClassName(isHomeActive)} href="/app">
             <Home className={getNavIconClassName(isHomeActive)} />
             <span className="hidden md:block">Inicio</span>
           </Link>

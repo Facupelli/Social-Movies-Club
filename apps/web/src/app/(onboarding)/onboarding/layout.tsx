@@ -17,13 +17,13 @@ export default async function OnboardingLayout({
   const session = await getServerSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   const profile = await getCurrentAccountProfile(session.user.id);
 
   if (profile?.onboardingCompletedAt) {
-    redirect('/');
+    redirect('/app');
   }
 
   return (

@@ -7,7 +7,7 @@ export default async function UsernamePage() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   const profile = await getCurrentAccountProfile(session.user.id);

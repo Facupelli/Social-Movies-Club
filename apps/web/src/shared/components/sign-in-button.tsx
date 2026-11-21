@@ -6,19 +6,31 @@ import { useSignIn } from '@/platform/auth/sign-in-provider';
 import { Button } from '@/shared/ui/button';
 import { cn } from '@/shared/utilities/utils';
 
-const label = 'Ingresar';
+type SignInButtonProps = Pick<
+  React.ComponentProps<typeof Button>,
+  'variant' | 'size' | 'className'
+> & {
+  label?: string;
+};
 
-export default function SignInButton() {
+export default function SignInButton({
+  label = 'Ingresar',
+  size,
+  variant,
+  className,
+}: SignInButtonProps) {
   const { isPending, failedButtonId, signIn } = useSignIn();
   const buttonId = useId();
 
   return (
     <div>
       <Button
-        className="grid place-items-center px-4"
+        className={cn('grid place-items-center px-4', className)}
         disabled={isPending}
         onClick={() => signIn(buttonId)}
+        size={size}
         type="button"
+        variant={variant}
       >
         <span
           className={cn(

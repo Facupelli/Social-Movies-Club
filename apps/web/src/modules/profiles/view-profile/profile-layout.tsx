@@ -27,7 +27,7 @@ export default async function ProfileLayout(
   return (
     <div className="min-h-svh">
       <div className="flex items-center justify-between px-2 py-2 md:px-10">
-        <Link href="/">
+        <Link href="/app">
           <ArrowLeft />
         </Link>
         {viewerId === profileUserId && <ProfileSettingsLink />}
@@ -76,7 +76,7 @@ async function UserInfo({
   );
 
   if (!profileUser) {
-    redirect('/');
+    redirect('/app');
   }
 
   return (

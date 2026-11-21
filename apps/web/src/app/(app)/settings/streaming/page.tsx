@@ -6,7 +6,7 @@ export default async function SettingsStreamingPage() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   return <StreamingPreferencesPage userId={session.user.id} />;

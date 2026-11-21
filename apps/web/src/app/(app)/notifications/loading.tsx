@@ -11,7 +11,7 @@ export default function NotificationsLoading() {
         <Link
           aria-label="Volver a Inicio"
           className="flex size-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          href="/"
+          href="/app"
         >
           <X className="size-6" />
         </Link>

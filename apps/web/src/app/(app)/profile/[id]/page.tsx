@@ -38,7 +38,7 @@ export default async function ProfileRatingsPage({
     searchParams,
   ]);
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   const viewerUserId = session.user.id;

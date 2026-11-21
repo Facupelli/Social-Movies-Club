@@ -26,7 +26,7 @@ export default async function FollowingPage(
   ]);
 
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   const profileUserId = profileIdSchema.safeParse(params.id);

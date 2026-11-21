@@ -6,7 +6,7 @@ export default async function UsersPage() {
   const session = await getServerSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/app');
   }
 
   return <SearchUsersPage viewerUserId={session.user.id} />;

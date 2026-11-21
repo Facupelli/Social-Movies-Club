@@ -45,7 +45,7 @@ export function SignInProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        callbackURL: '/app',
         errorCallbackURL: '/error',
         newUserCallbackURL: '/onboarding/username',
         disableRedirect: true,
