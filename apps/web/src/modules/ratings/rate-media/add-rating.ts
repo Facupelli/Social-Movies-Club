@@ -1,5 +1,6 @@
 'use server';
 
+import { refresh } from 'next/cache';
 import { rateMedia } from '@/modules/ratings/rate-media/rate-media';
 import type { RateMediaResult } from '@/modules/ratings/rating-mutation.types';
 import { withAuth } from '@/platform/auth/auth-server-action.middleware';
@@ -22,6 +23,10 @@ export async function addRatingToMovie(
         publicationMode: 'publish',
       });
     });
+
+    if (result.success && result.data.mediaIdentity.kind === 'movie') {
+      refresh();
+    }
 
     return result;
   });

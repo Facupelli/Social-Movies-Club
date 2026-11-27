@@ -1,8 +1,20 @@
 import { Children } from 'react';
+import { cn } from '@/shared/utilities/utils';
 
-export function MovieGrid({ children }: { children: React.ReactNode }) {
+export function MovieGrid({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(150px,1fr))] md:[grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
+    <div
+      className={cn(
+        'grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]',
+        className
+      )}
+    >
       {Children.toArray(children).map((child, idx) => (
         // biome-ignore lint:reason
         <div key={idx}>{child}</div>

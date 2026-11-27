@@ -20,21 +20,18 @@ import { updateUsername } from './update-username';
 const INITIAL_STATE: ApiResponse<void> = { success: false, error: '' };
 
 export function UpsertUsernameDialog({
-  canEdit,
   username,
 }: {
-  canEdit: boolean;
   username: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild className="cursor-pointer">
+      <DialogTrigger asChild>
         <Button
-          className="px-0 h-auto"
-          disabled={!canEdit}
-          size="sm"
+          className="h-auto max-w-full justify-start whitespace-normal p-0 text-left font-bold text-foreground text-lg"
+          title={username ? 'Editar nombre de usuario' : undefined}
           variant="link"
         >
           {username ?? 'Crear nombre de usuario'}
@@ -70,35 +67,36 @@ function UsernameDialogContent({
   const [state, action] = useActionState(handleUpdateUsername, INITIAL_STATE);
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
+    <DialogContent className="text-left">
+      <DialogHeader className="text-left">
+        <DialogTitle className="pr-6">
           {username ? 'Actualizar' : 'Crear'} nombre de usuario
         </DialogTitle>
         <DialogDescription>
           Al crear un nombre de usuario, los demás usuarios podrán buscarte en
           el buscador principal escribiendo tu @ para seguirte!
         </DialogDescription>
-
-        <form action={action} className="pt-4">
-          <UsernameField
-            currentUsername={username}
-            error={state.success ? undefined : state.error}
-          />
-
-          <DialogFooter className="gap-2 pt-4 md:gap-6">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancelar
-              </Button>
-            </DialogClose>
-
-            <SubmitButton loadingText={username ? 'Actualizando' : 'Creando'}>
-              {username ? 'Actualizar' : 'Crear'}
-            </SubmitButton>
-          </DialogFooter>
-        </form>
       </DialogHeader>
+
+      <form action={action}>
+        <UsernameField
+          currentUsername={username}
+          error={state.success ? undefined : state.error}
+          inputClassName="bg-surface dark:bg-surface"
+        />
+
+        <DialogFooter className="gap-2 pt-4 md:gap-6">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Cancelar
+            </Button>
+          </DialogClose>
+
+          <SubmitButton loadingText={username ? 'Actualizando' : 'Creando'}>
+            {username ? 'Actualizar' : 'Crear'}
+          </SubmitButton>
+        </DialogFooter>
+      </form>
     </DialogContent>
   );
 }

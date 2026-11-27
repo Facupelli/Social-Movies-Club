@@ -25,16 +25,22 @@ export function MoviePoster({
   posterPath,
   title,
   size = 'default',
+  className,
 }: {
   posterPath: string;
   title: string;
   size?: 'small' | 'default';
+  className?: string;
 }) {
   const sizeClasses = size === 'small' ? 'w-[120px]' : 'w-full';
 
   return (
     <div
-      className={`relative shrink-0 overflow-hidden rounded-xs bg-muted ${sizeClasses} aspect-[2/3]`}
+      className={cn(
+        'relative aspect-[2/3] shrink-0 overflow-hidden rounded-xs bg-muted',
+        sizeClasses,
+        className
+      )}
     >
       {posterPath ? (
         <Image
@@ -79,14 +85,26 @@ export function MovieReleaseDate({ year }: { year: string }) {
   );
 }
 
-export function MovieScore({ score }: { score?: number }) {
+export function MovieScore({
+  className,
+  score,
+}: {
+  className?: string;
+  score?: number;
+}) {
   if (!score) {
     return null;
   }
 
   return (
-    <div className="flex size-7 items-center justify-center rounded bg-primary md:size-9">
-      <p className="font-bold text-sm md:text-xl">{score}</p>
+    <div
+      className={cn(
+        'flex size-7 items-center justify-center rounded bg-primary font-bold text-sm md:size-9 md:text-xl',
+        className
+      )}
+    >
+      <span className="sr-only">Calificación: </span>
+      {score}
     </div>
   );
 }

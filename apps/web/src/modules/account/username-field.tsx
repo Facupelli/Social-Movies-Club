@@ -5,13 +5,16 @@ import {
 } from '@/modules/account/username-policy';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
+import { cn } from '@/shared/utilities/utils';
 
 export function UsernameField({
   currentUsername,
   error,
+  inputClassName,
 }: {
   currentUsername?: string | null;
   error?: string;
+  inputClassName?: string;
 }) {
   const descriptionId = 'username-description';
   const errorId = 'username-error';
@@ -35,7 +38,7 @@ export function UsernameField({
           aria-invalid={Boolean(error)}
           autoCapitalize="none"
           autoComplete="username"
-          className="h-12 pl-10 text-base"
+          className={cn('h-12 pl-10 text-base', inputClassName)}
           defaultValue={
             currentUsername ? getUsernameHandle(currentUsername) : undefined
           }

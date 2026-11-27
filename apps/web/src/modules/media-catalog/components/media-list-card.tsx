@@ -10,6 +10,7 @@ import { AddToWatchlistButton } from '@/modules/watchlist/add-to-watchlist/add-t
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { formatRuntime } from '@/shared/utilities/format-runtime';
+import { cn } from '@/shared/utilities/utils';
 
 export function MediaListCard({
   isTrustedRatingLoading = false,
@@ -104,11 +105,13 @@ export function MediaListCard({
   );
 }
 
-function TrustedRating({
-  isLoading,
+export function TrustedRating({
+  className,
+  isLoading = false,
   summary,
 }: {
-  isLoading: boolean;
+  className?: string;
+  isLoading?: boolean;
   summary?: TrustedRatingSummary;
 }) {
   if (isLoading) {
@@ -124,7 +127,12 @@ function TrustedRating({
   }
 
   return (
-    <div className="mt-2 flex items-center gap-2 border-border border-t pt-2 sm:mt-3 sm:gap-3 sm:pt-3">
+    <div
+      className={cn(
+        'mt-2 flex items-center gap-2 border-border border-t pt-2 sm:mt-3 sm:gap-3 sm:pt-3',
+        className
+      )}
+    >
       <div aria-hidden="true" className="flex shrink-0 -space-x-2">
         {summary.previewRaters.map((rater) => (
           <Avatar

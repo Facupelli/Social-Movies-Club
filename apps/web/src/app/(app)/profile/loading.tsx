@@ -8,11 +8,13 @@ import { Skeleton } from '@/shared/ui/skeleton';
 export default function ProfileLoading() {
   return (
     <div className="min-h-svh">
-      <div className="px-2 py-2 md:px-10">
-        <Skeleton className="size-6" />
+      <div className="px-4 py-2">
+        <div className="grid size-11 place-items-center">
+          <Skeleton className="size-5" />
+        </div>
       </div>
 
-      <div className="px-4 md:px-10">
+      <div className="px-4">
         <ProfileSkeleton />
         <ProfileNavSkeleton />
         <ProfileRatingsSkeleton />

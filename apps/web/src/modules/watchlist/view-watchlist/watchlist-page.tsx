@@ -1,16 +1,13 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { profileIdSchema } from '@/modules/profiles/profile-id';
 import { getTrustedRatingSummaries } from '@/modules/trusted-rating-context/get-trusted-rating-summaries/get-trusted-rating-summaries';
 import type { TrustedRatingSummary } from '@/modules/trusted-rating-context/trusted-rating-context.types';
 import { getWatchlist } from '@/modules/watchlist/view-watchlist/watchlist';
 import { WatchlistItemsGrid } from '@/modules/watchlist/view-watchlist/watchlist-items-grid';
-import { WatchlistProviderFilter } from '@/modules/watchlist/view-watchlist/watchlist-provider-filter';
 import {
   parseWatchlistSort,
   sortWatchlistItems,
 } from '@/modules/watchlist/view-watchlist/watchlist-sort';
-import { WatchlistSortControl } from '@/modules/watchlist/view-watchlist/watchlist-sort-control';
 import { getServerSession } from '@/platform/auth/get-server-session';
 import { execute } from '@/shared/http/safe-execute';
 
@@ -101,34 +98,15 @@ export default async function WatchlistPage(props: WatchlistPageProps) {
         </output>
       ) : null}
       <WatchlistItemsGrid
-        filter={
-          viewerId &&
-          (canFilter ? (
-            <WatchlistProviderFilter active={filterActive} />
-          ) : (
-            <p className="text-pretty text-muted-foreground text-sm">
-              Filtrá tu lista por las plataformas que usás.{' '}
-              <Link
-                className="rounded-sm font-medium text-foreground underline decoration-muted-foreground underline-offset-4 hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                href="/settings/streaming"
-              >
-                Configurar plataformas
-              </Link>
-            </p>
-          ))
-        }
+        activeSort={activeSort}
+        canFilter={canFilter}
+        filterActive={filterActive}
         filteredTotal={filterActive ? totalCount : undefined}
         hasUnknownAvailability={unknownCount > 0}
         initialItems={items}
         isOwner={isOwner}
-        sort={
-          viewerId && (
-            <WatchlistSortControl
-              socialSortingAvailable={socialSortingAvailable}
-              value={activeSort}
-            />
-          )
-        }
+        showControls={Boolean(viewerId)}
+        socialSortingAvailable={socialSortingAvailable}
       />
     </section>
   );

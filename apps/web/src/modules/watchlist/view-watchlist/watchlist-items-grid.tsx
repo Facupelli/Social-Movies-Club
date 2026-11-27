@@ -1,22 +1,33 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
-import { MediaListCard } from '@/modules/media-catalog/components/media-list-card';
-import { getMediaIdentityKey } from '@/modules/media-catalog/media-identity';
-import type { EnrichedWatchlistItem } from '@/modules/watchlist/watchlist.types';
+import Link from 'next/link';
+import { useState } from 'react';
+import type {
+  EnrichedWatchlistItem,
+  WatchlistSort,
+} from '@/modules/watchlist/watchlist.types';
+import { WatchlistCard } from './watchlist-card';
+import { WatchlistProviderFilter } from './watchlist-provider-filter';
+import { WatchlistSortControl } from './watchlist-sort-control';
 
 export function WatchlistItemsGrid({
   initialItems,
   isOwner,
-  sort,
-  filter,
+  activeSort,
+  canFilter,
+  filterActive,
+  showControls,
+  socialSortingAvailable,
   filteredTotal,
   hasUnknownAvailability,
 }: {
   initialItems: EnrichedWatchlistItem[];
   isOwner: boolean;
-  sort: ReactNode;
-  filter: ReactNode;
+  activeSort: WatchlistSort;
+  canFilter: boolean;
+  filterActive: boolean;
+  showControls: boolean;
+  socialSortingAvailable: boolean;
   filteredTotal: number | undefined;
   hasUnknownAvailability: boolean;
 }) {
@@ -49,9 +60,30 @@ export function WatchlistItemsGrid({
               ? `${items.length} ${items.length === 1 ? 'título' : 'títulos'}`
               : `${items.length} de ${total} ${total === 1 ? 'título' : 'títulos'}`}
           </output>
-          {sort}
+          {showControls && (
+            <WatchlistSortControl
+              socialSortingAvailable={socialSortingAvailable}
+              value={activeSort}
+            />
+          )}
         </div>
-        {filter && <div>{filter}</div>}
+        {showControls && (
+          <div>
+            {canFilter ? (
+              <WatchlistProviderFilter active={filterActive} />
+            ) : (
+              <p className="text-pretty text-muted-foreground text-sm">
+                Filtrá tu lista por las plataformas que usás.{' '}
+                <Link
+                  className="rounded-sm font-medium text-foreground underline decoration-muted-foreground underline-offset-4 hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  href="/settings/streaming"
+                >
+                  Configurar plataformas
+                </Link>
+              </p>
+            )}
+          </div>
+        )}
         {hasUnknownAvailability && (
           <p className="pt-1 text-pretty text-muted-foreground text-[0.6875rem]/4">
             Algunos títulos pueden faltar porque todavía no conocemos su
@@ -66,8 +98,8 @@ export function WatchlistItemsGrid({
       )}
       <div className="space-y-3">
         {items.map(({ mediaId, movie, trustedRating }) => (
-          <MediaListCard
-            key={`${getMediaIdentityKey(movie.tmdbId, movie.kind)}-${mediaId}`}
+          <WatchlistCard
+            key={mediaId}
             movie={movie}
             onRatingSaved={
               isOwner

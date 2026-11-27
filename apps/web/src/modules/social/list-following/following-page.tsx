@@ -49,17 +49,17 @@ export default async function FollowingPage(
   const isOwnProfile = viewerUserId === profileUserId.data;
 
   return (
-    <section className="flex-1 space-y-6 pt-6">
+    <section className="flex-1 space-y-2 pt-4">
       {isOwnProfile && (
         <Link
-          className="flex min-h-10 items-center gap-3 rounded-lg border bg-card px-4 py-2 transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="flex min-h-11 items-center gap-3 rounded-sm bg-card px-3 py-2 transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           href="/users"
         >
-          <Search aria-hidden="true" className="size-6 text-primary" />
-          <span className="flex-1 text-base">Buscar personas</span>
+          <Search aria-hidden="true" className="size-5 text-primary" />
+          <span className="flex-1 font-medium text-sm">Buscar personas</span>
           <ChevronRight
             aria-hidden="true"
-            className="size-6 text-muted-foreground"
+            className="size-5 text-muted-foreground"
           />
         </Link>
       )}
@@ -69,42 +69,54 @@ export default async function FollowingPage(
           {isOwnProfile ? 'No sigues a nadie' : 'Esta persona no sigue a nadie'}
         </p>
       ) : (
-        followingUsersResult.data.map((user) => (
-          <div className="flex justify-between" key={user.followeeId}>
-            <Link
-              aria-label={`Ver el perfil de ${user.userName}`}
-              className="flex gap-4"
-              href={`/profile/${user.followeeId}`}
+        <ul>
+          {followingUsersResult.data.map((user) => (
+            <li
+              className="relative flex items-center justify-between gap-2 py-1.5 not-last:after:absolute not-last:after:start-14 not-last:after:end-0 not-last:after:bottom-0 not-last:after:h-px not-last:after:bg-border/60"
+              key={user.followeeId}
             >
-              <div className="flex size-[50px] items-center justify-center overflow-hidden rounded-full bg-secondary-foreground">
-                {user.userImage ? (
-                  <Image
-                    alt={`Foto de perfil de ${user.userName}`}
-                    className="size-full object-cover"
-                    height={50}
-                    src={user.userImage}
-                    width={50}
+              <Link
+                aria-label={`Ver el perfil de ${user.userName}`}
+                className="flex min-w-0 items-center gap-3 rounded-sm hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                href={`/profile/${user.followeeId}`}
+              >
+                <div className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-muted text-muted-foreground">
+                  {user.userImage ? (
+                    <Image
+                      alt=""
+                      className="size-full object-cover"
+                      height={44}
+                      src={user.userImage}
+                      width={44}
+                    />
+                  ) : (
+                    <span aria-hidden="true" className="font-medium">
+                      {user.userName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 wrap-anywhere">
+                  <div className="font-medium text-sm">{user.userName}</div>
+                  {user.userUsername && (
+                    <div className="text-muted-foreground text-xs">
+                      {user.userUsername}
+                    </div>
+                  )}
+                </div>
+              </Link>
+              {shouldShowFollowButton(viewerUserId, user.followeeId) && (
+                <div className="max-w-1/2 shrink-0 text-right">
+                  <FollowUserButton
+                    followedUserId={user.followeeId}
+                    isFollowing={user.isFollowing}
+                    triggerClassName="text-xs"
+                    userName={user.userName}
                   />
-                ) : (
-                  <span aria-hidden="true" className="font-semibold">
-                    {user.userName.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <div>
-                <div>{user.userName}</div>
-                {user.userUsername && <div>{user.userUsername}</div>}
-              </div>
-            </Link>
-            {shouldShowFollowButton(viewerUserId, user.followeeId) && (
-              <FollowUserButton
-                followedUserId={user.followeeId}
-                isFollowing={user.isFollowing}
-                userName={user.userName}
-              />
-            )}
-          </div>
-        ))
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );

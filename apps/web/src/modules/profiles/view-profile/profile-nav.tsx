@@ -8,43 +8,44 @@ interface Props {
   userId: string;
 }
 
-export default function ProfileNav({ userId }: Props) {
-  const pathname = usePathname() || '';
+const PROFILE_TABS = [
+  { label: 'Calificaciones', suffix: '' },
+  { label: 'Lista', suffix: '/watchlist' },
+  { label: 'Siguiendo', suffix: '/following' },
+];
 
-  const isRatingsTab =
-    pathname === `/profile/${userId}` || pathname === `/profile/${userId}/`;
-  const isWatchlistTab = pathname.startsWith(`/profile/${userId}/watchlist`);
-  const isFollowingTab = pathname.startsWith(`/profile/${userId}/following`);
+const TRAILING_SLASH = /\/$/;
+
+export default function ProfileNav({ userId }: Props) {
+  const pathname = usePathname()?.replace(TRAILING_SLASH, '') ?? '';
 
   return (
-    <div className="flex items-center gap-6 border-border border-b pt-2">
-      <Link
-        className={clsx(
-          isRatingsTab && 'border-primary border-b-3 font-bold',
-          'pb-2'
-        )}
-        href={`/profile/${userId}`}
-      >
-        Calificaciones
-      </Link>
-      <Link
-        className={clsx(
-          isWatchlistTab && 'border-primary border-b-3 font-bold',
-          'pb-2'
-        )}
-        href={`/profile/${userId}/watchlist`}
-      >
-        Lista
-      </Link>
-      <Link
-        className={clsx(
-          isFollowingTab && 'border-primary border-b-3 font-bold',
-          'pb-2'
-        )}
-        href={`/profile/${userId}/following`}
-      >
-        Siguiendo
-      </Link>
-    </div>
+    <nav
+      aria-label="Secciones del perfil"
+      className="grid grid-cols-3 border-border border-b"
+    >
+      {PROFILE_TABS.map(({ label, suffix }) => {
+        const href = `/profile/${userId}${suffix}`;
+        const isActive =
+          pathname === href ||
+          (suffix !== '' && pathname.startsWith(`${href}/`));
+
+        return (
+          <Link
+            aria-current={isActive ? 'page' : undefined}
+            className={clsx(
+              'flex h-10 items-center justify-center border-b-2 text-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+              isActive
+                ? 'border-primary font-semibold text-foreground'
+                : 'border-transparent font-medium text-muted-foreground hover:text-foreground'
+            )}
+            href={href}
+            key={href}
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }

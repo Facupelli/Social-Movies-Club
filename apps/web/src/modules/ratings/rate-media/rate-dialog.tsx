@@ -95,6 +95,7 @@ type RateDialogProps = {
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
   triggerClassName?: string;
+  triggerVariant?: 'outline' | 'ghost';
 };
 
 export function RateDialog({
@@ -111,6 +112,7 @@ export function RateDialog({
   onOpenChange,
   showTrigger = true,
   triggerClassName,
+  triggerVariant = 'outline',
 }: RateDialogProps) {
   const isMobile = useIsMobile();
   const { data: session } = authClient.useSession();
@@ -142,7 +144,7 @@ export function RateDialog({
     <Button
       className={cn('w-full bg-transparent', triggerClassName)}
       size="sm"
-      variant="outline"
+      variant={triggerVariant}
     >
       <Star className={cn(userRating?.isRated && 'fill-yellow-400')} />
       <span className="sr-only">
